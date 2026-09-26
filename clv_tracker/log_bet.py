@@ -4,13 +4,12 @@ Public interface for logging a placed bet into the CLV tracker.
 Called by the dashboard Log Bet button, or manually from the CLI:
 
     python -m clv_tracker.log_bet \\
-        --game-date 2026-05-14 --game-pk 823950 \\
-        --home LAD --away SF --venue "UNIQLO Field at Dodger Stadium" \\
-        --market "F5 TOTAL UNDER" --side "UNDER 3.5" --direction NO \\
-        --event-ticker KXMLBF5TOTAL-26MAY142210SFLAD \\
-        --market-ticker KXMLBF5TOTAL-26MAY142210SFLAD-4 \\
-        --entry-price 0.430 --model-prob 0.515 --edge 0.085 \\
-        --kelly-pct 3.71 --bet-size 37.10
+        --game-date 2026-09-27 --game-id 999999 \\
+        --home CLE --away CAR --venue "Huntington Bank Field" \\
+        --market SPREAD --side CAR --line-value 2.5 --direction YES \\
+        --event-ticker KXNFLSPREAD-26SEP27CARCLE \\
+        --entry-price 0.520 --model-prob 0.560 --edge 0.040 \\
+        --kelly-pct 2.50 --bet-size 20.00
 """
 from __future__ import annotations
 
@@ -32,12 +31,13 @@ CURRENT_MODEL_VERSION = "v2"
 def log_bet(
     *,
     game_date: str | date,
-    game_pk: int | None = None,
+    game_id: int | None = None,
     home_team: str,
     away_team: str,
     venue: str = "",
     market: str,
     side: str,
+    line_value: float | None = None,
     direction: str,
     event_ticker: str,
     market_ticker: str,
@@ -54,14 +54,19 @@ def log_bet(
     """
     Log a placed bet. Returns the new bet_id.
 
-    market:       "ML" | "TOTAL OVER" | "TOTAL UNDER" | "F5 TOTAL OVER" | "F5 TOTAL UNDER"
-    side:         team code (ML) or "OVER 3.5" / "UNDER 7.5" (totals)
-    direction:    "YES" for over / home-win markets; "NO" for under / away-win markets
+    market:       "ML" | "1H ML" | "SPREAD" | "1H SPREAD"
+                  | "TOTAL OVER" | "TOTAL UNDER" | "1H TOTAL OVER" | "1H TOTAL UNDER"
+    side:         team code (ML/SPREAD, SPREAD uses the FAVORED team) or "OVER"/"UNDER" (TOTAL)
+    line_value:   the real spread or total line (e.g. 2.5, 42.5). None for ML.
+    direction:    "YES" backs the side/team as given; "NO" backs the other side
+                  (e.g. betting an underdog +2.5 means NO on the favorite's SPREAD ticker)
     entry_price:  Kalshi ask price paid for the direction taken (0-1)
                   — yes_ask for YES bets, no_ask for NO bets
-    market_ticker: specific Kalshi market ticker, used to pull closing lines later
-                  F5 strikes: "{event_ticker}-{floor_strike_int}"  e.g. "...-3"
-                  ML:         "{event_ticker}-{team_code}"         e.g. "...-LAD"
+    market_ticker: specific Kalshi market ticker, used to pull closing lines later.
+                  Ticker suffixes round the line UP to the next whole number:
+                  SPREAD: "{event_ticker}-{team_code}{rounded_line}"  e.g. "...-CAR3"
+                  TOTAL:  "{event_ticker}-{rounded_line}"             e.g. "...-43"
+                  ML:     "{event_ticker}-{team_code}"                e.g. "...-CLE"
     """
     init_db()
 
@@ -74,12 +79,13 @@ def log_bet(
 
     bet_id = insert_bet(
         game_date=game_date,
-        game_pk=game_pk,
+        game_id=game_id,
         home_team=home_team,
         away_team=away_team,
         venue=venue,
         market=market,
         side=side,
+        line_value=line_value,
         direction=direction,
         event_ticker=event_ticker,
         market_ticker=market_ticker,
@@ -100,23 +106,37 @@ def log_bet(
     return bet_id
 
 
-def market_ticker_for_bet(event_ticker: str, market: str, side: str) -> str | None:
+def market_ticker_for_bet(event_ticker: str, market: str, side: str, line_value: float | None) -> str | None:
     """
     Derive the Kalshi market_ticker from the event_ticker and bet details.
-    Useful when the dashboard pre-fills the log form from picks output.
 
-    F5 TOTAL — side like "UNDER 3.5": Kalshi's suffix is the strike rounded up to the
-               next whole number (floor_strike 3.5 = suffix "-4"), not int(3.5) = 3.
-    ML       — side is the team code                               → "{event_ticker}-{side}"
+    Ticker suffixes always round UP to the next whole number and drop the
+    decimal -- this is purely Kalshi's internal labeling convention. The real
+    line_value (e.g. 2.5, 42.5) is what's stored and used everywhere else;
+    only the ticker string itself uses the rounded integer.
+
+    ML          -- side is the team code                    -> "{event_ticker}-{side}"
+    SPREAD      -- side is the FAVORED team's code           -> "{event_ticker}-{side}{rounded_line}"
+                  (betting the underdog uses this SAME ticker with direction=NO)
+    TOTAL       -- no team involved                          -> "{event_ticker}-{rounded_line}"
     """
-    if "F5TOTAL" in event_ticker.upper():
-        try:
-            strike = float(side.split()[-1])
-            return f"{event_ticker}-{int(strike) + 1}"
-        except (ValueError, IndexError):
-            return None
-    if "GAME" in event_ticker.upper():
+    market = market.upper()
+
+    if market in ("ML", "1H ML"):
         return f"{event_ticker}-{side}"
+
+    if market in ("SPREAD", "1H SPREAD"):
+        if line_value is None:
+            return None
+        rounded = int(line_value) + 1 if line_value % 1 != 0 else int(line_value)
+        return f"{event_ticker}-{side}{rounded}"
+
+    if market in ("TOTAL OVER", "TOTAL UNDER", "1H TOTAL OVER", "1H TOTAL UNDER"):
+        if line_value is None:
+            return None
+        rounded = int(line_value) + 1 if line_value % 1 != 0 else int(line_value)
+        return f"{event_ticker}-{rounded}"
+
     return None
 
 
@@ -126,7 +146,8 @@ def _cli():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     p = argparse.ArgumentParser(description="Log a placed bet into the CLV tracker.")
     p.add_argument("--game-date",     required=True)
-    p.add_argument("--game-pk",       type=int, default=None)
+    p.add_argument("--game-id",       type=int, default=None)
+    p.add_argument("--line-value",    type=float, default=None)
     p.add_argument("--home",          required=True, dest="home_team")
     p.add_argument("--away",          required=True, dest="away_team")
     p.add_argument("--venue",         default="")
@@ -144,7 +165,7 @@ def _cli():
     args = p.parse_args()
 
     market_ticker = args.market_ticker or market_ticker_for_bet(
-        args.event_ticker, args.market, args.side
+        args.event_ticker, args.market, args.side, args.line_value
     )
     if not market_ticker:
         print("ERROR: could not derive market_ticker — pass --market-ticker explicitly.")
@@ -152,12 +173,13 @@ def _cli():
 
     bet_id = log_bet(
         game_date=args.game_date,
-        game_pk=args.game_pk,
+        game_id=args.game_id,
         home_team=args.home_team,
         away_team=args.away_team,
         venue=args.venue,
         market=args.market,
         side=args.side,
+        line_value=args.line_value,
         direction=args.direction,
         event_ticker=args.event_ticker,
         market_ticker=market_ticker,
