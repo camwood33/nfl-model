@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS bets (
     bet_id             INTEGER PRIMARY KEY AUTOINCREMENT,
     logged_at          TEXT    NOT NULL,          -- ISO-8601 UTC
     game_date          TEXT    NOT NULL,          -- YYYY-MM-DD
-    game_pk            INTEGER,                   -- MLB Stats API game ID
+    game_id            INTEGER,                   -- NFL game ID
     home_team          TEXT,
     away_team          TEXT,
     venue              TEXT,
@@ -149,7 +149,7 @@ def init_db() -> None:
 def insert_bet(
     *,
     game_date: str,
-    game_pk: int | None,
+    game_id: int | None,
     home_team: str,
     away_team: str,
     venue: str,
@@ -174,14 +174,14 @@ def insert_bet(
         cur = con.execute(
             """
             INSERT INTO bets (
-                logged_at, game_date, game_pk, home_team, away_team, venue,
+                logged_at, game_date, game_id, home_team, away_team, venue,
                 market, side, direction, event_ticker, market_ticker,
                 entry_price, model_prob, edge_at_entry, kelly_quarter_pct,
                 bet_size_dollars, morning_bet_size_dollars, unit_size, model_version, notes
             ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
             (
-                logged_at, game_date, game_pk, home_team, away_team, venue,
+                logged_at, game_date, game_id, home_team, away_team, venue,
                 market, side, direction, event_ticker, market_ticker,
                 entry_price, model_prob, edge_at_entry, kelly_quarter_pct,
                 bet_size_dollars, morning_bet_size_dollars, unit_size, model_version, notes,
