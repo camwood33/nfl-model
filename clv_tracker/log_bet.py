@@ -77,6 +77,14 @@ def log_bet(
     if direction not in ("YES", "NO"):
         raise ValueError(f"direction must be 'YES' or 'NO', got {direction!r}")
 
+    if market.upper() in ("SPREAD", "1H SPREAD"):
+        if line_value is None or line_value > 0:
+            raise ValueError(
+                f"SPREAD side must always be the FAVORED team with a negative "
+                f"line_value (got side={side!r}, line_value={line_value!r}). "
+                f"To bet the underdog, use the favorite's side/line_value with direction='NO'."
+            )
+
     bet_id = insert_bet(
         game_date=game_date,
         game_id=game_id,
