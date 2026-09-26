@@ -25,8 +25,8 @@ DUMP_PATH = DB_PATH.parent / "bets_dump.sql"
 # future ALTER TABLE that appends a column doesn't reorder every line of the
 # dump on the next export.
 _COLUMNS = [
-    "bet_id", "logged_at", "game_date", "game_pk", "home_team", "away_team",
-    "venue", "market", "side", "direction", "event_ticker", "market_ticker",
+    "bet_id", "logged_at", "game_date", "game_id", "home_team", "away_team",
+    "venue", "market", "side", "line_value", "direction", "event_ticker", "market_ticker",
     "entry_price", "model_prob", "edge_at_entry", "kelly_quarter_pct",
     "bet_size_dollars", "morning_bet_size_dollars", "unit_size",
     "model_version", "closing_price", "clv_raw", "clv_log_odds",
