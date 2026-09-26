@@ -266,51 +266,25 @@ def settle_open_bets(game_date: str | None = None) -> int:
     settled = 0
     for bet in bets:
         bid = bet["bet_id"]
-        pk = bet.get("game_pk")
+        game_id = bet.get("game_id")
 
-        if not pk:
-            logger.warning("Bet #%d has no game_pk — cannot settle.", bid)
+        if not game_id:
+            logger.warning("Bet #%d has no game_id — cannot settle.", bid)
             continue
 
-        if not _game_is_final(pk):
-            logger.info("Bet #%d (pk=%s) — game not yet Final, skipping.", bid, pk)
-            continue
-
-        linescore = _get_linescore(pk)
-        if linescore is None:
-            logger.warning("Bet #%d — could not fetch linescore.", bid)
-            continue
-
-        outcome = _determine_outcome(bet, linescore)
-        if outcome is None:
-            logger.warning("Bet #%d — could not determine outcome.", bid)
-            continue
-
-        # Guard against premature void: if the game is Final but the linescore
-        # hasn't finished populating (MLB API race condition), skip now and let
-        # the next nightly run retry rather than writing a permanent void.
-        if outcome == "void" and _linescore_looks_transient(linescore, bet["market"]):
-            logger.warning(
-                "Bet #%d (pk=%s) — game is Final but linescore has null inning "
-                "runs; deferring settlement to next run (not voiding).",
-                bid, pk,
-            )
-            continue
+        # PENDING ITEM 9: real NFL score-fetching not yet built. _game_is_final,
+        # _get_linescore, and _linescore_looks_transient are all MLB Stats API
+        # functions and do not apply. Once a real NFL data source is chosen,
+        # this block must fetch (is_final, home_score, away_score, is_1h_market)
+        # for game_id and pass home_score/away_score to _determine_outcome,
+        # which is already written and verified correct for SPREAD/TOTAL/ML.
+        logger.warning(
+            "Bet #%d (game_id=%s) — NFL score-fetching not yet implemented (item 9). Skipping.",
+            bid, game_id,
+        )
+        continue
 
         pnl = _calc_pnl(outcome, bet["entry_price"], bet["bet_size_dollars"])
-
-        # Build run detail string for the log line.
-        run_detail = ""
-        market_upper = bet["market"].upper()
-        if "F5 TOTAL" in market_upper:
-            f5 = _f5_runs(linescore)
-            if f5:
-                run_detail = f"  F5: {f5[0]}+{f5[1]}={f5[2]}"
-        elif "TOTAL" in market_upper or market_upper == "ML":
-            full = _full_game_runs(linescore)
-            if full:
-                run_detail = f"  Score: {full[0]}-{full[1]}"
-
         settle_bet(bid, outcome, pnl)
 
         clv_str = (
