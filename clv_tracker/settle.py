@@ -124,26 +124,40 @@ def _linescore_looks_transient(linescore: dict, market: str) -> bool:
 
 # ── Outcome determination ─────────────────────────────────────────────────────
 
-def _parse_total_side(side: str) -> tuple[str, float] | None:
-    """Parse 'OVER 4.5' or 'UNDER 3.5' → ('OVER'|'UNDER', strike). None on failure."""
-    parts = side.upper().split()
-    if len(parts) != 2:
-        return None
-    try:
-        return parts[0], float(parts[1])
-    except ValueError:
-        return None
+def _spread_outcome(direction: str, home_score: int, away_score: int, side: str, home_team: str, line_value: float) -> str:
+    """
+    Resolve a SPREAD market. Enforced by log_bet(): side is ALWAYS the
+    favored team, line_value is ALWAYS negative. direction='YES' backs the
+    favorite to cover; 'NO' backs the underdog (same ticker either way).
+
+    A whole-number line (-3, -7) can push if the margin lands exactly on
+    it. A half-point line (-2.5) never can, since NFL margins are integers.
+    """
+    is_home = side.upper() == home_team.upper()
+    favored_margin = (home_score - away_score) if is_home else (away_score - home_score)
+    threshold = abs(line_value)
+
+    if favored_margin > threshold:
+        favorite_covered = True
+    elif favored_margin < threshold:
+        favorite_covered = False
+    else:
+        return "push"
+
+    if direction == "YES":
+        return "win" if favorite_covered else "loss"
+    return "win" if not favorite_covered else "loss"
 
 
-def _total_outcome(direction: str, total: float, strike: float) -> str:
+def _total_outcome(direction: str, total: int, line_value: float) -> str:
     """
-    Resolve a totals market.
-    direction: 'YES' = bet the OVER, 'NO' = bet the UNDER.
-    Kalshi F5/game-total markets are always 'Over X?' so YES = over wins, NO = under wins.
+    Resolve a TOTAL market. One Kalshi contract per line -- YES backs the
+    OVER, NO backs the UNDER. Kalshi lines are always X.5 in practice, so
+    push is not expected to occur, but the check is kept for correctness.
     """
-    if total > strike:
+    if total > line_value:
         went_over = True
-    elif total < strike:
+    elif total < line_value:
         went_over = False
     else:
         return "push"
@@ -153,58 +167,54 @@ def _total_outcome(direction: str, total: float, strike: float) -> str:
     return "win" if not went_over else "loss"
 
 
-def _determine_outcome(bet: dict, linescore: dict) -> str | None:
-    """Return 'win'|'loss'|'push'|'void'|None (None = undeterminable)."""
+def _ml_outcome(direction: str, home_score: int, away_score: int, side: str, home_team: str, away_team: str) -> str | None:
+    """ML: side is the team backed. A tied final score is a push."""
+    if home_score == away_score:
+        return "push"
+    home_won = home_score > away_score
+    side_upper = side.upper()
+    is_home = side_upper == home_team.upper()
+    is_away = side_upper == away_team.upper()
+    if not (is_home or is_away):
+        logger.error(
+            "ML bet side %r matches neither home %r nor away %r",
+            side, home_team, away_team,
+        )
+        return None
+    team_won = home_won if is_home else not home_won
+    return "win" if team_won else "loss"
+
+
+def _determine_outcome(bet: dict, home_score: int, away_score: int) -> str | None:
+    """
+    Return 'win'|'loss'|'push'|None (None = undeterminable).
+
+    home_score/away_score must already be scoped correctly by the caller:
+    full-game totals for ML/SPREAD/TOTAL, first-half-only totals for
+    1H ML/1H SPREAD/1H TOTAL. See _fetch_scores() -- PENDING item 9, data
+    source not yet chosen.
+    """
     market = bet["market"].upper()
     side = bet["side"]
     direction = bet["direction"].upper()
+    line_value = bet.get("line_value")
+    home_team = bet.get("home_team", "")
+    away_team = bet.get("away_team", "")
 
-    if "F5 TOTAL" in market:
-        result = _f5_runs(linescore)
-        if result is None:
-            return "void"
-        _, _, f5_total = result
-        parsed = _parse_total_side(side)
-        if parsed is None:
-            logger.error("Cannot parse side %r for bet #%d", side, bet["bet_id"])
+    if market in ("SPREAD", "1H SPREAD"):
+        if line_value is None:
+            logger.error("Bet #%d SPREAD has no line_value", bet["bet_id"])
             return None
-        _, strike = parsed
-        return _total_outcome(direction, f5_total, strike)
+        return _spread_outcome(direction, home_score, away_score, side, home_team, line_value)
 
-    if "TOTAL" in market:
-        result = _full_game_runs(linescore)
-        if result is None:
-            return "void"
-        _, _, total = result
-        parsed = _parse_total_side(side)
-        if parsed is None:
-            logger.error("Cannot parse side %r for bet #%d", side, bet["bet_id"])
+    if market in ("TOTAL", "1H TOTAL"):
+        if line_value is None:
+            logger.error("Bet #%d TOTAL has no line_value", bet["bet_id"])
             return None
-        _, strike = parsed
-        return _total_outcome(direction, total, strike)
+        return _total_outcome(direction, home_score + away_score, line_value)
 
-    if market == "ML":
-        result = _full_game_runs(linescore)
-        if result is None:
-            return "void"
-        away_r, home_r, _ = result
-        if away_r == home_r:
-            return "push"
-        home_won = home_r > away_r
-        side_upper = side.upper()
-        is_home = side_upper == bet.get("home_team", "").upper()
-        is_away = side_upper == bet.get("away_team", "").upper()
-        if not (is_home or is_away):
-            logger.error(
-                "ML bet #%d side %r matches neither home %r nor away %r",
-                bet["bet_id"], side, bet.get("home_team"), bet.get("away_team"),
-            )
-            return None
-        # team_won is True when the team named in 'side' actually won.
-        # direction='YES' means we backed the home team; direction='NO' means away.
-        # Either way, we win when the side team wins — no direction inversion needed.
-        team_won = home_won if is_home else not home_won
-        return "win" if team_won else "loss"
+    if market in ("ML", "1H ML"):
+        return _ml_outcome(direction, home_score, away_score, side, home_team, away_team)
 
     logger.error("Unknown market %r for bet #%d", market, bet["bet_id"])
     return None
