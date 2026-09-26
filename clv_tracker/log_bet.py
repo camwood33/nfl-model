@@ -54,12 +54,12 @@ def log_bet(
     """
     Log a placed bet. Returns the new bet_id.
 
-    market:       "ML" | "1H ML" | "SPREAD" | "1H SPREAD"
-                  | "TOTAL OVER" | "TOTAL UNDER" | "1H TOTAL OVER" | "1H TOTAL UNDER"
-    side:         team code (ML/SPREAD, SPREAD uses the FAVORED team) or "OVER"/"UNDER" (TOTAL)
+    market:       "ML" | "1H ML" | "SPREAD" | "1H SPREAD" | "TOTAL" | "1H TOTAL"
+    side:         team code for ML/SPREAD (SPREAD uses the FAVORED team). Empty string for TOTAL.
     line_value:   the real spread or total line (e.g. 2.5, 42.5). None for ML.
-    direction:    "YES" backs the side/team as given; "NO" backs the other side
-                  (e.g. betting an underdog +2.5 means NO on the favorite's SPREAD ticker)
+    direction:    "YES" backs the side/team as given, or backs the OVER for TOTAL.
+                  "NO" backs the other side (e.g. an underdog +2.5 is NO on the
+                  favorite's SPREAD ticker; UNDER is NO on the TOTAL ticker).
     entry_price:  Kalshi ask price paid for the direction taken (0-1)
                   — yes_ask for YES bets, no_ask for NO bets
     market_ticker: specific Kalshi market ticker, used to pull closing lines later.
@@ -131,7 +131,7 @@ def market_ticker_for_bet(event_ticker: str, market: str, side: str, line_value:
         rounded = int(line_value) + 1 if line_value % 1 != 0 else int(line_value)
         return f"{event_ticker}-{side}{rounded}"
 
-    if market in ("TOTAL OVER", "TOTAL UNDER", "1H TOTAL OVER", "1H TOTAL UNDER"):
+    if market in ("TOTAL", "1H TOTAL"):
         if line_value is None:
             return None
         rounded = int(line_value) + 1 if line_value % 1 != 0 else int(line_value)
