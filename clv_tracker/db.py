@@ -32,9 +32,11 @@ CREATE TABLE IF NOT EXISTS bets (
     venue              TEXT,
 
     -- What we bet
-    market             TEXT    NOT NULL,          -- "ML" | "TOTAL OVER" | "TOTAL UNDER"
-                                                  -- | "F5 TOTAL OVER" | "F5 TOTAL UNDER"
-    side               TEXT    NOT NULL,          -- team code, "OVER 3.5", "UNDER 7.5", …
+    market             TEXT    NOT NULL,          -- "ML" | "1H ML" | "SPREAD" | "1H SPREAD"
+                                                  -- | "TOTAL OVER" | "TOTAL UNDER"
+                                                  -- | "1H TOTAL OVER" | "1H TOTAL UNDER"
+    side               TEXT    NOT NULL,          -- team code for ML/SPREAD, "OVER"/"UNDER" for TOTAL
+    line_value         REAL,                      -- signed number: spread for that team, or the total line. NULL for ML.
     direction          TEXT    NOT NULL           -- "YES" | "NO"
                        CHECK(direction IN ('YES','NO')),
 
