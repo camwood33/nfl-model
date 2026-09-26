@@ -157,6 +157,7 @@ def insert_bet(
     venue: str,
     market: str,
     side: str,
+    line_value: float | None,
     direction: str,
     event_ticker: str,
     market_ticker: str,
@@ -177,14 +178,14 @@ def insert_bet(
             """
             INSERT INTO bets (
                 logged_at, game_date, game_id, home_team, away_team, venue,
-                market, side, direction, event_ticker, market_ticker,
+                market, side, line_value, direction, event_ticker, market_ticker,
                 entry_price, model_prob, edge_at_entry, kelly_quarter_pct,
                 bet_size_dollars, morning_bet_size_dollars, unit_size, model_version, notes
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
             (
                 logged_at, game_date, game_id, home_team, away_team, venue,
-                market, side, direction, event_ticker, market_ticker,
+                market, side, line_value, direction, event_ticker, market_ticker,
                 entry_price, model_prob, edge_at_entry, kelly_quarter_pct,
                 bet_size_dollars, morning_bet_size_dollars, unit_size, model_version, notes,
             ),
