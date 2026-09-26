@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from config import CLV_RECORDS_DIR
 
-DB_PATH = CLV_RECORDS_DIR / "bets.db"
+DB_PATH = CLV_RECORDS_DIR / "nfl_bets.db"
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS bets (
