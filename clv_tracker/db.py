@@ -142,14 +142,6 @@ def init_db() -> None:
             con.execute("ALTER TABLE bets ADD COLUMN morning_bet_size_dollars REAL")
         except sqlite3.OperationalError:
             pass  # column already exists
-        con.execute(
-            "UPDATE bets SET model_version = 'v1'"
-            " WHERE model_version IS NULL AND logged_at < '2026-06-16'"
-        )
-        con.execute(
-            "UPDATE bets SET model_version = 'v2'"
-            " WHERE model_version IS NULL AND logged_at >= '2026-06-16'"
-        )
 
 
 # ── Writes ────────────────────────────────────────────────────────────────────
