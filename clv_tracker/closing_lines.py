@@ -146,7 +146,7 @@ def _price_from_snapshot(bet: dict, raw_df: pd.DataFrame) -> float | None:
         return None
 
     rows["_ts"] = pd.to_datetime(rows["snapshot_ts"], utc=True)
-    game_start  = _parse_game_start_utc(event)
+    game_start  = _game_start_utc(bet["game_date"], bet["game_id"])
 
     if game_start is not None:
         cutoff = pd.Timestamp(game_start.astimezone(timezone.utc))
@@ -268,8 +268,7 @@ def pull_closing_lines(
     updated   = 0
 
     for bet in open_bets:
-        event_ticker = bet.get("event_ticker") or ""
-        game_start   = _parse_game_start_utc(event_ticker)
+        game_start   = _game_start_utc(bet["game_date"], bet["game_id"])
 
         if game_start is not None:
             cutoff = game_start.astimezone(timezone.utc) - window
