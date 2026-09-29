@@ -20,6 +20,8 @@ import argparse
 import logging
 import math
 import sys
+
+import requests
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -32,29 +34,44 @@ from clv_tracker.db import get_open_bets, update_closing
 
 logger = logging.getLogger(__name__)
 
-# Kalshi ticker body format: {YY}{MON}{DD}{HHMM}{TEAMS}; times are US Eastern (EDT = UTC-4)
-_MONTH_MAP = {
-    "JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6,
-    "JUL": 7, "AUG": 8, "SEP": 9, "OCT": 10, "NOV": 11, "DEC": 12,
-}
+# NFL kickoff times and scores come from ESPN's public scoreboard API, not
+# from the Kalshi ticker -- confirmed NFL tickers (e.g. "26SEP27CARCLE")
+# carry no time component at all, unlike MLB's. Unofficial/undocumented API,
+# no auth required, verified working 2026-09-28. Could change without notice.
+_ESPN_SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+_REQUEST_TIMEOUT = 15
 
 
-def _parse_game_start_utc(event_ticker: str) -> datetime | None:
-    """Parse scheduled game start (UTC) from a Kalshi event ticker."""
+def _fetch_espn_scoreboard(game_date: str) -> dict:
+    """Fetch ESPN's NFL scoreboard for one date (YYYY-MM-DD)."""
+    yyyymmdd = game_date.replace("-", "")
+    r = requests.get(_ESPN_SCOREBOARD_URL, params={"dates": yyyymmdd}, timeout=_REQUEST_TIMEOUT)
+    r.raise_for_status()
+    return r.json()
+
+
+def _find_espn_event(game_date: str, game_id) -> dict | None:
+    """Find one specific game by ESPN event id within that date's scoreboard."""
     try:
-        body = event_ticker.split("-", 1)[1]
-        for mon_str, mon_int in _MONTH_MAP.items():
-            if mon_str in body:
-                idx = body.index(mon_str)
-                year = 2000 + int(body[:idx])
-                day  = int(body[idx + 3: idx + 5])
-                hhmm = body[idx + 5: idx + 9]
-                hour, minute = int(hhmm[:2]), int(hhmm[2:])
-                edt = timezone(timedelta(hours=-4))
-                return datetime(year, mon_int, day, hour, minute, tzinfo=edt)
-    except Exception:
-        pass
+        data = _fetch_espn_scoreboard(game_date)
+    except Exception as exc:
+        logger.warning("ESPN scoreboard fetch failed for %s: %s", game_date, exc)
+        return None
+    for event in data.get("events", []):
+        if str(event.get("id")) == str(game_id):
+            return event
     return None
+
+
+def _game_start_utc(game_date: str, game_id) -> datetime | None:
+    """Real scheduled kickoff (UTC) from ESPN. Replaces ticker-based parsing."""
+    event = _find_espn_event(game_date, game_id)
+    if event is None or not event.get("date"):
+        return None
+    try:
+        return datetime.fromisoformat(event["date"].replace("Z", "+00:00"))
+    except ValueError:
+        return None
 
 
 # ── CLV math ──────────────────────────────────────────────────────────────────
