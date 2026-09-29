@@ -139,7 +139,6 @@ def _price_from_snapshot(bet: dict, raw_df: pd.DataFrame) -> float | None:
     daily snapshot CSV. Returns yes_ask for YES bets, no_ask for NO bets.
     """
     ticker    = bet["market_ticker"]
-    event     = bet.get("event_ticker") or ""
 
     rows = raw_df[raw_df["market_ticker"] == ticker].copy()
     if rows.empty:
