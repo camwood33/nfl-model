@@ -69,16 +69,16 @@ def compute_summary(
     df     = pd.DataFrame(bets)
     closed = df[df["closing_price"].notna() & (df["outcome"] != "void")].copy()
 
+    # CLV stats need closing prices; outcome/P&L stats don't. Bets can be
+    # settled without a closing price (settle_open_bets doesn't require one),
+    # so no closing prices must zero only the CLV fields -- never W/L or P&L.
     if closed.empty:
-        return _empty_summary(
-            total_bets=len(df),
-            total_wagered=float(df["bet_size_dollars"].sum()),
-        )
-
-    mean_clv_raw = float(closed["clv_raw"].mean())
-    lo_vals      = closed["clv_log_odds"].dropna()
-    mean_clv_lo  = float(lo_vals.mean()) if not lo_vals.empty else None
-    pct_positive = float((closed["clv_raw"] > 0).mean() * 100)
+        mean_clv_raw, mean_clv_lo, pct_positive = 0.0, None, 0.0
+    else:
+        mean_clv_raw = float(closed["clv_raw"].mean())
+        lo_vals      = closed["clv_log_odds"].dropna()
+        mean_clv_lo  = float(lo_vals.mean()) if not lo_vals.empty else None
+        pct_positive = float((closed["clv_raw"] > 0).mean() * 100)
 
     by_market = []
     for mkt, grp in df.groupby("market"):
@@ -168,14 +168,15 @@ def compute_summary(
     }
 
 
-def _empty_summary(total_bets: int = 0, total_wagered: float = 0.0) -> dict:
+def _empty_summary() -> dict:
+    """Summary for a query that matched no bets at all."""
     return {
-        "bets_with_closing": 0, "total_bets": total_bets,
+        "bets_with_closing": 0, "total_bets": 0,
         "mean_clv_raw": 0.0, "mean_clv_pct": 0.0, "mean_clv_log_odds": None,
         "pct_bets_positive_clv": 0.0, "by_market": [],
         "wins": 0, "losses": 0, "ties": 0,
         "total_pnl_dollars": 0.0,
-        "total_wagered_dollars": round(total_wagered, 2),
+        "total_wagered_dollars": 0.0,
         "roi_pct": 0.0,
         "units_pnl": None,
     }

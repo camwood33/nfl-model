@@ -93,13 +93,9 @@ class FullGameML(_SettleCase):
         from clv_tracker.summary import compute_summary
         common = dict(market="ML", side="LAR", event_ticker="KXNFLGAME-26OCT12BUFLAR",
                       market_ticker="KXNFLGAME-26OCT12BUFLAR-LAR")
-        yes = self._bet(BUF_LAR, **common, direction="YES", entry_price=0.4874)
-        no = self._bet(BUF_LAR, **common, direction="NO", entry_price=0.60)
-        # Closing prices set so summary takes its normal path (it currently
-        # reports zero P&L when no bet has a closing price -- separate issue).
-        db.update_closing(yes, 0.50, 0.0126, None, "2026-10-13T00:14:00+00:00")
-        db.update_closing(no, 0.58, -0.02, None, "2026-10-13T00:14:00+00:00")
-        self._settle(full=(20, 20), first_half=(10, 7))
+        self._bet(BUF_LAR, **common, direction="YES", entry_price=0.4874)
+        self._bet(BUF_LAR, **common, direction="NO", entry_price=0.60)
+        self._settle(full=(20, 20), first_half=(10, 7))  # no closing prices set
         s = compute_summary()
         self.assertEqual(s["ties"], 2)
         self.assertAlmostEqual(s["total_pnl_dollars"], 0.52 - 3.33, places=2)
