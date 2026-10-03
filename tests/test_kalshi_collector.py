@@ -81,6 +81,16 @@ class CollectorMain(unittest.TestCase):
             self.assertEqual(sorted(files["kalshi_lines_2026-10-05.csv"]["market"].unique()),
                              ["1H ML", "1H SPREAD", "1H TOTAL"])
 
+            # floor_strike round-trips through the CSV: real line for SPREAD/TOTAL
+            # (= ticker suffix - 0.5, since every live line is X.5), blank for ML.
+            rows = pd.concat(files.values())
+            lined = rows[rows["market"].str.contains("SPREAD|TOTAL")]
+            self.assertEqual(len(lined), 2 * 4)
+            suffix = lined["market_ticker"].str.extract(r"(\d+)$")[0].astype(float)
+            self.assertTrue((lined["floor_strike"] == suffix - 0.5).all())
+            self.assertEqual(sorted(set(lined["floor_strike"])), [7.5, 68.5])
+            self.assertTrue(rows[rows["market"].str.contains("ML")]["floor_strike"].isna().all())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -190,11 +190,13 @@ def game_date_from_ticker(ticker: str) -> str | None:
 # minimal: these files are committed to git and get one row per open market
 # per snapshot, so static per-market text (rules_primary was ~36% of every
 # file) and fields nothing reads are not stored. closing_lines.py reads
-# market_ticker, snapshot_ts, status, yes_ask, no_ask; the rest identify the
-# row. Static market details are one /markets/{ticker} call away if needed.
+# market_ticker, snapshot_ts, status, yes_ask, no_ask; floor_strike is the
+# real line for SPREAD/TOTAL markets (None for ML/1H ML), kept for the model;
+# the rest identify the row. Other static market details are one
+# /markets/{ticker} call away if needed.
 SNAPSHOT_COLUMNS = [
     "snapshot_ts", "pull_date", "game_date", "market",
-    "event_ticker", "market_ticker", "status", "yes_ask", "no_ask",
+    "event_ticker", "market_ticker", "floor_strike", "status", "yes_ask", "no_ask",
 ]
 
 
@@ -209,6 +211,7 @@ def parse_market_row(market: dict, event_ticker: str, snapshot_ts: str) -> dict:
         "snapshot_ts": snapshot_ts,
         "event_ticker": event_ticker,
         "market_ticker": market.get("ticker"),
+        "floor_strike": market.get("floor_strike"),
         "status": market.get("status"),
         "yes_ask": fee_inclusive_price(market.get("yes_ask_dollars")),
         "no_ask": fee_inclusive_price(market.get("no_ask_dollars")),
@@ -260,6 +263,9 @@ def main() -> pd.DataFrame:
                 subset=["market_ticker", "snapshot_ts"],
                 keep="last",
             )
+        # Fixed column order even when appending to a file written before a
+        # column was added (its older rows get blanks for the new column).
+        chunk = chunk.reindex(columns=SNAPSHOT_COLUMNS)
         chunk.to_csv(out, index=False)
         logger.info("Saved %d rows (%d markets this snapshot) to %s",
                     len(chunk), int((chunk["snapshot_ts"] == snapshot_ts).sum()), out)
