@@ -1,11 +1,15 @@
 """
-Collects MLB prediction market lines from Kalshi.
+Collects NFL prediction market lines from Kalshi -- the six markets we bet
+(ML, 1H ML, SPREAD, 1H SPREAD, TOTAL, 1H TOTAL; see NFL_SERIES).
 
-Authentication: RSA-SHA256 signed requests using the API key ID from .env
-and the private key from kalshi_private_key.pem in the project root.
+Market data is public, so the collector needs no credentials. kalshi_request
+(RSA-SHA256 signed, API key ID from .env + kalshi_private_key.pem in the
+project root) is kept for authenticated endpoints.
 
-Source: Kalshi Trade API v2 (https://trading-api.kalshi.com/trade-api/v2)
-Output: data/raw/kalshi_lines_YYYY-MM-DD.csv
+Source: Kalshi Trade API v2 (https://api.elections.kalshi.com/trade-api/v2)
+Output: data/raw/kalshi_lines_<GAME DATE>.csv, appended once per run
+
+    python3 -m data.collect.kalshi_lines
 """
 from __future__ import annotations
 import sys
@@ -14,6 +18,7 @@ import hashlib
 import hmac
 import logging
 import os
+import re
 import time
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -55,16 +60,23 @@ def fee_inclusive_price(price_str: str | None) -> str | None:
         return None
     return f"{p + KALSHI_TAKER_FEE_RATE * p * (1 - p):.4f}"
 
-# Confirmed game-level MLB series tickers (verified May 2026)
-MLB_SERIES_PREFIXES = [
-    "KXMLBGAME",      # game winner (moneyline proxy)
-    "KXMLBF5",        # first 5 innings winner
-    "KXMLBF5TOTAL",   # first 5 innings total
-    "KXMLBF5SPREAD",  # first 5 innings spread
-    "KXMLBRFI",       # run scored in first inning
-    "KXMLBKS",        # strikeouts
-    "KXMLBHRR",       # hits/runs/RBIs
-]
+# Kalshi NFL series for the six markets we bet, mapped to our `market` labels
+# (verified live 2026-10-03 against /series and /markets). KXNFL1HWINNER exists
+# but had no open markets; KXNFL1HFT is a 1H+full-game combo, not one of ours.
+NFL_SERIES = {
+    "KXNFLGAME":     "ML",         # 2 strikes/game, one per team
+    "KXNFL1H":       "1H ML",      # 3 strikes/game: team, team, TIE
+    "KXNFLSPREAD":   "SPREAD",     # "{team} wins by over X.5", many strikes/game
+    "KXNFL1HSPREAD": "1H SPREAD",
+    "KXNFLTOTAL":    "TOTAL",      # "over X.5 points", many strikes/game
+    "KXNFL1HTOTAL":  "1H TOTAL",
+}
+
+# Event tickers carry the game's (US Eastern) date: KXNFLGAME-26OCT12BUFLAR -> 2026-10-12.
+# Same date ESPN's scoreboard uses, so it matches bets.game_date.
+_TICKER_DATE_RE = re.compile(r"^[A-Z0-9]+-(\d{2})([A-Z]{3})(\d{2})")
+_MONTHS = {m: i for i, m in enumerate(
+    ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"], start=1)}
 
 
 def get_credentials() -> tuple[str, bytes]:
@@ -123,64 +135,55 @@ def kalshi_request(
     return r.json()
 
 
-def fetch_mlb_events(key_id: str, pem_bytes: bytes) -> list[dict]:
-    """Fetches open MLB-related events from Kalshi."""
-    all_events = []
-    for series_ticker in MLB_SERIES_PREFIXES:
+def kalshi_public_get(path: str, params: dict | None = None, timeout: float = 20) -> dict:
+    """Unauthenticated GET against the Kalshi Trade API.
+
+    Market data (/series, /markets, /events) is public -- verified 2026-10-03
+    with no key -- so the collector doesn't depend on .env / the private key.
+    Authenticated endpoints (portfolio, orders) still go through kalshi_request."""
+    r = requests.get(f"{KALSHI_BASE_URL}{path}", params=params, timeout=timeout)
+    r.raise_for_status()
+    return r.json()
+
+
+def fetch_nfl_markets() -> list[tuple[str, dict]]:
+    """
+    All open markets in the six NFL series, as (series_ticker, market) pairs.
+    Pages through /markets with the cursor; a failed series is logged and
+    skipped so one bad series doesn't lose the whole snapshot.
+    """
+    out: list[tuple[str, dict]] = []
+    for series_ticker in NFL_SERIES:
+        cursor = None
+        n = 0
         try:
-            data = kalshi_request(
-                "GET", "/events",
-                key_id, pem_bytes,
-                params={"series_ticker": series_ticker, "status": "open", "limit": 200},
-            )
-            events = data.get("events", [])
-            logger.info("Series %s: found %d events", series_ticker, len(events))
-            all_events.extend(events)
+            while True:
+                params = {"series_ticker": series_ticker, "status": "open", "limit": 1000}
+                if cursor:
+                    params["cursor"] = cursor
+                data = kalshi_public_get("/markets", params=params)
+                markets = data.get("markets", [])
+                out.extend((series_ticker, m) for m in markets)
+                n += len(markets)
+                cursor = data.get("cursor")
+                if not cursor or not markets:
+                    break
         except Exception as exc:
-            logger.debug("No events for series %s: %s", series_ticker, exc)
-
-    # Deduplicate by event_ticker
-    seen = set()
-    unique = []
-    for e in all_events:
-        t = e.get("event_ticker", "")
-        if t not in seen:
-            seen.add(t)
-            unique.append(e)
-
-    if not unique:
-        # Fallback: search all open events for baseball keywords
-        logger.info("No MLB events by series ticker — searching all open events")
-        try:
-            data = kalshi_request("GET", "/events", key_id, pem_bytes,
-                                  params={"status": "open", "limit": 200})
-            unique = [
-                e for e in data.get("events", [])
-                if any(kw in e.get("title", "").upper() for kw in ["MLB", "BASEBALL", "WORLD SERIES"])
-            ]
-            logger.info("Fallback search found %d MLB-related events", len(unique))
-        except Exception as exc:
-            logger.warning("Fallback event search failed: %s", exc)
-
-    return unique
+            logger.warning("Failed fetching series %s after %d markets: %s", series_ticker, n, exc)
+        logger.info("Series %s: %d open markets", series_ticker, n)
+    return out
 
 
-def fetch_markets_for_event(
-    event_ticker: str, key_id: str, pem_bytes: bytes, timeout: float = 20,
-) -> list[dict]:
-    """Fetches all markets under a given Kalshi event.
-
-    timeout defaults to 20s; time-critical callers should pass a tighter
-    value explicitly (see kalshi_request)."""
+def game_date_from_ticker(ticker: str) -> str | None:
+    """'KXNFLSPREAD-26OCT08TBDAL-TB8' -> '2026-10-08'; None if unparseable."""
+    m = _TICKER_DATE_RE.match(ticker or "")
+    if not m or m.group(2) not in _MONTHS:
+        return None
+    yy, mon, dd = m.groups()
     try:
-        data = kalshi_request(
-            "GET", f"/events/{event_ticker}",
-            key_id, pem_bytes, timeout=timeout,
-        )
-        return data.get("markets", [])
-    except Exception as exc:
-        logger.warning("Could not fetch markets for event %s: %s", event_ticker, exc)
-        return []
+        return date(2000 + int(yy), _MONTHS[mon], int(dd)).isoformat()
+    except ValueError:
+        return None
 
 
 def parse_market_row(market: dict, event_ticker: str, snapshot_ts: str) -> dict:
@@ -213,56 +216,53 @@ def parse_market_row(market: dict, event_ticker: str, snapshot_ts: str) -> dict:
     }
 
 
-def main(game_date: date = None):
-    if game_date is None:
-        game_date = date.today()
+def main() -> pd.DataFrame:
+    """
+    Take one snapshot of every open market in the six NFL series and append it
+    to data/raw/kalshi_lines_<GAME DATE>.csv -- one file per game date, not per
+    pull date. closing_lines.py reads kalshi_lines_{bet.game_date}.csv, and NFL
+    bets are often placed days before kickoff, so partitioning by game date is
+    what lets every snapshot of a game (Wednesday's through the last pre-kickoff
+    one) be found by the closing-line puller. Run repeatedly; each run appends.
 
-    try:
-        key_id, pem_bytes = get_credentials()
-    except (ValueError, FileNotFoundError) as exc:
-        logger.error("Kalshi credentials error: %s", exc)
-        return pd.DataFrame()
-
+    Returns this run's rows (all game dates).
+    """
     snapshot_ts = datetime.now(timezone.utc).isoformat()
-    logger.info("Fetching Kalshi MLB markets at %s", snapshot_ts)
+    logger.info("Fetching Kalshi NFL markets at %s", snapshot_ts)
 
-    events = fetch_mlb_events(key_id, pem_bytes)
-    if not events:
-        logger.warning("No Kalshi MLB events found")
+    pairs = fetch_nfl_markets()
+    if not pairs:
+        logger.warning("No open Kalshi NFL markets found")
         return pd.DataFrame()
 
-    logger.info("Processing %d Kalshi MLB events", len(events))
     rows = []
-    for event in events:
-        event_ticker = event.get("event_ticker", "")
-        markets = fetch_markets_for_event(event_ticker, key_id, pem_bytes)
-        if not markets:
-            # Event itself might contain market data at the top level
-            markets = [event]
-        for market in markets:
-            rows.append(parse_market_row(market, event_ticker, snapshot_ts))
-        time.sleep(0.1)  # rate limit courtesy pause
-
-    if not rows:
-        logger.warning("No market rows extracted from Kalshi events")
-        return pd.DataFrame()
+    for series_ticker, market in pairs:
+        row = parse_market_row(market, market.get("event_ticker", ""), snapshot_ts)
+        row["market"] = NFL_SERIES[series_ticker]
+        row["game_date"] = game_date_from_ticker(row["event_ticker"])
+        rows.append(row)
 
     df = pd.DataFrame(rows)
-    df["pull_date"] = game_date.isoformat()
+    df["pull_date"] = snapshot_ts[:10]
+
+    undated = df["game_date"].isna()
+    if undated.any():
+        logger.warning("Dropping %d market(s) with unparseable ticker dates, e.g. %s",
+                       int(undated.sum()), df.loc[undated, "event_ticker"].iloc[0])
+        df = df[~undated]
 
     RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    out = RAW_DATA_DIR / f"kalshi_lines_{game_date.isoformat()}.csv"
-
-    # Append to today's file to track intraday movement
-    if out.exists():
-        existing = pd.read_csv(out)
-        df = pd.concat([existing, df], ignore_index=True).drop_duplicates(
-            subset=["market_ticker", "snapshot_ts"],
-            keep="last",
-        )
-
-    df.to_csv(out, index=False)
-    logger.info("Saved %d Kalshi market rows to %s", len(df), out)
+    for game_date, chunk in df.groupby("game_date"):
+        out = RAW_DATA_DIR / f"kalshi_lines_{game_date}.csv"
+        if out.exists():
+            existing = pd.read_csv(out)
+            chunk = pd.concat([existing, chunk], ignore_index=True).drop_duplicates(
+                subset=["market_ticker", "snapshot_ts"],
+                keep="last",
+            )
+        chunk.to_csv(out, index=False)
+        logger.info("Saved %d rows (%d markets this snapshot) to %s",
+                    len(chunk), int((chunk["snapshot_ts"] == snapshot_ts).sum()), out)
     return df
 
 
