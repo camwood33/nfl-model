@@ -78,6 +78,15 @@ _TICKER_DATE_RE = re.compile(r"^[A-Z0-9]+-(\d{2})([A-Z]{3})(\d{2})")
 _MONTHS = {m: i for i, m in enumerate(
     ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"], start=1)}
 
+# Kickoff times come from ESPN's public scoreboard (same source closing_lines.py
+# uses; not imported from there because closing_lines imports this module).
+_ESPN_SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+# Kalshi event tickers end in AWAY+HOME team codes ("...26OCT04DETCAR"). They
+# match ESPN abbreviations except these two -- checked for all 32 teams against
+# live events 2026-10-03.
+_ESPN_TO_KALSHI_TEAM = {"WSH": "WAS", "JAX": "JAC"}
+_EVENT_MATCHUP_RE = re.compile(r"^[A-Z0-9]+-\d{2}[A-Z]{3}\d{2}([A-Z]+)$")
+
 
 def get_credentials() -> tuple[str, bytes]:
     """Returns (api_key_id, private_key_pem_bytes)."""
@@ -174,6 +183,36 @@ def fetch_nfl_markets() -> list[tuple[str, dict]]:
     return out
 
 
+def _matchup_from_event(event_ticker: str) -> str | None:
+    """'KXNFL1HSPREAD-26OCT05ATLNO' -> 'ATLNO' (away + home Kalshi team codes)."""
+    m = _EVENT_MATCHUP_RE.match(event_ticker or "")
+    return m.group(1) if m else None
+
+
+def kickoffs_by_matchup(game_date: str) -> dict[str, datetime]:
+    """
+    Scheduled kickoff (UTC) per Kalshi matchup key for one date, from ESPN:
+    {'DETCAR': datetime(2026, 10, 5, 0, 20, tzinfo=utc), ...}. Returns {} if
+    ESPN can't be reached, so callers treat every game as not yet started.
+    """
+    try:
+        r = requests.get(_ESPN_SCOREBOARD_URL, params={"dates": game_date.replace("-", "")}, timeout=15)
+        r.raise_for_status()
+        events = r.json().get("events", [])
+    except Exception as exc:
+        logger.warning("ESPN scoreboard fetch failed for %s -- no markets skipped: %s", game_date, exc)
+        return {}
+    out: dict[str, datetime] = {}
+    for e in events:
+        try:
+            teams = {c["homeAway"]: c["team"]["abbreviation"] for c in e["competitions"][0]["competitors"]}
+            away, home = (_ESPN_TO_KALSHI_TEAM.get(teams[s], teams[s]) for s in ("away", "home"))
+            out[away + home] = datetime.fromisoformat(e["date"].replace("Z", "+00:00"))
+        except (KeyError, IndexError, ValueError):
+            continue
+    return out
+
+
 def game_date_from_ticker(ticker: str) -> str | None:
     """'KXNFLSPREAD-26OCT08TBDAL-TB8' -> '2026-10-08'; None if unparseable."""
     m = _TICKER_DATE_RE.match(ticker or "")
@@ -218,7 +257,7 @@ def parse_market_row(market: dict, event_ticker: str, snapshot_ts: str) -> dict:
     }
 
 
-def main() -> pd.DataFrame:
+def main(now: datetime | None = None) -> pd.DataFrame:
     """
     Take one snapshot of every open market in the six NFL series and append it
     to data/raw/kalshi_lines_<GAME DATE>.csv -- one file per game date, not per
@@ -227,9 +266,15 @@ def main() -> pd.DataFrame:
     what lets every snapshot of a game (Wednesday's through the last pre-kickoff
     one) be found by the closing-line puller. Run repeatedly; each run appends.
 
+    Markets whose game has already kicked off (per ESPN's scheduled time) are
+    skipped: closing_lines.py ignores snapshots at/after kickoff, so in-game
+    rows would only bloat the committed files.
+
+    now: snapshot time, default the current UTC time (overridable for tests).
     Returns this run's rows (all game dates).
     """
-    snapshot_ts = datetime.now(timezone.utc).isoformat()
+    now = now or datetime.now(timezone.utc)
+    snapshot_ts = now.isoformat()
     logger.info("Fetching Kalshi NFL markets at %s", snapshot_ts)
 
     pairs = fetch_nfl_markets()
@@ -254,22 +299,55 @@ def main() -> pd.DataFrame:
                        int(undated.sum()), df.loc[undated, "event_ticker"].iloc[0])
         df = df[~undated]
 
+    df = _drop_started_games(df, now)
+
     RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
     for game_date, chunk in df.groupby("game_date"):
-        out = RAW_DATA_DIR / f"kalshi_lines_{game_date}.csv"
-        if out.exists():
-            existing = pd.read_csv(out)
-            chunk = pd.concat([existing, chunk], ignore_index=True).drop_duplicates(
-                subset=["market_ticker", "snapshot_ts"],
-                keep="last",
-            )
-        # Fixed column order even when appending to a file written before a
-        # column was added (its older rows get blanks for the new column).
-        chunk = chunk.reindex(columns=SNAPSHOT_COLUMNS)
-        chunk.to_csv(out, index=False)
-        logger.info("Saved %d rows (%d markets this snapshot) to %s",
-                    len(chunk), int((chunk["snapshot_ts"] == snapshot_ts).sum()), out)
+        _append_snapshot(RAW_DATA_DIR / f"kalshi_lines_{game_date}.csv", chunk)
     return df
+
+
+def _drop_started_games(df: pd.DataFrame, now: datetime) -> pd.DataFrame:
+    """Drop rows for games whose scheduled kickoff is at or before `now`.
+    A game ESPN can't be matched to is kept (and logged) -- never dropped blind."""
+    started = pd.Series(False, index=df.index)
+    for game_date, idx in df.groupby("game_date").groups.items():
+        kickoffs = kickoffs_by_matchup(game_date)
+        if not kickoffs:
+            continue
+        matchups = df.loc[idx, "event_ticker"].map(_matchup_from_event)
+        unmatched = sorted(set(df.loc[idx][~matchups.isin(kickoffs)]["event_ticker"]))
+        if unmatched:
+            logger.warning("No ESPN game for %d event(s) on %s, kept: %s", len(unmatched), game_date, unmatched)
+        started.loc[idx] = matchups.map(lambda m: m in kickoffs and now >= kickoffs[m]).astype(bool)
+    if started.any():
+        logger.info("Skipping %d market(s) in %d game(s) already kicked off",
+                    int(started.sum()), df.loc[started, "event_ticker"].map(_matchup_from_event).nunique())
+    return df[~started]
+
+
+def _append_snapshot(out: Path, chunk: pd.DataFrame) -> None:
+    """
+    Add this snapshot's rows to a game-date file without rewriting existing
+    lines, so each committed diff is only the new rows. (Re-reading the file
+    through pandas and writing it back reformatted earlier values, e.g.
+    0.2320 -> 0.232 -- same number, but noise in every diff.)
+    """
+    chunk = chunk.reindex(columns=SNAPSHOT_COLUMNS)
+    if not out.exists():
+        chunk.to_csv(out, index=False)
+    else:
+        with out.open() as f:
+            header = f.readline().rstrip("\n").split(",")
+        if header == SNAPSHOT_COLUMNS:
+            chunk.to_csv(out, mode="a", header=False, index=False)
+        else:
+            # Older column layout: one-time rewrite into the current layout,
+            # reading as text so existing values keep their exact formatting.
+            existing = pd.read_csv(out, dtype=str, keep_default_na=False)
+            pd.concat([existing, chunk], ignore_index=True).reindex(columns=SNAPSHOT_COLUMNS).to_csv(out, index=False)
+            logger.info("Migrated %s from columns %s to %s", out.name, header, SNAPSHOT_COLUMNS)
+    logger.info("Appended %d rows to %s", len(chunk), out)
 
 
 def fetch_single_market(market_ticker: str) -> dict | None:
