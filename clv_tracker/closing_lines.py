@@ -105,10 +105,10 @@ def price_from_market_row(bet: dict, row: dict) -> float | None:
     Extract this bet's price from a single already-selected Kalshi market
     row, using the same yes_ask/no_ask column rule regardless of how the
     row was obtained (CSV snapshot search, live API, or a direct in-memory
-    fetch — see commit_closing_price). ML NO bets buy YES on the away
-    team's market (entry_price = yes_ask). Total/F5 NO bets buy NO on the
-    over market (entry_price = no_ask). Uses the same column as entry_price
-    so CLV = closing - entry is a valid comparison.
+    fetch — see commit_closing_price). Every market, ML included, uses
+    yes_ask for YES bets and no_ask for NO bets: a NO bet buys NO on the
+    bet's own market_ticker (see log_bet), matching both entry_price and
+    _price_from_api, so CLV = closing - entry is a valid comparison.
 
     Rejects rows whose market has already resolved/gone inactive by the
     time of the snapshot (status != "active", or a degenerate 0/1 sentinel
@@ -116,12 +116,11 @@ def price_from_market_row(bet: dict, row: dict) -> float | None:
     enough that Kalshi finalizes the market hours before the originally
     scheduled first pitch (bet #438, 2026-06-18).
     """
-    market    = bet.get("market", "").upper()
     direction = bet["direction"]
     status    = str(row.get("status", "")).lower()
     if status and status != "active":
         return None
-    col = "yes_ask" if market == "ML" else ("yes_ask" if direction == "YES" else "no_ask")
+    col = "yes_ask" if direction == "YES" else "no_ask"
     try:
         v = float(row.get(col))
         if math.isnan(v):
