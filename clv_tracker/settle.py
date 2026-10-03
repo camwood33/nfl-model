@@ -240,20 +240,42 @@ def settle_open_bets(game_date: str | None = None) -> int:
             logger.warning("Bet #%d has no game_id — cannot settle.", bid)
             continue
 
-        # PENDING ITEM 9: real NFL score-fetching not yet built. _game_is_final,
-        # _get_linescore, and _linescore_looks_transient are all MLB Stats API
-        # functions and do not apply. Once a real NFL data source is chosen,
-        # this block must fetch (is_final, home_score, away_score, is_1h_market)
-        # for game_id and pass home_score/away_score to _determine_outcome,
-        # which is already written and verified correct for SPREAD/TOTAL/ML.
-        logger.warning(
-            "Bet #%d (game_id=%s) — NFL score-fetching not yet implemented (item 9). Skipping.",
-            bid, game_id,
-        )
-        continue
+        game_date = bet.get("game_date")
+        if not game_date:
+            logger.warning("Bet #%d has no game_date — cannot settle.", bid)
+            continue
+
+        if not _game_is_final(game_date, game_id):
+            logger.info("Bet #%d (game_id=%s) — game not yet Final, skipping.", bid, game_id)
+            continue
+
+        scores = _fetch_scores(game_date, game_id)
+        if scores is None:
+            logger.warning("Bet #%d — could not fetch scores from ESPN.", bid)
+            continue
+
+        market_upper = bet["market"].upper()
+        is_1h_market = market_upper.startswith("1H")
+        if is_1h_market:
+            if scores["1h"] is None:
+                logger.warning(
+                    "Bet #%d — game is Final but first-half scores unavailable.", bid,
+                )
+                continue
+            home_score, away_score = scores["1h"]
+        else:
+            home_score, away_score = scores["full"]
+
+        outcome = _determine_outcome(bet, home_score, away_score)
+        if outcome is None:
+            logger.warning("Bet #%d — could not determine outcome.", bid)
+            continue
 
         pnl = _calc_pnl(outcome, bet["entry_price"], bet["bet_size_dollars"])
         settle_bet(bid, outcome, pnl)
+
+        half_label = "1H " if is_1h_market else ""
+        run_detail = f"  {half_label}Score: {home_score}-{away_score}"
 
         clv_str = (
             f"CLV {bet['clv_raw']:+.3f}"
