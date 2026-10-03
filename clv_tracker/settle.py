@@ -27,99 +27,67 @@ from clv_tracker.db import get_unsettled_bets, settle_bet, init_db
 
 logger = logging.getLogger(__name__)
 
-MLB_API = "https://statsapi.mlb.com/api/v1"
 _REQUEST_TIMEOUT = 15
 
 
-# ── MLB Stats API helpers ─────────────────────────────────────────────────────
+# ── ESPN score fetching ───────────────────────────────────────────────────────
+# Reuses the ESPN scoreboard lookup already built and verified in
+# closing_lines.py, rather than duplicating it here.
 
-def _mlb_get(path: str, params: dict | None = None) -> dict:
-    url = f"{MLB_API}{path}"
-    r = requests.get(url, params=params, timeout=_REQUEST_TIMEOUT)
-    r.raise_for_status()
-    return r.json()
+from clv_tracker.closing_lines import _find_espn_event
 
 
-def _game_is_final(game_pk: int) -> bool:
-    """Return True only when the MLB Stats API reports the game as Final."""
-    try:
-        data = _mlb_get("/schedule", params={"gamePk": game_pk})
-        game = data["dates"][0]["games"][0]
-        return game["status"]["abstractGameState"] == "Final"
-    except Exception as exc:
-        logger.warning("Could not check game status for pk=%s: %s", game_pk, exc)
+def _game_is_final(game_date: str, game_id) -> bool:
+    """Return True only when ESPN reports the game as Final."""
+    event = _find_espn_event(game_date, game_id)
+    if event is None:
         return False
+    status = event.get("status", {}).get("type", {})
+    return bool(status.get("completed")) and status.get("state") == "post"
 
 
-def _get_linescore(game_pk: int) -> dict | None:
+def _fetch_scores(game_date: str, game_id) -> dict | None:
+    """
+    Fetch ESPN scores for one game.
+
+    Returns {"full": (home_score, away_score), "1h": (home_1h, away_1h) or None}.
+    Returns None overall if the event or full-game scores aren't available yet.
+    "1h" is None specifically if first-half linescores (periods 1 and 2) aren't
+    both present for both teams -- e.g. the game hasn't reached halftime yet.
+    """
+    event = _find_espn_event(game_date, game_id)
+    if event is None:
+        return None
     try:
-        return _mlb_get(f"/game/{game_pk}/linescore")
-    except Exception as exc:
-        logger.warning("Could not fetch linescore for pk=%s: %s", game_pk, exc)
+        competitors = event["competitions"][0]["competitors"]
+    except (KeyError, IndexError):
         return None
 
+    full: dict[str, int] = {}
+    half: dict[str, int] = {}
+    for comp in competitors:
+        side = comp.get("homeAway")
+        if side not in ("home", "away"):
+            continue
+        try:
+            full[side] = int(comp["score"])
+        except (KeyError, ValueError, TypeError):
+            return None
 
-def _f5_runs(linescore: dict) -> tuple[int, int, int] | None:
-    """
-    Return (away_f5, home_f5, total) for the first 5 innings.
-    Returns None if 5 full innings were not completed (rain delay, etc.).
-    """
-    innings = linescore.get("innings", [])
-    if len(innings) < 5:
+        q1 = q2 = None
+        for ls in comp.get("linescores", []):
+            if ls.get("period") == 1:
+                q1 = ls.get("value")
+            elif ls.get("period") == 2:
+                q2 = ls.get("value")
+        if q1 is not None and q2 is not None:
+            half[side] = int(q1) + int(q2)
+
+    if "home" not in full or "away" not in full:
         return None
-    away_f5, home_f5 = 0, 0
-    for inn in innings[:5]:
-        a = inn.get("away", {}).get("runs")
-        h = inn.get("home", {}).get("runs")
-        if a is None or h is None:
-            return None  # incomplete inning — treat as uncountable
-        away_f5 += a
-        home_f5 += h
-    return away_f5, home_f5, away_f5 + home_f5
 
-
-def _full_game_runs(linescore: dict) -> tuple[int, int, int] | None:
-    teams = linescore.get("teams", {})
-    away = teams.get("away", {}).get("runs")
-    home = teams.get("home", {}).get("runs")
-    if away is None or home is None:
-        return None
-    return int(away), int(home), int(away) + int(home)
-
-
-def _linescore_looks_transient(linescore: dict, market: str) -> bool:
-    """
-    Return True when the MLB API has marked a game Final but its linescore
-    data hasn't fully populated yet — a known race condition where the game
-    status flips to Final a few seconds before inning/run data is written.
-
-    Genuine postponement/suspension: innings=[], team run totals=None.
-    Transient race condition: innings list is present but individual inning
-    run values are None, or team totals are None despite innings existing.
-
-    When True, the settler skips (leaves outcome=NULL) so the next nightly
-    run retries with a fully-populated linescore instead of settling void.
-    """
-    innings = linescore.get("innings", [])
-    teams   = linescore.get("teams", {})
-
-    # No innings at all → genuine postponement; void is correct.
-    if not innings:
-        return False
-
-    if "F5" in market.upper():
-        for inn in innings[:5]:
-            if inn.get("away", {}).get("runs") is None or inn.get("home", {}).get("runs") is None:
-                return True
-    else:
-        has_team_runs = (
-            teams.get("away", {}).get("runs") is not None
-            and teams.get("home", {}).get("runs") is not None
-        )
-        if not has_team_runs:
-            return True
-
-    return False
+    half_scores = (half["home"], half["away"]) if "home" in half and "away" in half else None
+    return {"full": (full["home"], full["away"]), "1h": half_scores}
 
 
 # ── Outcome determination ─────────────────────────────────────────────────────
