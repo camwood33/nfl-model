@@ -66,7 +66,9 @@ class MLClosingPricePathsAgree(unittest.TestCase):
 
     def _api_price(self, bet: dict) -> float | None:
         with mock.patch.object(closing_lines, "kalshi_request", return_value={"market": dict(self.market)}):
-            return closing_lines._price_from_api(bet, "test-key-id", b"unused")
+            # Snapshot is 20 min before kickoff; ask the API at that same pre-game moment.
+            now = datetime.fromisoformat(SNAPSHOT_TS)
+            return closing_lines._price_from_api(bet, "test-key-id", b"unused", KICKOFF, now=now)
 
     def _assert_paths_agree(self, direction: str, ask_field: str):
         bet = self._log_ml_bet(direction)

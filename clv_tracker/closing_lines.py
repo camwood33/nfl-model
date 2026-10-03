@@ -139,6 +139,8 @@ def _price_from_snapshot(bet: dict, raw_df: pd.DataFrame) -> float | None:
     """
     ticker    = bet["market_ticker"]
 
+    if raw_df.empty:
+        return None  # no snapshot file for this date
     rows = raw_df[raw_df["market_ticker"] == ticker].copy()
     if rows.empty:
         return None
@@ -165,14 +167,30 @@ def _price_from_snapshot(bet: dict, raw_df: pd.DataFrame) -> float | None:
 
 # ── Price lookup: live Kalshi API ─────────────────────────────────────────────
 
-def _price_from_api(bet: dict, key_id: str, pem_bytes: bytes) -> float | None:
+def _price_from_api(
+    bet: dict, key_id: str, pem_bytes: bytes,
+    game_start: datetime | None, now: datetime | None = None,
+) -> float | None:
     """
     Pull current market price from the Kalshi API.
-    Fallback only — only usable before game settlement; settled markets return 0/1
-    which is useless as a closing line and would corrupt CLV.
+    Fallback only, and only BEFORE the game's scheduled kickoff: at or after
+    kickoff the live price is an in-game price, and closing_price is
+    write-once, so recording it would corrupt CLV permanently. An unknown
+    kickoff (ESPN unreachable / game not found) is refused too -- it can't be
+    shown to be pre-game. Settled markets (0/1 prices) are also rejected.
     """
     ticker    = bet["market_ticker"]
     direction = bet["direction"]
+    now = now or datetime.now(timezone.utc)
+    if game_start is None:
+        logger.warning("API fallback refused for bet #%d (%s): kickoff time unknown, "
+                       "can't confirm the live price is pre-game.", bet["bet_id"], ticker)
+        return None
+    if now >= game_start:
+        logger.warning("API fallback refused for bet #%d (%s): game kicked off at %s, "
+                       "live price would be in-game, not a closing line.",
+                       bet["bet_id"], ticker, game_start.isoformat())
+        return None
     try:
         data   = kalshi_request("GET", f"/markets/{ticker}", key_id, pem_bytes)
         market = data.get("market", data)
@@ -281,7 +299,7 @@ def pull_closing_lines(
         # 2. Live API fallback
         if closing is None and creds is not None:
             logger.debug("No snapshot price for bet #%d — trying API.", bet["bet_id"])
-            closing = _price_from_api(bet, *creds)
+            closing = _price_from_api(bet, *creds, game_start, now=now_utc)
 
         if closing is None:
             logger.warning(
