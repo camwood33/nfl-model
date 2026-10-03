@@ -1,0 +1,217 @@
+"""
+Decides whether the Kalshi collector (kalshi_lines.main) should pull right now,
+from ESPN's kickoff schedule. Meant to be invoked every minute; it pulls at
+most once per invocation and only when a scheduled slot has come due.
+
+Slots, per US Eastern calendar day:
+  Game day (ESPN lists >=1 game with a confirmed time):
+    - every hour on the hour from 09:00 ET until the day's last kickoff
+    - T-30, T-10 and T-3 minutes before each distinct kickoff time
+  Quiet day: 09:00, 15:00 and 21:00 ET
+
+Why: the closing line is the last snapshot before kickoff, so staleness there
+is CLV error -- hence the T-3 anchor (before ESPN's *scheduled* kickoff, which
+is the cutoff closing_lines.py uses), with T-10/T-30 as backups. Hourly game-day
+and 3x quiet-day pulls record line movement without bloating the committed CSVs.
+
+Missed slots (e.g. the Mac was asleep): a slot is due if it falls after the last
+successful pull and at or before now. Any number of due slots collapse into one
+pull. Slots older than CATCH_UP are logged as missed and not pulled for -- a
+catch-up pull hours later says nothing about the price at that slot.
+
+Kickoff anchors only work if this runs every minute or two: with a 5-minute
+interval the T-3 pull can land after kickoff and be skipped for that game.
+
+    python3 -m data.collect.dispatch               # decide, and pull if due
+    python3 -m data.collect.dispatch --dry-run     # decide only, change nothing
+    python3 -m data.collect.dispatch --plan 2026-10-04   # print that day's slots
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import logging
+import sys
+from datetime import date, datetime, time, timedelta, timezone
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+import requests
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from config import BASE_DIR
+
+logger = logging.getLogger(__name__)
+
+ET = ZoneInfo("America/New_York")
+UTC = timezone.utc
+
+STATE_PATH = BASE_DIR / "outputs" / "state" / "collector_dispatch.json"
+_ESPN_SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+
+KICKOFF_ANCHORS = (timedelta(minutes=30), timedelta(minutes=10), timedelta(minutes=3))
+GAME_DAY_FIRST_HOUR = 9                 # ET; hourly pulls from here to the last kickoff
+QUIET_DAY_HOURS = (9, 15, 21)           # ET
+CATCH_UP = timedelta(hours=2)           # older due slots are logged as missed, not pulled
+SCHEDULE_TTL = timedelta(hours=1)       # re-fetch ESPN's schedule for a day after this
+
+
+# ── Slots (pure) ──────────────────────────────────────────────────────────────
+
+def slots_for_day(day: date, kickoffs: list[datetime]) -> list[tuple[datetime, str]]:
+    """
+    All pull slots (UTC, sorted) for one ET calendar day, each with a label.
+    `kickoffs` are that day's scheduled kickoffs (UTC); empty = quiet day.
+    """
+    def at(hour: int) -> datetime:
+        return datetime.combine(day, time(hour), tzinfo=ET).astimezone(UTC)
+
+    slots: dict[datetime, str] = {}
+    if not kickoffs:
+        for h in QUIET_DAY_HOURS:
+            slots[at(h)] = f"quiet {h:02d}:00 ET"
+        return sorted(slots.items())
+
+    last = max(kickoffs)
+    h = GAME_DAY_FIRST_HOUR
+    while h < 24 and at(h) < last:
+        slots[at(h)] = f"hourly {h:02d}:00 ET"
+        h += 1
+    for k in sorted(set(kickoffs)):
+        for lead in KICKOFF_ANCHORS:
+            label = f"T-{int(lead.total_seconds() // 60)} kickoff {k.astimezone(ET):%H:%M} ET"
+            slots[k - lead] = label if (k - lead) not in slots else f"{slots[k - lead]} + {label}"
+    return sorted(slots.items())
+
+
+def decide(now: datetime, since: datetime | None,
+           slots: list[tuple[datetime, str]]) -> tuple[bool, list[tuple[datetime, str]], list[tuple[datetime, str]]]:
+    """
+    Returns (pull_now, due, missed) for slots in (since, now]:
+      due    -- no older than CATCH_UP; pull once if there are any
+      missed -- older than CATCH_UP; logged, not pulled
+    `since` is the later of the last pull and the last already-reported miss.
+    With no `since` (first run ever), older slots are not reported as missed.
+    """
+    pending = [(s, l) for s, l in slots if s <= now and (since is None or s > since)]
+    due = [(s, l) for s, l in pending if now - s <= CATCH_UP]
+    missed = [] if since is None else [(s, l) for s, l in pending if now - s > CATCH_UP]
+    return bool(due), due, missed
+
+
+# ── ESPN schedule (cached) ────────────────────────────────────────────────────
+
+def _fetch_kickoffs(day: date) -> list[datetime]:
+    """Scheduled kickoffs (UTC) for an ET date. Games without a confirmed time are left out."""
+    r = requests.get(_ESPN_SCOREBOARD_URL, params={"dates": day.strftime("%Y%m%d")}, timeout=15)
+    r.raise_for_status()
+    out = []
+    for e in r.json().get("events", []):
+        comp = (e.get("competitions") or [{}])[0]
+        if comp.get("timeValid") is False or not e.get("date"):
+            continue
+        out.append(datetime.fromisoformat(e["date"].replace("Z", "+00:00")))
+    return out
+
+
+def kickoffs_for_day(day: date, state: dict, now: datetime) -> list[datetime]:
+    """That day's kickoffs, from the state cache if fresh, else ESPN. On an ESPN
+    failure a stale cached copy is used; with none, raises (the caller skips the tick)."""
+    cache = state.setdefault("schedule", {})
+    entry = cache.get(day.isoformat())
+    if entry and now - datetime.fromisoformat(entry["fetched_at"]) < SCHEDULE_TTL:
+        return [datetime.fromisoformat(k) for k in entry["kickoffs"]]
+    try:
+        kickoffs = _fetch_kickoffs(day)
+    except Exception as exc:
+        if entry:
+            logger.warning("ESPN schedule fetch failed for %s, using cached copy: %s", day, exc)
+            return [datetime.fromisoformat(k) for k in entry["kickoffs"]]
+        raise
+    cache[day.isoformat()] = {"fetched_at": now.isoformat(), "kickoffs": [k.isoformat() for k in kickoffs]}
+    return kickoffs
+
+
+# ── State ─────────────────────────────────────────────────────────────────────
+
+def load_state(path: Path = STATE_PATH) -> dict:
+    try:
+        return json.loads(path.read_text())
+    except FileNotFoundError:
+        return {}
+
+
+def save_state(state: dict, now: datetime, path: Path = STATE_PATH) -> None:
+    # Drop cached schedules older than a week so the file stays small.
+    cutoff = (now - timedelta(days=7)).date().isoformat()
+    state["schedule"] = {d: v for d, v in state.get("schedule", {}).items() if d >= cutoff}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(state, indent=1, sort_keys=True))
+    tmp.replace(path)
+
+
+def _ts(state: dict, key: str) -> datetime | None:
+    return datetime.fromisoformat(state[key]) if state.get(key) else None
+
+
+# ── Tick ──────────────────────────────────────────────────────────────────────
+
+def tick(now: datetime | None = None, dry_run: bool = False, state_path: Path = STATE_PATH) -> bool:
+    """One dispatcher invocation. Returns True if a pull ran (or would, if dry_run)."""
+    now = now or datetime.now(UTC)
+    state = load_state(state_path)
+    marks = [t for t in (_ts(state, "last_pull"), _ts(state, "missed_through")) if t]
+    since = max(marks) if marks else None
+
+    # Yesterday too: catch-up after midnight ET can still reach last night's slots.
+    today = now.astimezone(ET).date()
+    slots: list[tuple[datetime, str]] = []
+    for day in (today - timedelta(days=1), today):
+        try:
+            slots += slots_for_day(day, kickoffs_for_day(day, state, now))
+        except Exception as exc:
+            logger.error("No schedule for %s (ESPN unreachable, nothing cached) -- skipping this tick: %s", day, exc)
+            return False
+
+    pull, due, missed = decide(now, since, slots)
+    for s, label in missed:
+        logger.warning("Missed slot %s ET (%s) -- %s late, beyond the %s catch-up; not pulled",
+                       f"{s.astimezone(ET):%a %H:%M}", label, now - s, CATCH_UP)
+    if missed:
+        state["missed_through"] = missed[-1][0].isoformat()  # report each miss once
+
+    if pull:
+        logger.info("Pulling for %d due slot(s): %s", len(due),
+                    "; ".join(f"{s.astimezone(ET):%a %H:%M} ET {label}" for s, label in due))
+        if not dry_run:
+            from data.collect import kalshi_lines
+            kalshi_lines.main(now=now)
+            state["last_pull"] = now.isoformat()  # only after a pull that didn't raise
+    if not dry_run:
+        save_state(state, now, state_path)
+    return pull
+
+
+def _cli():
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    p = argparse.ArgumentParser(description="Pull Kalshi NFL lines if a scheduled slot is due.")
+    p.add_argument("--dry-run", action="store_true", help="decide and log only; no pull, no state change")
+    p.add_argument("--plan", metavar="YYYY-MM-DD", help="print the slots for an ET date and exit")
+    args = p.parse_args()
+
+    if args.plan:
+        day = date.fromisoformat(args.plan)
+        kickoffs = _fetch_kickoffs(day)
+        print(f"{day} ({day:%A}): {len(kickoffs)} game(s), "
+              f"{len(set(kickoffs))} kickoff time(s) -> {'game day' if kickoffs else 'quiet day'}")
+        for s, label in slots_for_day(day, kickoffs):
+            print(f"  {s.astimezone(ET):%H:%M} ET  ({s:%H:%MZ})  {label}")
+        return
+    if not tick(dry_run=args.dry_run):
+        logging.getLogger(__name__).info("No slot due.")
+
+
+if __name__ == "__main__":
+    _cli()

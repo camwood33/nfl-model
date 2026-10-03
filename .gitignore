@@ -7,3 +7,6 @@ __pycache__/
 *.pyc
 
 .DS_Store
+
+# Dispatcher state (last pull time, cached ESPN schedule) -- per-machine, not data
+outputs/state/

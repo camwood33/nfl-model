@@ -1,0 +1,340 @@
+{
+ "events": [
+  {
+   "id": "401872965",
+   "date": "2026-10-04T13:30Z",
+   "shortName": "IND VS WSH",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "WSH"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "IND"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872971",
+   "date": "2026-10-04T17:00Z",
+   "shortName": "NE @ BUF",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "BUF"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "NE"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872972",
+   "date": "2026-10-04T17:00Z",
+   "shortName": "NYJ @ CHI",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "CHI"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "NYJ"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872969",
+   "date": "2026-10-04T17:00Z",
+   "shortName": "JAX @ CIN",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "CIN"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "JAX"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872966",
+   "date": "2026-10-04T17:00Z",
+   "shortName": "ARI @ NYG",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "NYG"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "ARI"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872970",
+   "date": "2026-10-04T17:00Z",
+   "shortName": "LAR @ PHI",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "PHI"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "LAR"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872968",
+   "date": "2026-10-04T17:00Z",
+   "shortName": "GB @ TB",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "TB"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "GB"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872973",
+   "date": "2026-10-04T17:00Z",
+   "shortName": "TEN @ BAL",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "BAL"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "TEN"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872967",
+   "date": "2026-10-04T17:00Z",
+   "shortName": "DAL @ HOU",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "HOU"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "DAL"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872974",
+   "date": "2026-10-04T20:05Z",
+   "shortName": "MIA @ MIN",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "MIN"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "MIA"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872976",
+   "date": "2026-10-04T20:25Z",
+   "shortName": "KC @ LV",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "LV"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "KC"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872975",
+   "date": "2026-10-04T20:25Z",
+   "shortName": "DEN @ SF",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "SF"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "DEN"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872977",
+   "date": "2026-10-04T20:25Z",
+   "shortName": "LAC @ SEA",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "SEA"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "LAC"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401872978",
+   "date": "2026-10-05T00:20Z",
+   "shortName": "DET @ CAR",
+   "competitions": [
+    {
+     "timeValid": true,
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "abbreviation": "CAR"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "abbreviation": "DET"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
