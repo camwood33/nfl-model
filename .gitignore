@@ -1,0 +1,9 @@
+# Secrets -- data/collect/kalshi_lines.py loads both from the project root
+.env
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+
+.DS_Store
