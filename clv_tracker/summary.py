@@ -221,8 +221,10 @@ def _cli():
     if s["by_market"]:
         print(f"\n  By market:")
         for row in s["by_market"]:
-            print(f"    {row['market_type']:20s}  n={row['count']}  "
-                  f"mean CLV {row['mean_clv'] * 100:+.3f} pp")
+            # mean_clv is None for a market whose bets have no closing price yet
+            clv_str = (f"{row['mean_clv'] * 100:+.3f} pp"
+                       if row["mean_clv"] is not None else "n/a (no closing lines yet)")
+            print(f"    {row['market_type']:20s}  n={row['count']}  mean CLV {clv_str}")
     print()
 
     if args.export:

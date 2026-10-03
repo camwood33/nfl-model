@@ -8,6 +8,7 @@ Table:    bets — one row per placed bet, extended in place as
 from __future__ import annotations
 
 import logging
+import os
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -19,7 +20,10 @@ logger = logging.getLogger(__name__)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from config import CLV_RECORDS_DIR
 
-DB_PATH = CLV_RECORDS_DIR / "nfl_bets.db"
+# NFL_BETS_DB overrides the location -- lets tests run the real CLI entry
+# points (python -m clv_tracker.summary, etc.) against a throwaway DB instead
+# of the tracked nfl_bets.db. Unset in normal use.
+DB_PATH = Path(os.environ.get("NFL_BETS_DB") or CLV_RECORDS_DIR / "nfl_bets.db")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS bets (
@@ -113,7 +117,7 @@ END;
 
 @contextmanager
 def _conn():
-    CLV_RECORDS_DIR.mkdir(parents=True, exist_ok=True)
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(DB_PATH)
     con.row_factory = sqlite3.Row
     try:
