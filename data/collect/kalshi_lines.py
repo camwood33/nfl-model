@@ -186,8 +186,21 @@ def game_date_from_ticker(ticker: str) -> str | None:
         return None
 
 
+# Columns written to kalshi_lines_<GAME DATE>.csv, in order. Deliberately
+# minimal: these files are committed to git and get one row per open market
+# per snapshot, so static per-market text (rules_primary was ~36% of every
+# file) and fields nothing reads are not stored. closing_lines.py reads
+# market_ticker, snapshot_ts, status, yes_ask, no_ask; the rest identify the
+# row. Static market details are one /markets/{ticker} call away if needed.
+SNAPSHOT_COLUMNS = [
+    "snapshot_ts", "pull_date", "game_date", "market",
+    "event_ticker", "market_ticker", "status", "yes_ask", "no_ask",
+]
+
+
 def parse_market_row(market: dict, event_ticker: str, snapshot_ts: str) -> dict:
-    """Flattens a Kalshi market dict into a flat row.
+    """Flattens a Kalshi market dict into a snapshot row (main() adds
+    pull_date / game_date / market).
 
     yes_ask/no_ask are the fee-inclusive price actually paid to buy, not the raw
     resting-order price — see fee_inclusive_price().
@@ -196,23 +209,9 @@ def parse_market_row(market: dict, event_ticker: str, snapshot_ts: str) -> dict:
         "snapshot_ts": snapshot_ts,
         "event_ticker": event_ticker,
         "market_ticker": market.get("ticker"),
-        "market_title": market.get("title"),
-        "yes_subtitle": market.get("yes_sub_title"),
-        "no_subtitle": market.get("no_sub_title"),
         "status": market.get("status"),
-        "yes_bid": market.get("yes_bid_dollars"),
         "yes_ask": fee_inclusive_price(market.get("yes_ask_dollars")),
-        "no_bid": market.get("no_bid_dollars"),
         "no_ask": fee_inclusive_price(market.get("no_ask_dollars")),
-        "last_price": market.get("last_price_dollars"),
-        "volume": market.get("volume_fp"),
-        "volume_24h": market.get("volume_24h_fp"),
-        "open_interest": market.get("open_interest_fp"),
-        "close_time": market.get("close_time"),
-        "expiration_time": market.get("expiration_time"),
-        "liquidity": market.get("liquidity_dollars"),
-        "floor_strike": market.get("floor_strike"),
-        "rules_primary": market.get("rules_primary"),
     }
 
 
@@ -244,6 +243,7 @@ def main() -> pd.DataFrame:
 
     df = pd.DataFrame(rows)
     df["pull_date"] = snapshot_ts[:10]
+    df = df[SNAPSHOT_COLUMNS]
 
     undated = df["game_date"].isna()
     if undated.any():

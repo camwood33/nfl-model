@@ -68,6 +68,7 @@ class CollectorMain(unittest.TestCase):
             total = 0
             for name, df in files.items():
                 gd = name[len("kalshi_lines_"):-len(".csv")]
+                self.assertEqual(list(df.columns), kl.SNAPSHOT_COLUMNS, name)
                 self.assertTrue((df["game_date"] == gd).all(), name)
                 self.assertEqual(df["snapshot_ts"].nunique(), 2, f"{name}: second run should append")
                 self.assertFalse(df.duplicated(["market_ticker", "snapshot_ts"]).any(), name)
