@@ -41,8 +41,11 @@ CREATE TABLE IF NOT EXISTS bets (
     clv_log_odds       REAL,                      -- log-odds CLV (positive = beat close)
     closing_pulled_at  TEXT,                      -- ISO-8601 UTC
 
-    -- Settlement (filled manually or by a future settler)
-    outcome            TEXT    CHECK(outcome IN ('win','loss','push','void',NULL)),
+    -- Settlement (filled by settle.settle_open_bets)
+    -- 'tie' = full-game ML on a tied game: Kalshi settles every contract at
+    -- $0.50 (see settle.py). Kalshi NFL markets never push; 'push' is kept
+    -- only so the constraint stays a superset of older databases.
+    outcome            TEXT    CHECK(outcome IS NULL OR outcome IN ('win','loss','tie','push','void')),
     profit_loss        REAL,                      -- dollars won (+) or lost (-)
     settled_at         TEXT,                      -- ISO-8601 UTC
 

@@ -2,15 +2,15 @@
 Nightly bet settler for the CLV tracker.
 
 For each unsettled bet (outcome IS NULL):
-  1. Check the MLB Stats API — skip if the game is not yet Final
-  2. Pull the closing line from Kalshi snapshots (if not already done)
-  3. Determine outcome (win/loss/push/void) from inning-by-inning scores
-  4. Calculate P&L
-  5. Persist settlement to the database
+  1. Check ESPN's scoreboard — skip if the game is not yet Final
+  2. Determine outcome (win/loss/tie) from full-game or first-half scores,
+     per Kalshi's contract rules for that market (see _SETTLEMENT_PAYOUT)
+  3. Calculate P&L
+  4. Persist settlement to the database
 
-Supported markets: F5 TOTAL OVER | F5 TOTAL UNDER | ML | TOTAL OVER | TOTAL UNDER
+Supported markets: ML | 1H ML | SPREAD | 1H SPREAD | TOTAL | 1H TOTAL
 
-Run nightly (2 am) via launchd, or manually:
+Run manually:
     python -m clv_tracker.settle [YYYY-MM-DD]
 """
 from __future__ import annotations
@@ -92,55 +92,66 @@ def _fetch_scores(game_date: str, game_id) -> dict | None:
 
 # ── Outcome determination ─────────────────────────────────────────────────────
 
+# Tie handling below follows Kalshi's own contract rules (rules_primary /
+# rules_secondary), pulled from live markets 2026-10-03 and saved under
+# tests/fixtures/. Nothing here is a sportsbook-style push:
+#
+#   ML        KXNFLGAME     tied game -> every contract settles at $0.50 ("tie")
+#   1H ML     KXNFL1H       3 strikes (team, team, TIE); tied half -> team
+#                           strikes resolve No, TIE strike resolves Yes
+#   SPREAD /  KXNFLSPREAD,  Yes only if the team wins by MORE THAN the line;
+#   1H SPREAD KXNFL1HSPREAD landing exactly on it (or a tie) resolves No
+#   TOTAL /   KXNFLTOTAL,   Yes only if combined points are MORE THAN the
+#   1H TOTAL  KXNFL1HTOTAL  line; landing exactly on it resolves No
+
+# Dollars a contract pays at settlement, per outcome.
+_SETTLEMENT_PAYOUT = {"win": 1.0, "loss": 0.0, "tie": 0.5}
+
+
+def _resolve(direction: str, yes_resolves: bool) -> str:
+    """Our outcome given which way the contract resolved and which side we bought."""
+    return "win" if (direction == "YES") == yes_resolves else "loss"
+
+
 def _spread_outcome(direction: str, home_score: int, away_score: int, side: str, home_team: str, line_value: float) -> str:
     """
     Resolve a SPREAD market. Enforced by log_bet(): side is ALWAYS the
     favored team, line_value is ALWAYS negative. direction='YES' backs the
     favorite to cover; 'NO' backs the underdog (same ticker either way).
 
-    A whole-number line (-3, -7) can push if the margin lands exactly on
-    it. A half-point line (-2.5) never can, since NFL margins are integers.
+    Kalshi: Yes only if the team "wins by more than" the line, so a margin
+    exactly on a whole-number line resolves No -- never a push. (All live
+    NFL spread strikes were X.5 as of 2026-10-03, so this can't happen today.)
     """
     is_home = side.upper() == home_team.upper()
     favored_margin = (home_score - away_score) if is_home else (away_score - home_score)
-    threshold = abs(line_value)
-
-    if favored_margin > threshold:
-        favorite_covered = True
-    elif favored_margin < threshold:
-        favorite_covered = False
-    else:
-        return "push"
-
-    if direction == "YES":
-        return "win" if favorite_covered else "loss"
-    return "win" if not favorite_covered else "loss"
+    return _resolve(direction, favored_margin > abs(line_value))
 
 
 def _total_outcome(direction: str, total: int, line_value: float) -> str:
     """
     Resolve a TOTAL market. One Kalshi contract per line -- YES backs the
-    OVER, NO backs the UNDER. Kalshi lines are always X.5 in practice, so
-    push is not expected to occur, but the check is kept for correctness.
+    OVER, NO backs the UNDER. Kalshi: Yes only if combined points are "more
+    than" the line, so a total exactly on a whole-number line resolves No.
     """
-    if total > line_value:
-        went_over = True
-    elif total < line_value:
-        went_over = False
-    else:
-        return "push"
-
-    if direction == "YES":
-        return "win" if went_over else "loss"
-    return "win" if not went_over else "loss"
+    return _resolve(direction, total > line_value)
 
 
-def _ml_outcome(direction: str, home_score: int, away_score: int, side: str, home_team: str, away_team: str) -> str | None:
-    """ML: side is the team backed. A tied final score is a push."""
-    if home_score == away_score:
-        return "push"
-    home_won = home_score > away_score
+def _ml_outcome(direction: str, home_score: int, away_score: int, side: str, home_team: str, away_team: str, first_half: bool) -> str | None:
+    """
+    ML / 1H ML: side is the team whose contract was bought (YES = that team
+    wins, NO = it doesn't). 1H ML may also be side="TIE", Kalshi's third
+    KXNFL1H strike.
+
+    Full game: a tie settles every contract at $0.50 -> "tie".
+    1st half:  a tie resolves team strikes No and the TIE strike Yes.
+    """
+    tied = home_score == away_score
     side_upper = side.upper()
+
+    if first_half and side_upper == "TIE":
+        return _resolve(direction, tied)
+
     is_home = side_upper == home_team.upper()
     is_away = side_upper == away_team.upper()
     if not (is_home or is_away):
@@ -149,18 +160,21 @@ def _ml_outcome(direction: str, home_score: int, away_score: int, side: str, hom
             side, home_team, away_team,
         )
         return None
-    team_won = home_won if is_home else not home_won
-    return "win" if team_won else "loss"
+
+    if tied:
+        return _resolve(direction, False) if first_half else "tie"
+    team_won = (home_score > away_score) if is_home else (away_score > home_score)
+    return _resolve(direction, team_won)
 
 
 def _determine_outcome(bet: dict, home_score: int, away_score: int) -> str | None:
     """
-    Return 'win'|'loss'|'push'|None (None = undeterminable).
+    Return 'win'|'loss'|'tie'|None (None = undeterminable). 'tie' only
+    occurs for a full-game ML bet on a tied game ($0.50 settlement).
 
     home_score/away_score must already be scoped correctly by the caller:
     full-game totals for ML/SPREAD/TOTAL, first-half-only totals for
-    1H ML/1H SPREAD/1H TOTAL. See _fetch_scores() -- PENDING item 9, data
-    source not yet chosen.
+    1H ML/1H SPREAD/1H TOTAL (see _fetch_scores()).
     """
     market = bet["market"].upper()
     side = bet["side"]
@@ -182,7 +196,8 @@ def _determine_outcome(bet: dict, home_score: int, away_score: int) -> str | Non
         return _total_outcome(direction, home_score + away_score, line_value)
 
     if market in ("ML", "1H ML"):
-        return _ml_outcome(direction, home_score, away_score, side, home_team, away_team)
+        return _ml_outcome(direction, home_score, away_score, side, home_team, away_team,
+                           first_half=market == "1H ML")
 
     logger.error("Unknown market %r for bet #%d", market, bet["bet_id"])
     return None
@@ -193,16 +208,17 @@ def _determine_outcome(bet: dict, home_score: int, away_score: int) -> str | Non
 def _calc_pnl(outcome: str, entry_price: float, bet_size: float) -> float:
     """
     Kalshi binary contract P&L.
-    bet_size is the dollars staked (maximum loss).
-    Win: profit = bet_size * (1 - entry_price) / entry_price
+    bet_size is the dollars staked (maximum loss), buying bet_size / entry_price
+    contracts that each pay _SETTLEMENT_PAYOUT[outcome]:
+    Win:  profit = bet_size * (1 - entry_price) / entry_price
     Loss: profit = -bet_size
+    Tie:  profit = bet_size * (0.50 - entry_price) / entry_price
     Push/void: 0
     """
-    if outcome == "win":
-        return round(bet_size * (1.0 - entry_price) / entry_price, 2)
-    if outcome == "loss":
-        return round(-bet_size, 2)
-    return 0.0  # push or void
+    payout = _SETTLEMENT_PAYOUT.get(outcome)
+    if payout is None:
+        return 0.0  # push or void
+    return round(bet_size * (payout - entry_price) / entry_price, 2)
 
 
 # ── Main settler ──────────────────────────────────────────────────────────────
@@ -213,7 +229,7 @@ def settle_open_bets(game_date: str | None = None) -> int:
 
     Steps:
       1. Pull closing lines for any bet that still needs one (reuses closing_lines.py)
-      2. For each unsettled bet, verify game is Final via MLB Stats API
+      2. For each unsettled bet, verify game is Final via ESPN's scoreboard
       3. Fetch linescore, determine outcome, compute P&L, persist
 
     Returns the number of bets settled.

@@ -20,6 +20,11 @@ from clv_tracker.db import get_all_bets, init_db
 
 logger = logging.getLogger(__name__)
 
+# Settled outcomes that carry real P&L and stake. 'tie' (full-game ML tie,
+# Kalshi settles at $0.50) has nonzero P&L, so it must be counted alongside
+# win/loss or it would silently drop out of total P&L and ROI.
+_PNL_OUTCOMES = ["win", "loss", "tie"]
+
 
 def compute_summary(
     game_date: str | date | None = None,
@@ -43,7 +48,7 @@ def compute_summary(
       mean_clv_log_odds     float | None
       pct_bets_positive_clv float — % of closed bets with CLV > 0
       by_market             list[dict] — breakdown per market type
-      wins / losses         int
+      wins / losses / ties  int — ties = full-game ML ties settled at $0.50
       total_pnl_dollars     float
       total_wagered_dollars float
       roi_pct               float
@@ -78,7 +83,7 @@ def compute_summary(
     by_market = []
     for mkt, grp in df.groupby("market"):
         mkt_closed  = grp[grp["closing_price"].notna() & (grp["outcome"] != "void")]
-        mkt_settled = grp[grp["outcome"].isin(["win", "loss"])]
+        mkt_settled = grp[grp["outcome"].isin(_PNL_OUTCOMES)]
 
         count       = len(mkt_closed)
         mean_clv    = round(float(mkt_closed["clv_raw"].mean()), 5) if count else None
@@ -94,6 +99,7 @@ def compute_summary(
 
         wins    = int((mkt_settled["outcome"] == "win").sum())
         losses  = int((mkt_settled["outcome"] == "loss").sum())
+        ties    = int((mkt_settled["outcome"] == "tie").sum())
         pnl     = round(float(mkt_settled["profit_loss"].sum()), 2) if not mkt_settled.empty else 0.0
         wagered = float(mkt_settled["bet_size_dollars"].sum()) if not mkt_settled.empty else 0.0
         roi     = round(pnl / wagered * 100, 2) if wagered > 0 else None
@@ -113,6 +119,7 @@ def compute_summary(
             "count":            count,
             "wins":             wins,
             "losses":           losses,
+            "ties":             ties,
             "mean_clv":         mean_clv,
             "mean_clv_lo":      mean_clv_lo,
             "pct_clv_positive": pct_clv_positive,
@@ -123,9 +130,10 @@ def compute_summary(
             "total_pnl":        pnl,
         })
 
-    has_outcome   = df[df["outcome"].isin(["win", "loss"])]
+    has_outcome   = df[df["outcome"].isin(_PNL_OUTCOMES)]
     wins          = int((has_outcome["outcome"] == "win").sum())
     losses        = int((has_outcome["outcome"] == "loss").sum())
+    ties          = int((has_outcome["outcome"] == "tie").sum())
     total_pnl     = float(has_outcome["profit_loss"].sum()) if not has_outcome.empty else 0.0
     total_wagered = float(has_outcome["bet_size_dollars"].sum())
 
@@ -151,6 +159,7 @@ def compute_summary(
         "by_market":              by_market,
         "wins":                   wins,
         "losses":                 losses,
+        "ties":                   ties,
         "total_pnl_dollars":      round(total_pnl, 2),
         "total_wagered_dollars":  round(total_wagered, 2),
         "roi_pct":                round(total_pnl / total_wagered * 100, 2)
@@ -164,7 +173,7 @@ def _empty_summary(total_bets: int = 0, total_wagered: float = 0.0) -> dict:
         "bets_with_closing": 0, "total_bets": total_bets,
         "mean_clv_raw": 0.0, "mean_clv_pct": 0.0, "mean_clv_log_odds": None,
         "pct_bets_positive_clv": 0.0, "by_market": [],
-        "wins": 0, "losses": 0,
+        "wins": 0, "losses": 0, "ties": 0,
         "total_pnl_dollars": 0.0,
         "total_wagered_dollars": round(total_wagered, 2),
         "roi_pct": 0.0,
@@ -215,7 +224,7 @@ def _cli():
               if s["mean_clv_log_odds"] is not None else "")
     print(f"  Mean CLV:           {s['mean_clv_pct']:+.3f} pp{lo_str}")
     print(f"  % positive CLV:     {s['pct_bets_positive_clv']:.1f}%")
-    print(f"  W / L:              {s['wins']} / {s['losses']}")
+    print(f"  W / L / T:          {s['wins']} / {s['losses']} / {s['ties']}")
     print(f"  Total wagered:      ${s['total_wagered_dollars']:,.2f}")
     print(f"  P&L:                ${s['total_pnl_dollars']:+,.2f}  (ROI {s['roi_pct']:+.2f}%)")
     if s["by_market"]:

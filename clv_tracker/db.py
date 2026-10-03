@@ -65,8 +65,11 @@ CREATE TABLE IF NOT EXISTS bets (
     clv_log_odds       REAL,                      -- log-odds CLV (positive = beat close)
     closing_pulled_at  TEXT,                      -- ISO-8601 UTC
 
-    -- Settlement (filled manually or by a future settler)
-    outcome            TEXT    CHECK(outcome IN ('win','loss','push','void',NULL)),
+    -- Settlement (filled by settle.settle_open_bets)
+    -- 'tie' = full-game ML on a tied game: Kalshi settles every contract at
+    -- $0.50 (see settle.py). Kalshi NFL markets never push; 'push' is kept
+    -- only so the constraint stays a superset of older databases.
+    outcome            TEXT    CHECK(outcome IS NULL OR outcome IN ('win','loss','tie','push','void')),
     profit_loss        REAL,                      -- dollars won (+) or lost (-)
     settled_at         TEXT,                      -- ISO-8601 UTC
 
@@ -149,6 +152,51 @@ def init_db() -> None:
             con.execute("ALTER TABLE bets ADD COLUMN morning_bet_size_dollars REAL")
         except sqlite3.OperationalError:
             pass  # column already exists
+        if _migrate_outcome_check(con):
+            con.executescript(_SCHEMA)  # recreate indexes + trigger dropped with the old table
+
+
+_OLD_OUTCOME_CHECK = "CHECK(outcome IN ('win','loss','push','void',NULL))"
+_NEW_OUTCOME_CHECK = "CHECK(outcome IS NULL OR outcome IN ('win','loss','tie','push','void'))"
+
+
+def _migrate_outcome_check(con: sqlite3.Connection) -> bool:
+    """
+    Replace bets.outcome's original CHECK on databases created before this
+    fix. The old form, `outcome IN (..., NULL)`, never rejected anything: for
+    a value not in the list, `x IN (..., NULL)` is NULL, not false, and a
+    CHECK only fails on false -- so any typo was silently accepted. The new
+    form also allows 'tie'. SQLite can't ALTER a CHECK constraint, so this is the standard
+    rebuild: create bets_new from the table's own stored SQL (keeping any
+    ALTER-added columns) with only the CHECK swapped, copy every row, drop
+    the old table, rename. Runs in one transaction; the AUTOINCREMENT
+    counter is carried over so bet_ids are never reused. Returns True if it
+    migrated (the caller must then recreate indexes/trigger).
+    """
+    (table_sql,) = con.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'bets'"
+    ).fetchone()
+    if _NEW_OUTCOME_CHECK in table_sql:
+        return False
+    if _OLD_OUTCOME_CHECK not in table_sql or not table_sql.startswith("CREATE TABLE bets ("):
+        raise RuntimeError("bets table schema not recognised -- refusing to auto-migrate outcome CHECK")
+
+    new_sql = table_sql.replace(_OLD_OUTCOME_CHECK, _NEW_OUTCOME_CHECK).replace(
+        "CREATE TABLE bets (", "CREATE TABLE bets_new (", 1
+    )
+    con.commit()
+    con.execute("BEGIN")
+    seq = con.execute("SELECT seq FROM sqlite_sequence WHERE name = 'bets'").fetchone()
+    con.execute(new_sql)
+    con.execute("INSERT INTO bets_new SELECT * FROM bets")
+    con.execute("DROP TABLE bets")
+    con.execute("ALTER TABLE bets_new RENAME TO bets")
+    con.execute("DELETE FROM sqlite_sequence WHERE name = 'bets'")
+    if seq is not None:
+        con.execute("INSERT INTO sqlite_sequence (name, seq) VALUES ('bets', ?)", (seq[0],))
+    con.commit()
+    logger.info("Migrated bets.outcome CHECK (now enforced; allows 'tie').")
+    return True
 
 
 # ── Writes ────────────────────────────────────────────────────────────────────
