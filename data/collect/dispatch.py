@@ -19,6 +19,10 @@ successful pull and at or before now. Any number of due slots collapse into one
 pull. Slots older than CATCH_UP are logged as missed and not pulled for -- a
 catch-up pull hours later says nothing about the price at that slot.
 
+After each successful pull, closing lines are recorded for open bets whose
+kickoff comes before the next scheduled pull (record_closing_lines): that pull's
+snapshot is the last one before kickoff, normally the T-3 one.
+
 Kickoff anchors only work if this runs every minute or two: with a 5-minute
 interval the T-3 pull can land after kickoff and be skipped for that game.
 
@@ -32,9 +36,11 @@ import argparse
 import fcntl
 import json
 import logging
+import math
 import sys
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
+from time import monotonic
 from zoneinfo import ZoneInfo
 
 import requests
@@ -157,11 +163,58 @@ def _ts(state: dict, key: str) -> datetime | None:
     return datetime.fromisoformat(state[key]) if state.get(key) else None
 
 
+# ── Closing lines ─────────────────────────────────────────────────────────────
+
+def next_slot_after(t: datetime, slots: list[tuple[datetime, str]], state: dict) -> datetime | None:
+    """The first scheduled pull after `t`: from today's slots, else tomorrow's.
+    None if tomorrow's schedule can't be had (ESPN down, nothing cached)."""
+    later = [s for s, _ in slots if s > t]
+    if later:
+        return min(later)
+    tomorrow = t.astimezone(ET).date() + timedelta(days=1)
+    try:
+        return min(s for s, _ in slots_for_day(tomorrow, kickoffs_for_day(tomorrow, state, t)))
+    except Exception as exc:
+        logger.warning("No schedule for %s, so no next slot: %s", tomorrow, exc)
+        return None
+
+
+def record_closing_lines(at: datetime, slots: list[tuple[datetime, str]], state: dict) -> int:
+    """
+    Record closing prices for open bets whose kickoff is at or before the next
+    scheduled pull, i.e. bets for which the snapshot just taken is the last
+    pre-kickoff one there will be.
+
+    closing_price is write-once, so recording on an earlier pull would lock in
+    a stale price for good. A fixed window can't get this right: the 16:00
+    hourly pull is T-5 for a 16:05 kickoff, and for a 13:02 kickoff the 13:00
+    hourly pull is the last one (T-2). Hence the window is the time from `at`
+    to the next slot, rounded UP to whole minutes. Kickoffs and slots fall on
+    whole minutes, so with pull_closing_lines measuring from the same `at`,
+    "kickoff <= at + window" is exactly "kickoff <= next slot". A kickoff that
+    *equals* the next slot counts: that pull would skip the game as kicked off.
+
+    A bet whose T-3 pull failed is caught by the first successful pull after
+    it (its kickoff is still <= that pull's next slot); closing_lines only
+    reads snapshots taken before kickoff, so it gets the last pre-kickoff one.
+    """
+    nxt = next_slot_after(at, slots, state)
+    if nxt is None:
+        logger.warning("Closing lines not recorded this pull (next slot unknown); retried next pull.")
+        return 0
+    window = max(0, math.ceil((nxt - at).total_seconds() / 60))
+    logger.info("Recording closing lines for bets kicking off by %s (next pull), window %d min",
+                f"{nxt.astimezone(ET):%a %H:%M} ET", window)
+    from clv_tracker.closing_lines import pull_closing_lines
+    return pull_closing_lines(pre_game_window_minutes=window, now=at, require_kickoff=True)
+
+
 # ── Tick ──────────────────────────────────────────────────────────────────────
 
 def tick(now: datetime | None = None, dry_run: bool = False, state_path: Path = STATE_PATH) -> bool:
     """One dispatcher invocation. Returns True if a pull ran (or would, if dry_run)."""
     now = now or datetime.now(UTC)
+    t0 = monotonic()
     state = load_state(state_path)
     marks = [t for t in (_ts(state, "last_pull"), _ts(state, "missed_through")) if t]
     since = max(marks) if marks else None
@@ -190,6 +243,15 @@ def tick(now: datetime | None = None, dry_run: bool = False, state_path: Path = 
             from data.collect import kalshi_lines
             kalshi_lines.main(now=now)
             state["last_pull"] = now.isoformat()  # only after a pull that didn't raise
+            # Measured from after the pull (the same clock as `now`, so replays work).
+            at = now + timedelta(seconds=monotonic() - t0)
+            try:
+                record_closing_lines(at, slots, state)
+            except Exception:
+                # The pull succeeded; don't let this undo last_pull. Open bets
+                # stay open, so the next pull retries them.
+                logger.exception("Closing-line recording FAILED after a successful pull; "
+                                 "will retry after the next pull.")
     if not dry_run:
         save_state(state, now, state_path)
     return pull

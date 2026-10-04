@@ -11,7 +11,9 @@ Strategy:
      already appends multiple snapshots per day to this file.
   2. Fall back to a live Kalshi API call when no pre-game snapshot exists.
 
-Run once per day after the first game of the slate starts:
+Runs automatically after every collector pull (data/collect/dispatch.py, which
+picks the window so a bet is recorded from the last snapshot before its
+kickoff). Manual run, e.g. to catch up:
     python -m clv_tracker.closing_lines [YYYY-MM-DD]
 """
 from __future__ import annotations
@@ -245,6 +247,8 @@ def pull_closing_lines(
     game_date: str | None = None,
     use_api_fallback: bool = True,
     pre_game_window_minutes: int = 0,
+    now: datetime | None = None,
+    require_kickoff: bool = False,
 ) -> int:
     """
     Pull closing lines for all open bets whose game has started (or is within
@@ -253,8 +257,16 @@ def pull_closing_lines(
     game_date:               YYYY-MM-DD; if None, processes all open bets.
     use_api_fallback:        call the Kalshi live API when no snapshot row found.
     pre_game_window_minutes: allow processing bets this many minutes before
-                             first pitch — used by the pre-game snapshot puller
-                             to immediately write the snapshot it just collected.
+                             kickoff — the dispatcher passes the time until its
+                             next pull, so a bet is recorded on the last pull
+                             before its kickoff (see dispatch.record_closing_lines).
+    now:                     the time the window is measured from, and the
+                             time checked by the API fallback's kickoff guard.
+                             Default: the current UTC time.
+    require_kickoff:         skip bets whose kickoff ESPN can't supply, instead
+                             of recording the latest snapshot. Without a kickoff
+                             there's no way to tell the game is close, so an
+                             automatic caller could record a price days early.
 
     Returns the number of bets updated.
     """
@@ -279,7 +291,7 @@ def pull_closing_lines(
         except Exception as exc:
             logger.warning("Kalshi credentials unavailable — API fallback disabled: %s", exc)
 
-    now_utc   = datetime.now(timezone.utc)
+    now_utc   = now or datetime.now(timezone.utc)
     window    = timedelta(minutes=pre_game_window_minutes)
     updated   = 0
 
@@ -291,6 +303,10 @@ def pull_closing_lines(
             if now_utc < cutoff:
                 logger.debug("Game not yet started for bet #%d — skipping.", bet["bet_id"])
                 continue
+        elif require_kickoff:
+            logger.warning("Kickoff unknown for bet #%d (%s) — not recording; will retry next run.",
+                           bet["bet_id"], bet["market_ticker"])
+            continue
 
         # 1. Snapshot CSV (preferred)
         raw_df  = snapshots.get(bet["game_date"], pd.DataFrame())

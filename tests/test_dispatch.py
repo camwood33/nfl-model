@@ -66,6 +66,9 @@ class _Replay(unittest.TestCase):
         self._patches = [
             mock.patch.object(dispatch, "_fetch_kickoffs", side_effect=_fixture_kickoffs),
             mock.patch.object(kalshi_lines, "main", side_effect=lambda now: self.pulls.append(now)),
+            # Closing-line recording after each pull is tested in test_closing_on_pull;
+            # here it must not reach the real nfl_bets.db.
+            mock.patch.object(dispatch, "record_closing_lines", return_value=0),
         ]
         for p in self._patches:
             p.start()
