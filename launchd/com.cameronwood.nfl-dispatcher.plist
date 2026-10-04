@@ -3,7 +3,7 @@
 <!--
   Runs the Kalshi collector dispatcher (data/collect/dispatch.py) at the top of
   every minute; it pulls only when a scheduled slot is due. Source of truth is
-  this file in the repo; install/uninstall with launchd/install.sh.
+  this file in the repo; install/uninstall with launchd/install.sh dispatcher.
 
   Overlap: launchd never starts a second instance of a job that is still
   running (a tick that fires mid-run is dropped), and dispatch.py also takes a

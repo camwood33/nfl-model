@@ -5,7 +5,7 @@ Disaster-recovery path: if bets.db is lost, corrupted, or this is a fresh
 laptop, this replays the dump to recreate it -- schema (including
 trg_closing_price_write_once and idx_bets_dedup), indexes, and every row,
 exactly as of the last nightly export (see export_dump.py, run nightly by
-run_git_sync.sh at 2:30am). The restored file is stale by however long
+scripts/nightly_git_sync.py at 2:30am). The restored file is stale by however long
 it's been since that last run -- any bets logged after it are not in the
 dump and must be re-entered manually.
 

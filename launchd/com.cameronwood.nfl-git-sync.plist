@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Nightly commit-and-push of data/raw/ and the bets dump
+  (scripts/nightly_git_sync.py) at 02:30 local. Install/uninstall with
+  launchd/install.sh git-sync. Push auth comes from the osxkeychain
+  credential helper in the login keychain, which a gui/ LaunchAgent can read.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.cameronwood.nfl-git-sync</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>/Users/cameronwood/nfl-model/scripts/nightly_git_sync.py</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/cameronwood/nfl-model</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PYTHONWARNINGS</key>
+    <string>ignore:urllib3 v2 only supports OpenSSL</string>
+  </dict>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>2</integer>
+    <key>Minute</key>
+    <integer>30</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/cameronwood/nfl-model/outputs/logs/git_sync.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/cameronwood/nfl-model/outputs/logs/git_sync.log</string>
+</dict>
+</plist>
