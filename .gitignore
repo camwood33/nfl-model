@@ -10,3 +10,6 @@ __pycache__/
 
 # Dispatcher state (last pull time, cached ESPN schedule) -- per-machine, not data
 outputs/state/
+
+# Dispatcher / launchd logs
+outputs/logs/

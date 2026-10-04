@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Runs the Kalshi collector dispatcher (data/collect/dispatch.py) at the top of
+  every minute; it pulls only when a scheduled slot is due. Source of truth is
+  this file in the repo; install/uninstall with launchd/install.sh.
+
+  Overlap: launchd never starts a second instance of a job that is still
+  running (a tick that fires mid-run is dropped), and dispatch.py also takes a
+  non-blocking file lock, so a manual run can't overlap a scheduled one either.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.cameronwood.nfl-dispatcher</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>-m</string>
+    <string>data.collect.dispatch</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/cameronwood/nfl-model</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PYTHONPATH</key>
+    <string>/Users/cameronwood/nfl-model</string>
+    <!-- urllib3's LibreSSL warning would otherwise print on every tick -->
+    <key>PYTHONWARNINGS</key>
+    <string>ignore:urllib3 v2 only supports OpenSSL</string>
+  </dict>
+
+  <!-- Empty dict = every minute, aligned to :00 -->
+  <key>StartCalendarInterval</key>
+  <dict/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/cameronwood/nfl-model/outputs/logs/dispatcher.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/cameronwood/nfl-model/outputs/logs/dispatcher.log</string>
+</dict>
+</plist>

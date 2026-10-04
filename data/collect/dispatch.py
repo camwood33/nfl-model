@@ -29,6 +29,7 @@ interval the T-3 pull can land after kickoff and be skipped for that game.
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import logging
 import sys
@@ -47,6 +48,7 @@ ET = ZoneInfo("America/New_York")
 UTC = timezone.utc
 
 STATE_PATH = BASE_DIR / "outputs" / "state" / "collector_dispatch.json"
+LOCK_PATH = STATE_PATH.with_suffix(".lock")
 _ESPN_SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
 
 KICKOFF_ANCHORS = (timedelta(minutes=30), timedelta(minutes=10), timedelta(minutes=3))
@@ -209,8 +211,17 @@ def _cli():
         for s, label in slots_for_day(day, kickoffs):
             print(f"  {s.astimezone(ET):%H:%M} ET  ({s:%H:%MZ})  {label}")
         return
-    if not tick(dry_run=args.dry_run):
-        logging.getLogger(__name__).info("No slot due.")
+    # launchd won't start a second copy of a running job, but a manual run can
+    # still overlap a scheduled one; the lock makes any overlapping run exit.
+    LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(LOCK_PATH, "w") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            logger.warning("Previous dispatcher run still in progress -- skipping this tick.")
+            return
+        if not tick(dry_run=args.dry_run):
+            logger.info("No slot due.")
 
 
 if __name__ == "__main__":
