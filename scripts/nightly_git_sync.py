@@ -9,16 +9,23 @@ com.cameronwood.nfl-git-sync LaunchAgent (launchd/).
      if something is writing the database).
   3. Commit ONLY data/raw/ and the dump, as "Nightly data sync: YYYY-MM-DD".
      `git commit -- <paths>` commits just those paths, so code edits -- even
-     ones already `git add`ed -- are never swept in. nfl_bets.db itself is
-     never staged by this job.
+     ones already `git add`ed -- are never swept in. nfl_bets.db is
+     gitignored; the dump is the source of truth.
   4. Push if the branch is ahead of origin. A failed push is logged (and a
      macOS notification posted); the commit stays local and the next run
      pushes it. Never force-pushes, rebases, or amends.
 
+If export_dump's guard trips (nfl_bets.db missing, or the dump would hold
+fewer bets than the committed one) the whole run is refused: nothing is
+committed or pushed. --allow-shrink passes through to export_dump; launchd
+never passes it.
+
     python3 scripts/nightly_git_sync.py
+    python3 scripts/nightly_git_sync.py --allow-shrink
 """
 from __future__ import annotations
 
+import argparse
 import fcntl
 import logging
 import os
@@ -30,7 +37,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from clv_tracker.export_dump import DUMP_PATH, export_dump
+from clv_tracker.alerts import notify
+from clv_tracker.export_dump import DUMP_PATH, DumpGuardError, export_dump
 from data.collect.dispatch import LOCK_PATH
 
 logger = logging.getLogger("git_sync")
@@ -51,16 +59,6 @@ def git(*args: str, check: bool = True, timeout: int | None = 60) -> subprocess.
     if check and r.returncode != 0:
         raise RuntimeError(f"git {' '.join(args)} failed ({r.returncode}): {r.stderr.strip()}")
     return r
-
-
-def notify(message: str) -> None:
-    """Best-effort macOS notification, so a failure is seen without reading the log."""
-    try:
-        subprocess.run(["/usr/bin/osascript", "-e",
-                        f'display notification "{message}" with title "NFL git sync" sound name "Basso"'],
-                       timeout=10, capture_output=True)
-    except Exception:
-        pass
 
 
 def acquire_lock(f) -> bool:
@@ -87,9 +85,10 @@ def preflight() -> str | None:
     return None
 
 
-def commit_data(today: str) -> bool:
-    """Export the dump and commit data/raw + dump if changed. Returns True if a commit was made."""
-    export_dump()
+def commit_data(today: str, allow_shrink: bool = False) -> bool:
+    """Export the dump and commit data/raw + dump if changed. Returns True if a commit was made.
+    Raises DumpGuardError (before anything is staged) if the export is refused."""
+    export_dump(allow_shrink=allow_shrink)
     git("add", "--", *SYNC_PATHS)
     if git("diff", "--cached", "--quiet", "--", *SYNC_PATHS, check=False).returncode == 0:
         logger.info("No data changes in %s -- nothing to commit.", ", ".join(SYNC_PATHS))
@@ -128,6 +127,10 @@ def push() -> bool:
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    parser = argparse.ArgumentParser(description="Commit and push data/raw and the bets dump.")
+    parser.add_argument("--allow-shrink", action="store_true",
+                        help="pass through to export_dump: accept a missing db / fewer bets")
+    args = parser.parse_args()
     logger.info("Nightly git sync starting.")
     try:
         reason = preflight()
@@ -142,7 +145,12 @@ def main() -> int:
                 logger.error("Dispatcher lock still held after %ss -- skipping tonight.", LOCK_WAIT)
                 notify("Skipped: dispatcher lock held")
                 return 1
-            commit_data(datetime.now().date().isoformat())
+            try:
+                commit_data(datetime.now().date().isoformat(), allow_shrink=args.allow_shrink)
+            except DumpGuardError:
+                # export_dump already logged loudly and notified.
+                logger.error("Nightly git sync REFUSED: nothing committed or pushed.")
+                return 1
         # Lock released: pushing doesn't touch the working tree.
         return 0 if push() else 1
     except Exception as exc:

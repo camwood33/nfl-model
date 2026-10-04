@@ -13,3 +13,7 @@ outputs/state/
 
 # Dispatcher / launchd logs
 outputs/logs/
+
+# Bets database -- rebuilt from the tracked clv_tracker/records/bets_dump.sql
+# (python -m clv_tracker.restore_from_dump); the dump is the source of truth.
+clv_tracker/records/nfl_bets.db

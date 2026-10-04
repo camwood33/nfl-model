@@ -1,7 +1,8 @@
 """
 Rebuild bets.db from the tracked SQL dump (clv_tracker/records/bets_dump.sql).
 
-Disaster-recovery path: if bets.db is lost, corrupted, or this is a fresh
+nfl_bets.db is gitignored; this dump is the tracked source of truth. Use this
+as the disaster-recovery path: if bets.db is lost, corrupted, or this is a fresh
 laptop, this replays the dump to recreate it -- schema (including
 trg_closing_price_write_once and idx_bets_dedup), indexes, and every row,
 exactly as of the last nightly export (see export_dump.py, run nightly by
