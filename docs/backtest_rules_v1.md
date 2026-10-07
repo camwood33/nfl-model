@@ -269,3 +269,36 @@ Other facts from the run:
 - The Thursday fallback (8pm Eastern the day before) is the same as the
   Thursday primary cutoff (Wednesday 8pm), so the fallback cannot change a
   Thursday result.
+
+---
+
+## Amendment 3 (2026-10-06, before any share is computed)
+
+- Data: 2010 to 2024 regular season rows. 2009 is excluded entirely because
+  it has no timestamps (a data gap, not a timing result). Any other row with
+  a game status but no stamp counts as not stamped in time, and the count is
+  reported.
+- Groups are disjoint: Thursday, Sunday and Monday games exclude neutral-site
+  games. Neutral-site games are left out of version 1. The 9 Tuesday and
+  Wednesday games and the cancelled 2022 Week 17 BUF@CIN rows are left out
+  and listed.
+- Time zone: 2021 to 2024 stamps are true UTC. 2010 to 2020 stamps are local
+  clock time in an unknown US zone, so no zone is assumed. Compute every
+  share twice for 2010 to 2020: once treating the stamps as Eastern (best
+  case) and once as Pacific, which is 3 hours later in Eastern (worst case).
+  2021 to 2024 use UTC converted to Eastern. Pool 2010 to 2024 under each
+  assumption.
+- A group passes if both criteria (all Out, Doubtful and Questionable rows,
+  and QB rows alone) are at least 90% under the worst case. It fails if
+  either criterion is under 90% even under the best case. A group in between
+  is left out of version 1 and listed. No threshold changes after results. A
+  later amendment may re-include a group only with new evidence about the
+  zone and the same thresholds.
+- Thursday has no day-before fallback, since it would equal the main cutoff.
+  Other groups that fail use the one-time day-before fallback from
+  Amendment 1, under the same rule.
+- Also report 2021 to 2024 alone (exact UTC) for information. It is not used
+  for pass or fail.
+- Note: a row stamped after the cutoff counts as not available. This
+  understates availability, since a later edit may have kept an earlier
+  designation.
