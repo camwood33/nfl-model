@@ -176,3 +176,96 @@ Ambiguities found while writing this file. None of these is decided here:
   the Friday stamps cluster by hour) and write the evidence in the file. If
   it can't be determined, report the check as inconclusive instead of
   assuming a time zone.
+
+---
+
+## Amendment 2 (2026-10-06): injury timing check results
+
+Data: nflverse injuries 2009 to 2024 (`injuries_YYYY.parquet`), regular
+season rows only (`game_type == REG`), and nflverse schedules
+(`games.parquet`) for game dates, weekday and `location`.
+
+### Designation column
+
+The game designation is `report_status`. Values in 2009 to 2024 regular and
+postseason rows: Questionable 22,333, Probable 17,400, Out 14,725, Doubtful
+3,260, Note 6, blank 26,960. Only Out, Doubtful and Questionable count as a
+game status under Amendment 1. Probable and Note rows are not counted.
+
+### Time zone of `date_modified`: inconclusive
+
+`date_modified` is stored with a UTC label. The data shows two eras:
+
+- **2021 to 2024: UTC, determined.** Friday stamps on status rows cluster at
+  17 to 21h UTC, with a median of about 19.3 to 19.6h UTC while daylight time
+  is in effect and about 19.8 to 20.5h UTC after it ends. A shift of about
+  +1 hour at the end of US daylight time is what a true UTC clock shows when
+  the reports are posted on Eastern local time. That puts the median at
+  about 3:15 to 3:30pm Eastern.
+- **2010 to 2020: not determined.** Friday stamps cluster at 10 to 13h
+  (median about 11.6 to 12.4h). The cluster does not move when US daylight
+  time ends (for example 2013: 11.85h with daylight time, 11.62h without).
+  So these stamps are local clock time in a daylight-saving zone, labeled as
+  UTC. They are not true UTC. The data does not show which zone: Eastern,
+  Central, Mountain and Pacific would all produce this pattern.
+- **Both eras:** West Coast and Mountain teams' Friday stamps sit about 1 to
+  1.25 hours later than East Coast teams' (2010 to 2020 medians: east 11.5h,
+  west/mountain 12.8h; 2021 to 2024: east 19.4h, west/mountain 20.6h).
+  So the stamps are real post times, not one batch scrape time.
+- **2009:** 2,278 of 2,288 status rows have no `date_modified`. The other 10
+  share a single stamp, 2010-01-01 09:23:14.
+
+The 2010 to 2020 time zone can't be determined, so per Amendment 1 the check
+is **inconclusive** for every tested group. No stamped-by-cutoff shares were
+computed, under any assumed time zone. No share has been seen.
+
+### Per-group results
+
+Groups use the weekday of the schedule `gameday` (Eastern game date),
+regular season 2009 to 2024. Rows are injury rows with status Out, Doubtful
+or Questionable, joined to games on season, week and team.
+
+| Group | Games | Status rows | QB status rows | Rows with no stamp (QB) | Share by cutoff, all / QB | Result |
+|---|---|---|---|---|---|---|
+| Thursday | 256 | 2,550 | 74 | 77 (1) | not computed | Inconclusive |
+| Friday | 5 | 47 | 0 | 6 (0) | not tested | Excluded: under 100 games |
+| Saturday | 86 | 837 | 31 | 13 (0) | not tested | Excluded: under 100 games |
+| Sunday | 3,517 | 33,285 | 930 | 2,033 (67) | not computed | Inconclusive |
+| Monday | 286 | 2,511 | 58 | 149 (0) | not computed | Inconclusive |
+| Neutral site | 54 | 555 | 14 | 9 (0) | not tested | Excluded: under 100 games |
+
+The fallback cutoff (8pm Eastern the day before) was not tried, because no
+tested group reached a pass or fail result.
+
+Other facts from the run:
+
+- 2 status rows (BUF and CIN, 2022 week 17) have no schedule row. That is
+  the BUF at CIN game, which has no row in nflverse schedules. They are not
+  in any group.
+- 9 regular season games fall on a Tuesday (5) or Wednesday (4). Amendment 1
+  puts them in no group.
+- The 54 neutral-site games are also counted in their weekday groups
+  (Sunday 47, Monday 6, Friday 1).
+
+### Version 1 membership, by the rules above
+
+- **Excluded from version 1:** Friday, Saturday and neutral-site games
+  (each under 100 games in 2009 to 2024).
+- **Not decided:** Thursday, Sunday and Monday. The check is inconclusive, and
+  the rules say nothing about what follows an inconclusive check. No group is
+  in version 1 yet.
+
+### Open questions raised by this check (not decided here)
+
+- What follows an inconclusive check. For example: fix the 2010 to 2020
+  time zone from an outside source, run the check on 2021 to 2024 only, or
+  test each era separately. Any choice must be committed as an amendment
+  before any share is computed.
+- Rows with no `date_modified` (almost all of 2009): count them as not
+  stamped by the cutoff, or leave them out of the denominator.
+- Neutral-site games also sit in a weekday group. Does excluding the neutral
+  group remove them from version 1 even when their weekday group passes?
+- Tuesday and Wednesday games are in no group.
+- The Thursday fallback (8pm Eastern the day before) is the same as the
+  Thursday primary cutoff (Wednesday 8pm), so the fallback cannot change a
+  Thursday result.
