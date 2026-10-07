@@ -147,3 +147,32 @@ Ambiguities found while writing this file. None of these is decided here:
 - **Simple baselines for first-half markets:** not specified.
 - **Regularization:** the type and how its strength is chosen are not
   specified.
+
+---
+
+## Amendment 1 (2026-10-06, before any check or model result)
+
+- Every remaining item under "Ambiguities found while writing this file" will
+  be settled by a dated amendment committed before the first run of the step
+  that depends on it, and always before that step's results are seen. Nothing
+  is settled after a result.
+- Game types for the injury timing check: group each regular season game by
+  the weekday of its Eastern game date (Thursday, Friday, Saturday, Sunday,
+  Monday), plus a separate group for neutral-site games (nflverse location =
+  Neutral, regular season only). The Thursday exception (Wednesday cutoff)
+  applies to every Thursday game, including Thanksgiving and season openers.
+  Playoffs are excluded from this check.
+- A group with fewer than 100 games in 2009 to 2024 is not tested and is
+  excluded from version 1.
+- A group passes if, for 2009 to 2024, both (a) at least 90% of all injury
+  rows with a game status (Out, Doubtful or Questionable) and (b) at least
+  90% of the QB rows with a game status were stamped at or before the cutoff.
+  Use the nflverse injury column that holds the game designation and say
+  which one it is.
+- A tested group that fails is tried once more at 8pm Eastern the day before
+  its game date, under the same pass rule. If it fails again, it is excluded
+  from version 1 and listed.
+- Time zone of date_modified: determine it from the data (for example where
+  the Friday stamps cluster by hour) and write the evidence in the file. If
+  it can't be determined, report the check as inconclusive instead of
+  assuming a time zone.
