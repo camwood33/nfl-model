@@ -355,3 +355,89 @@ three **pass**. No group failed, so the day-before fallback was not used.
     schedule row.
   - Playoff games (excluded from the check by Amendment 1).
   - 2009 rows (Amendment 3, no timestamps).
+
+---
+
+## Amendment 5 (2026-10-06, before any feature or result)
+
+- Plays used for efficiency: pass and rush plays only, excluding kneels,
+  spikes and plays with null epa. Garbage time: any play with wp below 0.05
+  or above 0.95 is removed.
+- Opponent adjustment: ridge regression of play-level EPA (pass and rush
+  separately) and of success on offense-team and defense-team indicators plus
+  a home-field term, fit only on games finished before the cutoff, with
+  recency weights. Ridge strength is chosen in walk-forward validation from a
+  predefined grid.
+- Recency: exponential weights by games ago, half-life grid of 4, 8 and 16
+  games, chosen in validation.
+- Early season: current-season ratings are blended with prior-season-end
+  ratings shrunk toward the league average, fading with games played. The
+  fade length is a validation parameter, with a grid of fully faded by game
+  4, 8 or 12. The preseason win total prior is not part of version 1, since
+  no historical source exists. 2010 is never predicted.
+- Pace: a team's plays per game (the plays above), recency weighted, not
+  opponent adjusted in version 1.
+- Short week: rest days of 5 or fewer for that team. Primetime: scheduled
+  kickoff at or after 8:00pm Eastern.
+- Time-zone shift: hours between the team's home time zone and the game
+  site's time zone, using a team-to-zone table by season (franchise moves
+  such as the Rams in 2016 handled by season). Home team shift is 0.
+  Version 1 has no neutral-site games.
+- QB rating: EPA per dropback (pass attempts plus sacks), shrunk toward the
+  league-average QB with prior strength k dropbacks, rating = (n times QB
+  EPA per dropback plus k times league average) divided by (n plus k), where
+  k comes from a validation grid of 100, 200 and 400. A QB with fewer than
+  200 dropbacks before the cutoff is low-sample. Who starts is settled later,
+  with the injury and snap data. Not settled here: starter status, the "key
+  starters out" definition, and every other open ambiguity. Each is settled
+  by its own amendment before the step that needs it.
+- First-half scores come from play-by-play (game_half = Half1) and must
+  reconcile to final scores for every game.
+- Data cleaning: before any feature is built, drop exact duplicate plays as
+  defined in Step 1a. Any game whose scores still don't match the schedule's
+  final score is excluded from features and training and is listed (the 2011
+  DET at NO game is the only one known). No play-level repair is done.
+- Franchise IDs: use today's codes everywhere (LA, LAC, LV). Schedule and
+  injury codes STL, SD and OAK map to LA, LAC and LV, and this applies to all
+  joins and features.
+- Snap counts start in 2013 (2010 and 2011 have none, 2012 is empty). The
+  games used to train the model come from 2013 onward only. Team ratings may
+  use play-by-play from 2010 as history. Lookback options are cut off at
+  2013, which shortens them for the 2018 to 2020 test seasons.
+
+### Data cleaning results
+
+"Step 1a" above means: drop play-by-play rows that repeat on `game_id`,
+`qtr`, game clock (`time`) and the full play description (`desc`), keeping
+the first. Run on nflverse play-by-play 2010 to 2024 (all rows, regular and
+postseason).
+
+- Duplicate rows dropped: 6 in total, all in 2011 (0.013% of 47,448 plays),
+  all from 2011_14_OAK_GB (4 run, 1 pass, 1 no_play). 0 in every other
+  season. No season exceeds 0.5%.
+- Score reconciliation after dropping (maximum running `total_home_score`
+  and `total_away_score` vs schedule final score): 4,077 of 4,078 games
+  match. Still failing: **2011_13_DET_NO**, play-by-play 37-23 vs schedule
+  31-17 (home-away). Two touchdowns appear twice with slightly different
+  descriptions, so the exact-duplicate rule does not remove them. This game
+  is excluded under the data cleaning rule.
+- Pass and rush plays (`pass == 1` or `rush == 1`, after dropping duplicates,
+  before removing kneels and spikes) missing a value:
+
+  | Season | Pass/rush plays | No epa | No success | No wp |
+  |---|---|---|---|---|
+  | 2010 | 34,579 | 1 | 1 | 0 |
+  | 2011 | 34,945 | 0 | 0 | 0 |
+  | 2012 | 35,389 | 0 | 0 | 0 |
+  | 2013 | 35,635 | 1 | 1 | 1 |
+  | 2014 | 35,339 | 0 | 0 | 0 |
+  | 2015 | 35,675 | 0 | 0 | 0 |
+  | 2016 | 35,394 | 0 | 0 | 0 |
+  | 2017 | 35,058 | 0 | 0 | 0 |
+  | 2018 | 34,883 | 0 | 0 | 0 |
+  | 2019 | 35,204 | 2 | 2 | 0 |
+  | 2020 | 35,605 | 0 | 0 | 0 |
+  | 2021 | 37,310 | 0 | 0 | 0 |
+  | 2022 | 36,870 | 0 | 0 | 0 |
+  | 2023 | 37,053 | 0 | 0 | 0 |
+  | 2024 | 36,724 | 0 | 0 | 0 |
