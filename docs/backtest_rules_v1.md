@@ -302,3 +302,56 @@ Other facts from the run:
 - Note: a row stamped after the cutoff counts as not available. This
   understates availability, since a later edit may have kept an earlier
   designation.
+
+---
+
+## Amendment 4 (2026-10-06): injury timing check results under Amendment 3
+
+Run exactly as Amendment 3 defines it: nflverse injuries and schedules,
+2010 to 2024 regular season. Rows have `report_status` Out, Doubtful or
+Questionable and are joined to games on season, week and team. Cutoff is 8pm
+Eastern two calendar days before the Eastern game date, or Wednesday 8pm for
+Thursday games. A row counts if stamped at or before the cutoff. No model was
+run and no game result was used.
+
+Checks before computing:
+- No status row in 2010 to 2024 lacks a stamp (count: 0 in every group).
+- No 2010 to 2020 stamp falls in a daylight-saving gap or overlap hour in
+  either Eastern or Pacific, so every stamp converts to exactly one time.
+
+### Results
+
+Best case: 2010 to 2020 stamps read as Eastern clock time. Worst case: read
+as Pacific clock time (3 hours later in Eastern). 2021 to 2024 is true UTC
+converted to Eastern in both. The 2021 to 2024 exact column is for
+information only.
+
+| Group (non-neutral) | Games | Criterion | Rows | No stamp | Best case | Worst case | 2021-24 rows | 2021-24 exact |
+|---|---|---|---|---|---|---|---|---|
+| Thursday | 247 | All status rows | 2,473 | 0 | 99.64% | 99.64% | 720 | 99.44% |
+| Thursday | 247 | QB rows | 73 | 0 | 100.00% | 100.00% | 24 | 100.00% |
+| Sunday | 3,243 | All status rows | 30,750 | 0 | 99.09% | 99.09% | 8,613 | 97.94% |
+| Sunday | 3,243 | QB rows | 852 | 0 | 99.53% | 99.53% | 259 | 99.61% |
+| Monday | 263 | All status rows | 2,314 | 0 | 99.09% | 98.88% | 674 | 98.52% |
+| Monday | 263 | QB rows | 55 | 0 | 98.18% | 98.18% | 12 | 91.67% |
+
+All three groups clear 90% on both criteria under the worst case, so all
+three **pass**. No group failed, so the day-before fallback was not used.
+
+### Version 1 membership
+
+- **In version 1:** regular season Thursday, Sunday and Monday games that are
+  not neutral-site, at the cutoff in the main rules (8pm Eastern two days
+  before; Thursday games Wednesday 8pm Eastern). The cutoff is no longer
+  provisional for these groups.
+- **Excluded and listed:**
+  - Neutral-site games: 53 in 2010 to 2024 (Amendment 3).
+  - Friday and Saturday games: under 100 games (Amendment 2). Non-neutral
+    counts in 2010 to 2024 are Friday 3 and Saturday 85.
+  - The 9 Tuesday and Wednesday games (Amendment 3): 2010_16_MIN_PHI,
+    2012_01_DAL_NYG, 2020_05_BUF_TEN, 2020_12_BAL_PIT, 2020_13_DAL_BAL,
+    2021_15_SEA_LA, 2021_15_WAS_PHI, 2024_17_KC_PIT, 2024_17_BAL_HOU.
+  - The cancelled 2022 Week 17 BUF@CIN game: 2 status rows (BUF, CIN), no
+    schedule row.
+  - Playoff games (excluded from the check by Amendment 1).
+  - 2009 rows (Amendment 3, no timestamps).
