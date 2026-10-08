@@ -1,4 +1,4 @@
-# Reads data/historical/pbp/play_by_play_2010..2024.parquet (fixed path) and the nflverse players.parquet given as argv[1]; counts designed QB runs per season and top QBs; produces the facts in Amendment 7's open questions (8,605 runs, shares, top QBs).
+# Reads data/historical/pbp/play_by_play_2010..2024.parquet (fixed path) and the nflverse players.parquet given as argv[1] (data/historical/derived/dl_players/players.parquet, from fetch_players.py); counts designed QB runs per season and top QBs; produces the facts in Amendment 7's open questions (8,605 runs, shares, top QBs).
 import sys, pandas as pd
 pd.set_option('display.width', 250)
 R = '/Users/cameronwood/nfl-model/data/historical/pbp'

@@ -1,7 +1,7 @@
-# Reads qb_runs.parquet and players.parquet in the session scratchpad plus data/historical/pbp/play_by_play_2010..2024.parquet (fixed paths); aborted-play rule, EPA, top-10 shares, per-QB-season counts, handoffs; numbers behind Amendment 8 (aborted plays, evidence, scale facts).
+# Reads qb_runs.parquet and players.parquet in data/historical/derived/ (run fetch_players.py first) plus data/historical/pbp/play_by_play_2010..2024.parquet (fixed paths); aborted-play rule, EPA, top-10 shares, per-QB-season counts, handoffs; numbers behind Amendment 8 (aborted plays, evidence, scale facts).
 import re, pandas as pd, numpy as np
 pd.set_option('display.width', 250); pd.set_option('display.max_colwidth', 200); pd.set_option('display.max_rows', 200)
-S = '/private/tmp/claude-501/-Users-cameronwood-nfl-model/7dcc42ab-51ff-405f-98cb-05b49fde8564/scratchpad'
+S = '/Users/cameronwood/nfl-model/data/historical/derived'
 R = '/Users/cameronwood/nfl-model/data/historical/pbp'
 q = pd.read_parquet(f'{S}/qb_runs.parquet')
 a = q[q.ab]

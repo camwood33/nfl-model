@@ -1,7 +1,7 @@
-# Reads data/historical/pbp/play_by_play_2010..2024.parquet and players.parquet in the session scratchpad (fixed paths), writes qb_runs.parquet there; helper that builds the 8,605 designed QB runs used for Amendment 8's evidence.
+# Reads data/historical/pbp/play_by_play_2010..2024.parquet and players.parquet in data/historical/derived/ (run fetch_players.py first) (fixed paths), writes qb_runs.parquet there; helper that builds the 8,605 designed QB runs used for Amendment 8's evidence.
 import sys, pandas as pd
 R = '/Users/cameronwood/nfl-model/data/historical/pbp'
-S = '/private/tmp/claude-501/-Users-cameronwood-nfl-model/7dcc42ab-51ff-405f-98cb-05b49fde8564/scratchpad'
+S = '/Users/cameronwood/nfl-model/data/historical/derived'
 cols = ['game_id','play_id','season','season_type','qtr','time','desc','play_type','pass','rush','qb_dropback','qb_kneel','qb_spike','two_point_attempt','epa','wp',
         'rusher_player_id','fumble','fumble_forced','fumble_not_forced','fumble_lost','fumble_out_of_bounds','aborted_play','rushing_yards','yards_gained','fumbled_1_player_id','fumble_recovery_1_team','posteam']
 avail = pd.read_parquet(f'{R}/play_by_play_2010.parquet').columns

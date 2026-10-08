@@ -1,6 +1,6 @@
-# Reads data/historical/pbp/play_by_play_2010..2024.parquet (fixed path), writes a8_t1.md, a8_t2.md, a8_t3.md to the session scratchpad (fixed path); produces Amendment 8's evidence tables and recomputed exclusion table.
+# Reads data/historical/pbp/play_by_play_2010..2024.parquet (fixed path), writes a8_t1.md, a8_t2.md, a8_t3.md to data/historical/derived/ (fixed path); produces Amendment 8's evidence tables and recomputed exclusion table.
 import pandas as pd, numpy as np
-S = '/private/tmp/claude-501/-Users-cameronwood-nfl-model/7dcc42ab-51ff-405f-98cb-05b49fde8564/scratchpad'
+S = '/Users/cameronwood/nfl-model/data/historical/derived'
 R = '/Users/cameronwood/nfl-model/data/historical/pbp'
 cols = ['game_id','season','qtr','time','desc','play_type','pass','rush','qb_dropback','qb_kneel','qb_spike','two_point_attempt','aborted_play','epa','wp','passer_id']
 d = pd.concat([pd.read_parquet(f'{R}/play_by_play_{y}.parquet', columns=cols) for y in range(2010, 2025)], ignore_index=True)

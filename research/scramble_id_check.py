@@ -1,4 +1,4 @@
-# Reads data/historical/pbp/play_by_play_2010..2024.parquet (fixed path) and the nflverse players.parquet given as argv[1]; checks passer_id vs scrambler on 60 sampled scrambles; produces the Step 1 result in Amendment 7 (QB identity).
+# Reads data/historical/pbp/play_by_play_2010..2024.parquet (fixed path) and the nflverse players.parquet given as argv[1] (data/historical/derived/dl_players/players.parquet, from fetch_players.py); checks passer_id vs scrambler on 60 sampled scrambles; produces the Step 1 result in Amendment 7 (QB identity).
 import sys, re, pandas as pd
 PAT = r'^00-\d{7}$'
 pd.set_option('display.width', 250); pd.set_option('display.max_colwidth', 90)

@@ -1,4 +1,4 @@
-# Reads data/historical/pbp/play_by_play_2010..2024.parquet (fixed path), writes a7_table.md to the session scratchpad (fixed path); produces Amendment 7's exclusion table by reason and season.
+# Reads data/historical/pbp/play_by_play_2010..2024.parquet (fixed path), writes a7_table.md to data/historical/derived/ (fixed path); produces Amendment 7's exclusion table by reason and season.
 import pandas as pd, numpy as np
 R = '/Users/cameronwood/nfl-model/data/historical/pbp'
 cols = ['game_id','season','qtr','time','desc','play_type','pass','rush','qb_dropback','qb_kneel','qb_spike','two_point_attempt','epa','wp','passer_id']
@@ -32,4 +32,4 @@ print('\nother play_type breakdown:', d[d.reason=='other play_type'].play_type.f
 print('fits neither, by play_type:', d[d.reason=='fits neither regression'].play_type.value_counts().to_dict())
 md = '| Season | ' + ' | '.join(t.columns) + ' |\n|' + '---|'*(len(t.columns)+1) + '\n'
 for s, r in t.iterrows(): md += f'| {s} | ' + ' | '.join(f'{int(v):,}' for v in r) + ' |\n'
-open('/private/tmp/claude-501/-Users-cameronwood-nfl-model/7dcc42ab-51ff-405f-98cb-05b49fde8564/scratchpad/a7_table.md','w').write(md)
+open('/Users/cameronwood/nfl-model/data/historical/derived/a7_table.md','w').write(md)
