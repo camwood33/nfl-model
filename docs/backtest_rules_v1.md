@@ -573,3 +573,147 @@ regression" is 22 run plays with pass = 1, rush = 0 and qb_dropback = 0
   "Aborted") are treated in any QB rushing effect. This must be settled by
   its own amendment before the as-of-cutoff feature table is built, which is
   earlier than the first model run.
+
+---
+
+## Amendment 8 (2026-10-07, before any model run)
+
+- Aborted plays (settles the open question in Amendment 7, "how aborted
+  snaps are treated in any QB rushing effect"): plays with aborted_play = 1
+  are excluded from the efficiency plays, which removes them from both
+  regressions and from pace. This changes Amendment 7's play set. It also
+  removes the 165 aborted plays where nflverse credits the fumble to a
+  player other than the QB (164 linemen, 1 wide receiver), about 8 botched
+  handoffs to running backs, 127 aborted plays in the pass regressions (the
+  QB fumbles the snap, recovers, then throws or is sacked) and 115 aborted
+  rushes by non-QBs. These are known losses. One unflagged muffed snap
+  (2010_14_SEA_SF, Hasselbeck) stays in. No play-level repair is done. Real
+  designed runs fumbled after the QB carried the ball (192 of the 7,488
+  unflagged designed QB runs) stay in.
+- Evidence recorded: nflverse's aborted_play flag matches the "Aborted" play
+  text on all 1,117 designed QB runs with no differences. Aborted plays
+  averaged -2.286 EPA against +0.222 for the other designed QB runs. Wilson,
+  Tannehill and Fields had the largest aborted shares among the ten QBs with
+  the most designed runs (12.2%, 11.4%, 7.8%). A typical starter (200+
+  dropbacks) has a median of 6 to 8 designed runs per season, and 16.6% to
+  18.7% of them have 20 or more.
+- Designed QB runs (settles the open question in Amendment 7): a designed QB
+  run is a play with rush = 1 and qb_dropback = 0 whose rusher_player_id is
+  listed as a QB in the nflverse players table (the current listing; players
+  who changed position are a known limit). The rush regressions get a QB-run
+  indicator shared by all QBs, unpenalized, plus a separate indicator for
+  each QB, penalized, with its own ridge penalty. QBs with few runs are
+  shrunk toward the shared term. Non-QB rushes have no QB term. Scrambles stay
+  in the pass regressions.
+- Score model inputs: Each QB gets two features: a passing effect from the
+  pass-play EPA regression, and a rushing effect equal to his own per-QB
+  rushing indicator from the rush EPA regression (the shared QB-run term is
+  not a feature), each with its own learned coefficient. When a starter is
+  Out, the backup's own effects are used if he has at least 200 dropbacks
+  before the cutoff. Otherwise league-average backup effects are used, for
+  passing and for rushing, estimated from past games where the starter sat.
+  This extends the Features rule to rushing. For Doubtful or Questionable,
+  the existing blend by P(plays | status) between the starter's effects and
+  the replacement's stays as it is. A starter with no history gets zero for
+  both effects.
+- Ablation: Test 2 runs a nested ladder of three runs: (1) full, with the QB
+  passing and QB rushing terms; (2) without the QB rushing term (the shared
+  term and the per-QB indicators removed from the rush regression and as a
+  feature), passing term kept; (3) without any QB term (Amendment 6's
+  ablation). The passing term is tested first: it stays only if run (2) has
+  a smaller prediction error than run (3) by more than the near-tie
+  tolerance. The rushing term is tested only if the passing term stays: it
+  stays only if run (1) beats run (2) by more than the tolerance. If the
+  passing term is dropped, the rushing term is dropped too. In each
+  comparison the simpler run wins near-ties. This clarifies Amendment 6's
+  ablation, which is the first comparison of this ladder. It is a ladder,
+  not a grid.
+- Exclusion counts: recompute Amendment 7's exclusion table by reason and
+  season with aborted plays added as a reason placed after two-point
+  attempts and before null epa. The order of reasons affects the counts.
+- Nothing else changes.
+
+### Open questions added by this amendment
+
+Each is settled by its own amendment before the as-of-cutoff feature table
+is built.
+
+- The ridge penalty grid for the per-QB rushing indicator, separate from the
+  other penalties. It and the Amendment 6 open questions on penalty grids
+  and on how a QB's effect carries across seasons must be settled before the
+  as-of-cutoff feature table is built.
+- How the league-average backup effects (passing and rushing) are
+  estimated.
+- Whether the QB rushing feature should reflect how often a QB runs, since
+  the per-QB indicator measures quality per run and not volume (for scale:
+  Jackson and Hurts average about 80 a season, the ten QBs with the most
+  designed runs about 40, and a typical starter 6 to 8).
+
+### Evidence: plays with aborted_play = 1
+
+nflverse play-by-play 2010 to 2024, regular season and postseason, cleaned as
+in Amendment 5. Each aborted play is placed where Amendment 7's rules would
+have sent it. 1,692 aborted plays in total: 328 already outside Amendment 7's
+play set, 5 fitting neither regression, and 1,359 newly removed from the
+regressions (1,117 designed QB runs plus 242 others).
+
+By play_type:
+
+| play_type | Pass regression | Rush regression | Fits neither | Not in Amendment 7 play set | Total |
+|---|---|---|---|---|---|
+| extra_point | 0 | 0 | 0 | 6 | 6 |
+| no_play | 0 | 0 | 0 | 38 | 38 |
+| pass | 127 | 0 | 0 | 34 | 161 |
+| punt | 0 | 0 | 0 | 14 | 14 |
+| run | 0 | 1,232 | 5 | 236 | 1,473 |
+| Total | 127 | 1,232 | 5 | 328 | 1,692 |
+
+By season:
+
+| Season | Pass regression | Rush regression | Fits neither | Not in Amendment 7 play set | Total |
+|---|---|---|---|---|---|
+| 2010 | 8 | 97 | 0 | 27 | 132 |
+| 2011 | 8 | 80 | 0 | 23 | 111 |
+| 2012 | 11 | 66 | 1 | 24 | 102 |
+| 2013 | 7 | 83 | 0 | 29 | 119 |
+| 2014 | 22 | 88 | 0 | 31 | 141 |
+| 2015 | 14 | 75 | 1 | 20 | 110 |
+| 2016 | 1 | 73 | 0 | 14 | 88 |
+| 2017 | 15 | 91 | 0 | 22 | 128 |
+| 2018 | 19 | 66 | 0 | 22 | 107 |
+| 2019 | 13 | 89 | 1 | 23 | 126 |
+| 2020 | 4 | 74 | 1 | 15 | 94 |
+| 2021 | 2 | 81 | 0 | 25 | 108 |
+| 2022 | 1 | 96 | 0 | 16 | 113 |
+| 2023 | 1 | 82 | 1 | 14 | 98 |
+| 2024 | 1 | 91 | 0 | 23 | 115 |
+| Total | 127 | 1,232 | 5 | 328 | 1,692 |
+
+### Exclusion counts by reason and season (replaces Amendment 7's table)
+
+Same data, candidate plays and method as Amendment 7's table, with aborted
+plays added as a reason after two-point attempts and before null epa.
+Reasons are applied in the column order below, and each play is counted
+once, under the first reason it meets. The order of reasons affects the
+counts: for example, aborted plays that are also two-point attempts are
+counted as two-point attempts, and aborted plays in garbage time are counted
+as aborted plays.
+
+| Season | Candidate plays | no_play | kneel | spike | other play_type | pass=0 and rush=0 | two-point attempt | aborted play | null epa | garbage time | fits neither regression | dropback, blank passer_id | kept: pass regression | kept: rush regression |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 2010 | 35,047 | 1,289 | 372 | 76 | 3 | 20 | 54 | 123 | 1 | 5,336 | 0 | 48 | 16,589 | 11,136 |
+| 2011 | 35,301 | 1,345 | 376 | 83 | 0 | 55 | 53 | 105 | 0 | 5,514 | 1 | 4 | 16,719 | 11,046 |
+| 2012 | 35,851 | 1,429 | 378 | 83 | 3 | 1 | 59 | 95 | 0 | 5,923 | 0 | 0 | 16,882 | 10,998 |
+| 2013 | 36,100 | 1,331 | 404 | 61 | 6 | 0 | 72 | 113 | 1 | 5,444 | 1 | 0 | 17,482 | 11,185 |
+| 2014 | 35,815 | 1,571 | 403 | 73 | 4 | 0 | 56 | 135 | 0 | 5,949 | 4 | 0 | 16,918 | 10,702 |
+| 2015 | 36,172 | 1,659 | 444 | 53 | 2 | 0 | 99 | 106 | 0 | 5,589 | 1 | 0 | 17,493 | 10,726 |
+| 2016 | 35,859 | 1,604 | 393 | 71 | 1 | 1 | 107 | 85 | 0 | 5,184 | 2 | 0 | 17,629 | 10,782 |
+| 2017 | 35,535 | 1,552 | 420 | 57 | 0 | 0 | 86 | 125 | 0 | 5,315 | 3 | 0 | 17,036 | 10,941 |
+| 2018 | 35,376 | 1,589 | 412 | 81 | 2 | 0 | 136 | 102 | 0 | 5,510 | 0 | 0 | 17,127 | 10,417 |
+| 2019 | 35,703 | 1,690 | 421 | 78 | 1 | 0 | 116 | 121 | 1 | 5,421 | 0 | 3 | 17,290 | 10,561 |
+| 2020 | 36,139 | 1,364 | 448 | 86 | 0 | 0 | 143 | 93 | 0 | 5,340 | 2 | 2 | 17,757 | 10,904 |
+| 2021 | 37,792 | 1,544 | 408 | 74 | 0 | 0 | 158 | 108 | 0 | 6,026 | 1 | 3 | 18,152 | 11,318 |
+| 2022 | 37,375 | 1,440 | 442 | 63 | 0 | 0 | 126 | 111 | 0 | 4,851 | 0 | 2 | 18,289 | 12,051 |
+| 2023 | 37,576 | 1,453 | 454 | 69 | 0 | 0 | 126 | 96 | 0 | 5,397 | 1 | 1 | 18,463 | 11,516 |
+| 2024 | 37,236 | 1,674 | 437 | 75 | 0 | 0 | 148 | 114 | 0 | 5,367 | 1 | 0 | 17,824 | 11,596 |
+| Total | 542,877 | 22,534 | 6,212 | 1,083 | 22 | 77 | 1,539 | 1,632 | 3 | 82,166 | 17 | 63 | 261,650 | 165,879 |
