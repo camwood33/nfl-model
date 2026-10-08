@@ -717,3 +717,99 @@ as aborted plays.
 | 2023 | 37,576 | 1,453 | 454 | 69 | 0 | 0 | 126 | 96 | 0 | 5,397 | 1 | 1 | 18,463 | 11,516 |
 | 2024 | 37,236 | 1,674 | 437 | 75 | 0 | 0 | 148 | 114 | 0 | 5,367 | 1 | 0 | 17,824 | 11,596 |
 | Total | 542,877 | 22,534 | 6,212 | 1,083 | 22 | 77 | 1,539 | 1,632 | 3 | 82,166 | 17 | 63 | 261,650 | 165,879 |
+
+---
+
+## Amendment 9 (2026-10-08, before any model run)
+
+- Correction to Amendment 8: its order-of-reasons sentence gives two examples.
+  The garbage-time example is right (268 aborted plays are counted as aborted
+  plays). The two-point example illustrates nothing, because there are 0
+  aborted plays that are also two-point attempts
+  (research/aborted_two_point_check.py). Read that sentence as having the
+  garbage-time example only. Nothing else in Amendment 8 changes.
+
+- Penalty units (settles the open question "the ridge penalty grid for the QB
+  indicator, separate from the team penalty"): every ridge penalty is in units
+  of recency-weighted plays, meaning a penalty of L pulls an indicator toward
+  zero as if it had L plays of zero effect behind it. The intercept, the
+  home-field term and the shared QB-run term (Amendment 8) are not penalized.
+
+- Four penalties, each from its own grid, tuned separately for each recency
+  half-life (4, 8, 16):
+  - Pass regressions: team penalty (offense and defense indicators) from {100,
+    300, 1000, 3000}, and QB passing indicator penalty from {100, 300, 1000,
+    3000}. All 16 combinations are tried.
+  - Rush regressions: team penalty from {100, 300, 1000, 3000}, and per-QB
+    rushing indicator penalty from {25, 100, 400, 1600}. All 16 combinations
+    are tried.
+  - The success-rate regressions reuse the penalties chosen for the EPA
+    regressions. They are not tuned separately.
+
+- Who chooses the penalties (replaces one sentence of Amendment 5, "Ridge
+  strength is chosen in walk-forward validation from a predefined grid"):
+  ridge strengths are not chosen in test 2. They are chosen once, by the
+  tuning procedure below, and then frozen. Test 2 keeps every other choice
+  that earlier rules give it: the lookback, the recency half-life, the
+  early-season fade length, additive vs multiplicative form, the QB ablation
+  ladder (Amendments 6 and 8) and the key-starters-out check. When test 2 uses
+  a half-life, it uses the penalties tuned for that half-life.
+
+- Rating window (keeps Amendment 5's split): the rating regressions use all
+  play-by-play from 2010 up to the cutoff, with recency weights and no
+  lookback cut. Test 2's lookback (3, 5, 8 seasons, cut off at 2013) applies
+  only to the games used to train the score model. The rating history is every
+  game finished before the cutoff (kickoff plus 4 hours), on any weekday, with
+  neutral-site and playoff games included. The home-field term is 0 for
+  neutral-site games.
+
+- Tuning procedure: for each Thursday, Sunday and Monday regular-season game
+  that is not neutral-site (the version 1 games) in 2014 to 2017, fit as of
+  that game's own cutoff (Amendment 4 rule), with no early-season fade, and
+  predict the EPA of every efficiency play in that game (Amendment 8 play set)
+  from the fitted indicators and the game's own home-field term. Games that
+  share a cutoff share one fit. Games outside version 1 are never predicted.
+  The error is the mean squared error over those held-out plays, pooled over
+  the four seasons, with equal weight per play. For each half-life and each
+  regression type the smallest error wins. A choice within 0.1% (relative) of
+  the smallest error goes to the larger penalty. If the winner sits at the
+  edge of a grid, it is reported and the grid is not extended.
+  - Seasons 2018 to 2024 and the 2025 holdout are never used for penalty
+    tuning. No game result or betting line is used.
+
+- Order against test 1: test 1 (leakage) runs with fixed penalties of 1000 for
+  the team, 1000 for the QB passing indicator and 400 for the per-QB rushing
+  indicator, for every half-life, because leakage does not depend on those
+  values. Tuning runs only after test 1 passes. The tuned values replace the
+  fixed ones from test 2 onward.
+
+- QB effects across seasons (settles "how a QB's effect carries across
+  seasons"): each QB has one passing indicator and one rushing indicator for
+  the whole rating history, not one per season and not one per team. His games
+  are weighted by the same recency weights (games ago) as everything else. The
+  model is refit at every cutoff from scratch.
+
+- League-average backup (keeps the wording in Features and Amendment 8,
+  "estimated from past games where the starter sat", and settles how it is
+  estimated): a game where the starter sat is a game in which the team's
+  season leader had no dropbacks. The season leader is the QB with the most
+  dropbacks for that team in that season (counted up to the cutoff for the
+  current season). "Season leader" is a label for this estimate only. Who
+  starts on a given Sunday is decided by a later amendment on starter status.
+  The league-average backup passing effect is the dropback-weighted mean of
+  the fitted passing indicators of the QBs who threw in those games, weighted
+  by their dropbacks in those games. The league-average backup rushing effect
+  is the mean of their fitted rushing indicators with the same weights. Both
+  are re-estimated at every cutoff from the same fit. Known limit: ridge
+  shrinks low-sample backups toward zero, so this average sits closer to zero
+  than the true backup gap.
+
+- Open questions: this amendment settles the penalty grids, the tuning
+  procedure, the carry-over across seasons and the league-average backup
+  estimation. Every other open question from Amendments 6 to 8 stays open.
+  - Team indicators and the early-season fade: whether team offense and
+    defense indicators are one per team over the whole rating history (recency
+    weights only) or one per season, and what the early-season fade in
+    Amendment 5 then acts on. Must be settled by its own amendment before the
+    as-of-cutoff feature table is built. Penalty tuning and test 2 both use
+    this definition.
