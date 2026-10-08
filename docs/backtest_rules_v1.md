@@ -441,3 +441,44 @@ postseason).
   | 2022 | 36,870 | 0 | 0 | 0 |
   | 2023 | 37,053 | 0 | 0 | 0 |
   | 2024 | 36,724 | 0 | 0 | 0 |
+
+---
+
+## Amendment 6 (2026-10-07, before any model run)
+
+- Rating layer: version 1 uses opponent-adjusted ratings, the ridge
+  regression already set in the Features section and Amendment 5. A raw-input
+  version can be built later as a separate version.
+- QB inside the adjustment: the pass-play ridge regressions (EPA and success
+  rate) also include a passer indicator for each QB on dropbacks. The team
+  offense rating then means everything about the team except its QB, and each
+  QB gets his own effect. Rush plays use team indicators only, with no QB
+  term in version 1. Defense and home field terms stay as in Amendment 5.
+- QB rating: the QB's effect from the pass-play EPA regression, shrunk by the
+  ridge penalty. The success-rate regression's QB effects are not used as
+  features. Their only role is to keep team success ratings free of the QB.
+  This replaces the formula with k in Amendment 5, and the k grid (100, 200,
+  400) is removed. The 200-dropback low-sample line stays as a label.
+- Known limit: a QB who has only played for one team can't be cleanly
+  separated from that team's other strengths. The split is identified from
+  QBs who changed teams and from backups who played in place of a starter,
+  and otherwise leans on the ridge penalty.
+- Ablation: test 2 also runs once with the QB term removed (from both pass
+  regressions and as a feature). Test 2's rule applies unchanged to this
+  comparison: the run without the QB term is the simpler option, so it wins
+  near-ties, and the QB term stays only if the run with it has a smaller
+  prediction error by more than the near-tie tolerance. The tolerance is set
+  by its own amendment before test 2 runs. This is one extra comparison, not
+  a new grid.
+
+### Open questions added by this amendment
+
+Each is settled by its own amendment before the first model run.
+
+- The ridge penalty grid for the QB indicator, separate from the team
+  penalty.
+- How a QB's effect carries across seasons.
+- How scrambles are handled. First check how nflverse codes them (the
+  `play_type`, `pass`, `rush`, `qb_dropback` and `qb_scramble` columns) and
+  report what is found before proposing anything. Not decided here.
+- The dropback definition used for the passer indicator.
