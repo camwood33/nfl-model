@@ -482,3 +482,94 @@ Each is settled by its own amendment before the first model run.
   `play_type`, `pass`, `rush`, `qb_dropback` and `qb_scramble` columns) and
   report what is found before proposing anything. Not decided here.
 - The dropback definition used for the passer indicator.
+
+---
+
+## Amendment 7 (2026-10-07, before any model run)
+
+- Dropback definition (settles the open question in Amendment 6, "the
+  dropback definition used for the passer indicator"): a dropback is a play
+  with qb_dropback = 1. This includes scrambles.
+- Scrambles (settles the open question in Amendment 6, "how scrambles are
+  handled"): scramble plays are dropbacks. They go in the pass-play
+  regressions with a passer indicator, and nowhere else. nflverse codes them
+  as play_type run with qb_scramble = 1 and qb_dropback = 1.
+- Play set (changes Amendment 5, which it replaces for efficiency plays and
+  for pace): efficiency plays are plays with play_type pass or run only, and
+  they must also have pass = 1 or rush = 1 as in Amendment 5. Plays with
+  play_type no_play (penalty-wiped), kneels, spikes and two-point attempts
+  (the two_point_attempt column) are excluded, along with null epa and
+  garbage time as in Amendment 5. The 77 plays with play_type pass or run but
+  pass = 0 and rush = 0 are excluded and counted: 74 from 2010 and 2011 coded
+  'play under review' (4 of them sacks), and 3 run plays (2011_02_STL_NYG,
+  2012_10_OAK_BAL, 2016_05_NE_CLE). Count every exclusion by reason and
+  season in the file.
+- Pace follows this play set: a team's plays per game is counted over the
+  efficiency plays defined here.
+- Each play goes in exactly one regression: a play with qb_dropback = 1
+  (scrambles included) goes in the pass-play regressions with a passer
+  indicator. A play with rush = 1 and qb_dropback = 0 goes in the rush
+  regressions. Any play that fits neither is excluded and counted.
+- QB identity: passer_id is the QB ID for the passer indicator, including on
+  scrambles, because passer_player_id and rusher_id are blank on scrambles
+  (rusher_player_id holds the scrambler). Step 1 result: on 60 sampled
+  scrambles (15 each from 2010, 2016, 2020, 2024), passer_id matched the
+  scrambler 59 times, and the one miss was a blank. On all 12,549 scramble
+  runs, passer_id equals rusher_player_id on every play where both are
+  filled in. All ID columns use the GSIS format, 00- followed by 7 digits.
+- Dropbacks with a blank passer_id (the 18 non-QB scrambles, and up to 0.29%
+  of dropbacks in a season) are excluded and counted by season.
+- Nothing else changes. The other open questions from Amendment 6 stay open,
+  except the two settled above.
+
+### Exclusion counts by reason and season
+
+Data: nflverse play-by-play 2010 to 2024, regular season and postseason, after
+the Amendment 5 cleaning (Step 1a duplicates dropped, 2011_13_DET_NO
+excluded). Candidate plays are rows with pass = 1, rush = 1, or play_type
+pass, run, qb_kneel or qb_spike. Reasons are applied in the column order
+below, and each play is counted once, under the first reason it meets.
+"Other play_type" is punt 17, blank 4 and extra_point 1. "Fits neither
+regression" is 22 run plays with pass = 1, rush = 0 and qb_dropback = 0
+(for example illegal forward passes and plays reversed on review).
+
+| Season | Candidate plays | no_play | kneel | spike | other play_type | pass=0 and rush=0 | two-point attempt | null epa | garbage time | fits neither regression | dropback, blank passer_id | kept: pass regression | kept: rush regression |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 2010 | 35,047 | 1,289 | 372 | 76 | 3 | 20 | 54 | 1 | 5,354 | 0 | 48 | 16,597 | 11,233 |
+| 2011 | 35,301 | 1,345 | 376 | 83 | 0 | 55 | 53 | 0 | 5,531 | 1 | 4 | 16,727 | 11,126 |
+| 2012 | 35,851 | 1,429 | 378 | 83 | 3 | 1 | 59 | 0 | 5,940 | 1 | 0 | 16,893 | 11,064 |
+| 2013 | 36,100 | 1,331 | 404 | 61 | 6 | 0 | 72 | 1 | 5,467 | 1 | 0 | 17,489 | 11,268 |
+| 2014 | 35,815 | 1,571 | 403 | 73 | 4 | 0 | 56 | 0 | 5,974 | 4 | 0 | 16,940 | 10,790 |
+| 2015 | 36,172 | 1,659 | 444 | 53 | 2 | 0 | 99 | 0 | 5,605 | 2 | 0 | 17,507 | 10,801 |
+| 2016 | 35,859 | 1,604 | 393 | 71 | 1 | 1 | 107 | 0 | 5,195 | 2 | 0 | 17,630 | 10,855 |
+| 2017 | 35,535 | 1,552 | 420 | 57 | 0 | 0 | 86 | 0 | 5,334 | 3 | 0 | 17,051 | 11,032 |
+| 2018 | 35,376 | 1,589 | 412 | 81 | 2 | 0 | 136 | 0 | 5,527 | 0 | 0 | 17,146 | 10,483 |
+| 2019 | 35,703 | 1,690 | 421 | 78 | 1 | 0 | 116 | 1 | 5,439 | 1 | 3 | 17,303 | 10,650 |
+| 2020 | 36,139 | 1,364 | 448 | 86 | 0 | 0 | 143 | 0 | 5,354 | 3 | 2 | 17,761 | 10,978 |
+| 2021 | 37,792 | 1,544 | 408 | 74 | 0 | 0 | 158 | 0 | 6,051 | 1 | 3 | 18,154 | 11,399 |
+| 2022 | 37,375 | 1,440 | 442 | 63 | 0 | 0 | 126 | 0 | 4,865 | 0 | 2 | 18,290 | 12,147 |
+| 2023 | 37,576 | 1,453 | 454 | 69 | 0 | 0 | 126 | 0 | 5,409 | 2 | 1 | 18,464 | 11,598 |
+| 2024 | 37,236 | 1,674 | 437 | 75 | 0 | 0 | 148 | 0 | 5,389 | 1 | 0 | 17,825 | 11,687 |
+| Total | 542,877 | 22,534 | 6,212 | 1,083 | 22 | 77 | 1,539 | 3 | 82,434 | 22 | 63 | 261,777 | 167,111 |
+
+### Open questions added by this amendment
+
+- Whether designed QB runs get their own QB-level rushing effect. Under
+  Amendments 6 and 7, designed runs by QBs go in the rush regression with
+  team indicators only, so the team's rushing rating absorbs a mobile QB's
+  rushing value. When he is out, the team keeps that credit and the backup
+  inherits it. One option to evaluate: add a QB indicator to the rush
+  regression, give the QB a combined passing and rushing value, and test it
+  as an ablation like the QB term in Amendment 6. The other option is to
+  leave version 1 as is. This must be settled by its own amendment before
+  the as-of-cutoff feature table is built, which is earlier than the first
+  model run, because it changes what the regressions contain.
+  - Facts (2026-10-07, not a decision): 8,605 designed QB runs in 2010 to
+    2024, rising from 3.28% of rush-regression plays in 2010 to 7.15% in
+    2024 (peak 7.56% in 2022). The top QBs by designed runs are Newton 690,
+    Jackson 611, Hurts 390 and Allen 385. Position comes from the current
+    nflverse players table, not the season's role.
+- How aborted snaps (1,117 of the 8,605 designed QB runs, 13%, described as
+  "Aborted") are treated in any QB rushing effect. This must be settled by
+  its own amendment before the as-of-cutoff feature table is built, which is
+  earlier than the first model run.
