@@ -838,3 +838,50 @@ as aborted plays.
   - Doubtful and Questionable blends work as in Amendment 8.
 
 - Open questions: this amendment settles the team-indicator and early-season fade question and the QB rushing volume question. Every other open question stays open.
+
+---
+
+## Amendment 11 (2026-10-10, before any model run)
+
+- Scope (settles the starter status and "key starters out" items that the original Features section and Amendment 5 left unsettled, and the statement in Amendment 9 that who starts on a given Sunday is decided by a later amendment): the rules below say who the primary QB is, how the report is read, how the QB features are blended, and what a key starter is.
+
+- Report status as of the cutoff: for a team and game, a player's status is the row for that player and week with report_status Out, Doubtful or Questionable whose date_modified is at or before the game's cutoff (Amendment 4). If a player has more than one row for the week, the row with the latest date_modified at or before the cutoff is used. A row stamped after the cutoff is ignored. Rows with Probable, Note or blank, and players with no row, have no status. For 2010 to 2020, where the time zone of date_modified is unknown (Amendment 3), stamps are read as Pacific clock time (the worst case), so a late stamp is never counted as early. 2021 to 2024 are read as UTC converted to Eastern. Seasons from 2025 are outside this amendment.
+
+- Who counts as a QB: in the rules of this amendment, a QB is a player listed as QB in the nflverse players table, or a player recorded as a team's starting QB (home_qb_id or away_qb_id) in a game finished before the cutoff. The second part is needed because 20 starts in 2010 to 2024 belong to players listed elsewhere (Terrelle Pryor 10, Taysom Hill 9, Kendall Hinton 1). A QB's dropbacks are counted by passer_id (Amendment 7). Known limit: Amendment 8's designed-run rule still uses the players-table position, so the designed runs of those players are in the non-QB rush term.
+
+- Primary QB (this is a different thing from the "season leader" label in Amendment 9, which is only used to estimate the league-average backup):
+  - The primary QB is the QB who started the team's most recent finished game (nflverse home_qb_id or away_qb_id of that game). A game is finished 4 hours after kickoff. Regular season and playoff games both count.
+  - Exception to the Features line that starting QBs are never model inputs: the home_qb_id and away_qb_id of games finished before the cutoff may be used for the primary QB rule and for the "Who counts as a QB" definition in this amendment, and for nothing else, because who started a finished game is a past fact at the cutoff. The ids of the game being predicted and of later games are never used as model inputs. They stay available to the ceiling tests only.
+  - In the first game of a season, the primary QB is the QB with the most dropbacks for the team in its previous regular season.
+  - Returning starter: if a QB on the team's report has status Questionable or Doubtful, and he had the most dropbacks of any of the team's QBs over its last 16 finished regular season games, he is the primary QB instead.
+  - Known limit: offseason QB changes are invisible in the first game of a season, and a starter returning from injury with no status row is missed.
+
+- Substitute QB: when the primary QB is not expected to play, the substitute is the QB with the most dropbacks for the team over its last 8 finished regular season games, not counting the primary QB and skipping any QB whose status is Out. If there is no such QB, the league-average backup of Amendment 9 is used. Amendment 8's 200-dropback rule then applies: a substitute with at least 200 dropbacks before the cutoff uses his own effects, otherwise the league-average backup is used.
+
+- Status of the primary QB: Out means he is replaced by the substitute (probability 0 that he plays). No status means he plays. Doubtful and Questionable use P(plays | status).
+  - P(plays | status) is the share of past primary QBs with that exact status, in regular season games, who had an offense snap share of at least 0.5 in that game (nflverse snap counts, offense_pct). It is estimated separately for Doubtful and for Questionable, pooled over all regular seasons from 2013 up to the season before the one being predicted. It is never estimated from the season being predicted or later.
+  - This is an exception to the Features wording "calibrated on training seasons": P is not limited to the test 2 lookback, because it calibrates a status and not a model fit.
+  - It needs at least 2 prior seasons of snap counts, so it is available from the 2015 season. A game in 2013 or 2014 in which either team's primary QB has status Doubtful or Questionable is excluded from the score model's training games (the whole game) and counted in the file. Test seasons (2018 and later) are never affected.
+  - The QB features (the passing feature and the rushing feature of Amendment 10) are blended: P x the primary QB's feature + (1 - P) x the substitute's feature.
+
+- Key starters (settles what counts as a key starter), for non-QB players:
+  - Snap shares come from the nflverse snap counts and are linked to injury rows by player ID through the nflverse players table.
+  - A player appears in a game if he has at least one offense or defense snap. A row with 0 offense and 0 defense snaps (special teams only) is not an appearance.
+  - Take the team's last 8 finished regular season games. A player is a key starter if he appeared in at least 3 of them and his average snap share over the games he appeared in is at least 0.75 on offense or at least 0.75 on defense. The larger of the two decides his side. Special teams are ignored.
+  - A key starter counts as out if his status is Out or Doubtful. Questionable does not count.
+  - A team with fewer than 3 finished games with snap counts before the cutoff (2013 only) gets a value of 0, and those team-games are counted in the file.
+  - The feature follows the Features section, "player weights from pre-cutoff snap share": the value out is the sum of the average snap shares (as defined above) of the key starters counted as out. There are two features per team and game: its own offensive value out, and the opponent's defensive value out. Each has its own learned coefficient, shared across home and away.
+  - Test 2 runs once with these two features and once without them. They are kept only if the run with them has a smaller prediction error by more than the near-tie tolerance, as with the QB ablation in Amendments 6 and 8. This is one extra comparison, not a new grid. The tolerance is set by its own amendment before test 2 runs.
+
+- Open questions:
+  - The source for the primary QB in the first game of a season (whether any nflverse roster or depth chart source can be shown to be stamped before the cutoff). Until it is settled, the rule above applies.
+  - The Features section says "Also a flag in the betting filter" for key starters out. That flag is not defined here, and it is not part of the key starters feature. Whether the bets in test 6 and test 7 go through such a flag is added here as a new open question.
+  - The injury timing rule for 2025 and 2026 (nflverse has no injury timestamps for those seasons). It must be settled before the 2025 holdout.
+  - The near-tie tolerance and the prediction error metric stay open and also govern the key-starters ablation.
+  - Every other open question stays open.
+
+- Checks before writing (read-only, 2026-10-10, no model run):
+  - Schedules 2010 to 2024: 3,903 regular season games; home_qb_id and away_qb_id have 0 nulls and 0 blanks.
+  - Injuries 2010 to 2024: columns gsis_id, position, report_status and date_modified exist; 1,028 regular season QB rows with status Out, Doubtful or Questionable (Out 490, Questionable 446, Doubtful 92), none with a null gsis_id.
+  - Snap counts 2013 to 2024: columns offense_pct and defense_pct (scale 0 to 1); player ID pfr_player_id, linking to pfr_id in the nflverse players table; 284,915 of 285,080 regular season rows map to a gsis_id (99.94%); QB rows 7,749 of 7,749. The 2012 snap count file is empty.
+  - Starting QBs 2010 to 2024, regular season and playoffs: 8,156 team-game starts, 20 of them by players not listed as QB in the players table (Terrelle Pryor 10, Taysom Hill 9, Kendall Hinton 1).
