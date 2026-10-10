@@ -813,3 +813,28 @@ as aborted plays.
     Amendment 5 then acts on. Must be settled by its own amendment before the
     as-of-cutoff feature table is built. Penalty tuning and test 2 both use
     this definition.
+
+---
+
+## Amendment 10 (2026-10-10, before any model run)
+
+- Team indicators (settles the open question in Amendment 9 titled "Team indicators and the early-season fade"): in the pass and rush regressions, for both EPA and success rate, the offense and defense indicators are one per team per season (a team-season), not one per team over the whole history. All team-season indicators are fit together over the whole rating history (Amendment 9), with the same recency weights and the ridge penalties from Amendment 9. QB indicators stay one per QB over the whole history. The intercept, the home-field term and the shared QB-run term are unchanged.
+
+- Early-season blend (settles what the early-season fade acts on; keeps the fade lengths and the prior-season-end idea of Amendment 5): for a team in season S with g games finished before the cutoff in season S, each of its 8 team ratings (pass offense, pass defense, rush offense and rush defense, each for EPA and for success rate) is w x current + (1 - w) x c x prior.
+  - Current is the team's season S indicator from the fit at that cutoff.
+  - Prior is the team's season S-1 indicator from the end-of-season fit for S-1. The end-of-season fit for S-1 uses every game finished at or before the finish time of the last regular season game of season S-1 (kickoff plus 4 hours, so that last game is included), and no playoff game of season S-1. It is made with the same half-life, the same penalties and the same ablation run as the fit it is used in, so it is recomputed under each setting being run and is not stored from another setting.
+  - w = min(1, g / F), where F is the fade length (4, 8 or 12 games, chosen in test 2). At g = F or more the prior no longer counts.
+  - c is a carry factor. A team with no season S-1 indicator uses 0 for prior.
+
+- Carry factor c: one value for each of the 8 rating types, for each half-life and for each ablation run (the full run; the run without QB rushing; the run without any QB term), estimated once and then frozen. For each season pair S, S+1 with S from 2010 to 2016, take each team's season S+1 indicator from the end-of-season fit for S+1, and its season S indicator from the end-of-season fit for S, both made with that setting's regressions and penalties. Regress the first on the second, through the origin, over all 32 teams, pooling the 7 pairs (224 team pairs) for one regression per rating type. Seasons 2018 and later are never used. c is estimated after the penalty tuning in Amendment 9, using the tuned penalties for that half-life (the success-rate regressions use the EPA penalties, as in Amendment 9). The two ablation runs reuse the team penalties tuned for the full run and are not re-tuned, and each estimates its own c.
+
+- Fixed values for test 1 and for penalty tuning: test 1 runs with c = 0.5 for all 8 rating types and F = 8. The penalty tuning in Amendment 9 predicts each game with the same blend, with c = 0.5 and F = 8 fixed, and with the prior recomputed under each penalty combination being tried. This replaces the words "no early-season fade" in the Amendment 9 tuning procedure and changes nothing else there.
+
+- QB rushing feature (replaces the QB rushing feature in the "Score model inputs" bullet of Amendment 8, and clarifies the sentence about "zero for both effects" in that bullet; nothing else in the bullet changes): a QB's rushing feature is V x (S + b). S is the shared QB-run term and b is his per-QB rushing indicator, both from the same fit. The feature is in EPA per game and has its own learned coefficient. The QB passing feature is unchanged. The ablation ladder is unchanged, and "without QB rushing" removes this feature.
+  - V is his recency-weighted designed QB runs per game. It counts only the designed QB runs in the Amendment 8 play set (the runs his per-QB indicator is fit on). It covers only games in which he had at least one dropback: a game with no dropbacks adds neither runs nor weight. Each game's weight is the recency weight its plays carry in the fits at that cutoff.
+  - A backup with at least 200 dropbacks before the cutoff uses his own V and b.
+  - The league-average backup (Amendment 9) uses the league-average backup V times (S + the league-average backup b). The league-average backup V is the mean of V over the QBs who threw in the starter-sat games used for the league-average backup, weighted by their dropbacks in those games.
+  - "No history" means no dropbacks before the cutoff. A starter with no history gets b = 0 and V equal to the mean of V over all QBs in the rating history, weighted by recency-weighted dropbacks. In Amendment 8, "zero for both effects" means the two indicators are zero (the passing indicator and b). The rushing feature is then as described here and is not itself zero.
+  - Doubtful and Questionable blends work as in Amendment 8.
+
+- Open questions: this amendment settles the team-indicator and early-season fade question and the QB rushing volume question. Every other open question stays open.
