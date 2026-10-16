@@ -932,3 +932,14 @@ as aborted plays.
   - Before test 2: the prediction error metric; the near-tie tolerance and which option wins when "simpler" and "middle" point to different choices; how test 2's choices are searched (full grid or fixed order, and one choice for all of 2018 to 2024 or one per season); additive versus multiplicative form; score model regularization; which games train the score model; first-half score reconciliation; the QB passing penalty in the "without QB rushing" run.
   - Later: injury timing and the cutoff table for 2025 and 2026; the first-game primary QB source; the key starters flag in the betting filter; the error spread; test 3 significance; the 2025 holdout training window; the Kalshi price at the cutoff; test 5 seasons; test 6 liquidity thresholds; ceiling test seasons and metric; the minimum number of flagged bets; the meaning of "the freeze"; first-half baselines.
   - Unverified: that nflverse gametime for seasons before 2026 equals the scheduled kickoff known at the time; that every version 1 game was played in its home team's time zone.
+
+---
+
+## Amendment 13 (2026-10-15, before any model run)
+
+- Purpose. Settles two points the rating fit needs before it is built. Written before any fit has been run.
+
+- Decisions:
+  - 1. Home-field term coding. In every regression (pass EPA, pass success, rush EPA, rush success) the home-field term is one coefficient, shared by the offense and defense sides, and it is not penalized (Amendment 9). On each play its value is +1 if the offense is the home team, -1 if the offense is the away team, and 0 if the game is at a neutral site (schedules location Neutral). The intercept is not penalized. A neutral-site game therefore sits halfway between a home and an away game, which is what Amendment 9 means by "the home-field term is 0 for neutral-site games".
+  - 2. Ages in the end-of-season fit. The end-of-season fit for season S-1 (Amendment 10) measures play ages as in Amendment 12 decision 5, with the predicted game-week P taken to be the game-week of the last regular season game of season S-1. The last regular season games of S-1 therefore have age 0. The end-of-season fit does not change with the game it is later used for, and it uses the same half-life as the current fit. The carry factor estimate of Amendment 10 uses these same fits.
+  - 3. Fit inputs. A rating fit is a function of the as-of time and the predicted game-week P. Every version 1 cutoff belongs to exactly one game-week (all 715 version 1 cutoffs were checked), so games that share a cutoff (Amendment 9) share one fit.
