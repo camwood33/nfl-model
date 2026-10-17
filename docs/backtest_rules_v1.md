@@ -963,3 +963,14 @@ as aborted plays.
 - Open questions added by this amendment (each settled before test 2):
   - Whether rows with missing P are scored in test 2.
   - Any minimum pool size for P.
+
+---
+
+## Amendment 15 (2026-10-17, before any model run)
+
+- Purpose. Settles three points the key starters features (plan module 10) need before they are built. Written before any key starters code exists and before any model result. The key starters rule itself stays as Amendment 11 and Amendment 12 decisions 10 and 17 state it: the team's own last 8 finished regular season games; at least 3 appearances; an average snap share of at least 0.75 on offense or at least 0.75 on defense, the larger deciding the side (offense if equal); Out and Doubtful count as out.
+
+- Decisions:
+  - 1. Who counts as a non-QB. A player is excluded from key starters if he is a QB under Amendment 11's definition as of the game's cutoff: listed as QB in the nflverse players table, or recorded as a team's starting QB (home_qb_id or away_qb_id) in a game finished strictly before the cutoff. The code uses the same function for this as the QB features (plan module 9), so there is one definition. A player who is not a QB under this definition can be a key starter even if the snap counts list him as QB. The position column of the snap counts is not used.
+  - 2. Zero-filled values. Each of the two value columns (own offensive value out; opponent defensive value out) has its own boolean flag column, named after the value it describes. A flag is true when the team that value comes from has fewer than 3 finished games with snap counts before the cutoff and the value was set to 0 (Amendment 11). The build report gives the count both in team-games and in table rows, and says which is which.
+  - 3. Switch. The key starters build takes an on/off setting. When off, the two value columns and their two flag columns are absent from the table (not zero). Every other column is identical with the switch on or off, and the build checks this.
