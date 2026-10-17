@@ -84,6 +84,26 @@ def columns(ablation: str) -> list[str]:
     return ID_COLS + {"full": PASS_COLS + RUSH_COLS, "no_qb_rush": PASS_COLS, "no_qb": []}[ablation]
 
 
+def team_game_starters(times: pd.DataFrame, starters: pd.DataFrame) -> pd.DataFrame:
+    """One row per game and team (all game types) with finish and the starting QB id, in finish order."""
+    st = starters.set_index("game_id")
+    tg = pd.concat([times[["game_id", "season", "game_type", "finish_et", "game_week_index", f"{s}_team"]]
+                    .rename(columns={f"{s}_team": "team"})
+                    .assign(starter=st[f"{s}_qb_id"].reindex(times.game_id).to_numpy())
+                    for s in ["home", "away"]], ignore_index=True)
+    tg["finish_ns"] = tg.finish_et.map(lambda x: x.value)
+    tg["reg"] = tg.game_type == "REG"
+    return tg.sort_values(["finish_ns", "game_id"]).reset_index(drop=True)
+
+
+def qbs_as_of(qb_listed: set[str], tg: pd.DataFrame, cut: int) -> set[str]:
+    """Amendment 11 QBs at a cutoff: listed as QB, or the starting QB of a game finished strictly before it.
+
+    The one QB definition for module 9 and module 10 (Amendment 12 decision 8; Amendment 15 decision 1).
+    """
+    return set(qb_listed) | set(tg.starter[(tg.finish_ns < cut) & tg.starter.notna()])
+
+
 class QBInputs:
     """Fit-independent inputs: team-games, dropbacks, designed runs, status and snaps."""
 
@@ -91,14 +111,7 @@ class QBInputs:
                  qb_listed: set[str], status: pd.DataFrame, snaps: pd.DataFrame):
         self.times = times
         t = times.set_index("game_id")
-        st = starters.set_index("game_id")
-        tg = pd.concat([times[["game_id", "season", "game_type", "finish_et", "game_week_index", f"{s}_team"]]
-                        .rename(columns={f"{s}_team": "team"})
-                        .assign(starter=st[f"{s}_qb_id"].reindex(times.game_id).to_numpy())
-                        for s in ["home", "away"]], ignore_index=True)
-        tg["finish_ns"] = tg.finish_et.map(lambda x: x.value)
-        tg["reg"] = tg.game_type == "REG"
-        self.tg = tg.sort_values(["finish_ns", "game_id"]).reset_index(drop=True)
+        self.tg = team_game_starters(times, starters)
         self.team_games = {k: g for k, g in self.tg.groupby("team")}
 
         if not set(plays.game_id) <= set(t.index):
@@ -131,8 +144,7 @@ class QBInputs:
 
     def qb_set(self, cut: int) -> set[str]:
         if cut not in self._qb_sets:
-            tg = self.tg
-            self._qb_sets[cut] = self.qb_listed | set(tg.starter[(tg.finish_ns < cut) & tg.starter.notna()])
+            self._qb_sets[cut] = qbs_as_of(self.qb_listed, self.tg, cut)
         return self._qb_sets[cut]
 
     def statuses(self, game_id: str, team: str) -> dict[str, str]:
