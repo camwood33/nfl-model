@@ -33,7 +33,6 @@ import pandas as pd
 
 from features import game_times, injury_status, snaps as SN
 from features import qb_features as Q
-from features.clean_pbp import PLAYERS
 from features.team_ratings import SEASONS
 
 OUT = game_times.HIST / "derived" / "key_starters.parquet"
@@ -114,13 +113,17 @@ def build(inp: KSInputs, on: bool = True, seasons=SEASONS, games=None) -> pd.Dat
     return d[columns(on)].sort_values(["game_id", "side"]).reset_index(drop=True)
 
 
+def inputs_from_tables(times: pd.DataFrame, schedule: pd.DataFrame, players: pd.DataFrame,
+                       injuries: pd.DataFrame, snaps: pd.DataFrame, links: pd.DataFrame) -> KSInputs:
+    """KSInputs from loaded tables (as qb_features.inputs_from_tables). Reads no file."""
+    status = injury_status.build(injuries, times)
+    return KSInputs(times, schedule[Q.STARTER_COLS], Q.qb_listed(players), status, SN.build(snaps, links))
+
+
 def load_inputs() -> KSInputs:
     times = game_times.build(game_times.load_schedule())
-    starters = game_times.load_schedule(["game_id", "season", "home_team", "away_team", "home_qb_id", "away_qb_id"])
-    players = pd.read_parquet(PLAYERS, columns=["gsis_id", "position"]).dropna(subset=["gsis_id"])
-    qb_listed = set(players.drop_duplicates("gsis_id").query("position == 'QB'").gsis_id)
-    status = injury_status.build(injury_status.load_injuries(), times)
-    return KSInputs(times, starters, qb_listed, status, SN.build(SN.load_snaps(), SN.load_links()))
+    return inputs_from_tables(times, game_times.load_schedule(Q.STARTER_COLS), Q.load_players(),
+                              injury_status.load_injuries(), SN.load_snaps(), SN.load_links())
 
 
 def main() -> None:

@@ -20,6 +20,10 @@ Follows docs/backtest_rules_v1.md:
   test 1 deleted build (Amendment 12 decision 23) can call it with tables built
   from reduced inputs. Every module table must cover exactly the games' home and
   away rows, and every join must keep the row count; otherwise the build stops.
+- load_tables() reads every input file once; build_from_tables() builds the
+  tables from them and reads no file, so the test 1 deleted build runs the same
+  code on reduced copies (Amendment 17 decision 6). games limits the rows built
+  to those game_ids.
 
 Writes data/historical/derived/feature_table/feature_table_h{H}_{run}_{ks|noks}.parquet
 for the 18 combinations of Amendment 16 decision 3, with the test 1 settings
@@ -33,8 +37,8 @@ import time
 
 import pandas as pd
 
-from features import game_context as GC, game_times, key_starters as K, pace as PC
-from features import qb_features as Q, ratings as R, team_ratings as TR
+from features import game_context as GC, game_times, injury_status, key_starters as K, pace as PC
+from features import qb_features as Q, ratings as R, snaps as SN, team_ratings as TR
 
 OUT_DIR = game_times.HIST / "derived" / "feature_table"
 SEASONS = TR.SEASONS
@@ -103,14 +107,15 @@ def _same(a: pd.Series, b: pd.Series) -> pd.Series:
 
 def assemble(times: pd.DataFrame, context: pd.DataFrame, ratings: pd.DataFrame, pace: pd.DataFrame,
              qb: pd.DataFrame, ks: pd.DataFrame | None, ablation: str, key_starters: bool,
-             seasons=SEASONS) -> pd.DataFrame:
+             seasons=SEASONS, games=None) -> pd.DataFrame:
     """The feature table from module tables. Pure: no file is read."""
     cols = columns(ablation, key_starters)
     if key_starters != (ks is not None):
         raise ValueError("pass the key starters table exactly when the switch is on")
     if set(Q.PASS_COLS + Q.RUSH_COLS) & set(qb.columns) != set(Q.columns(ablation)) - set(Q.ID_COLS):
         raise ValueError(f"qb_features table does not match the {ablation} run")
-    games = _games(times, seasons)
+    v1 = _games(times, seasons)
+    games = v1 if games is None else v1[v1.game_id.isin(list(games))].reset_index(drop=True)
     out = games[["game_id", "season", "week"]]
 
     ctx = context[["game_id"] + CONTEXT_GAME_COLS + [f"{s}_{c}" for s in SIDES for c in CONTEXT_TEAM_COLS]]
@@ -139,26 +144,51 @@ def assemble(times: pd.DataFrame, context: pd.DataFrame, ratings: pd.DataFrame, 
     return out[cols].sort_values("game_id").reset_index(drop=True)
 
 
+def load_tables() -> dict[str, pd.DataFrame]:
+    """Every input file the feature build reads, loaded once: schedule rows (Amendment 12 decision 23
+    columns, codes mapped), clean plays, injuries, snap counts, snap-count links and the players table."""
+    return {"schedule": game_times.load_schedule(game_times.SCHEDULE_COLS),
+            "plays": pd.read_parquet(R.CLEAN_PLAYS),
+            "injuries": injury_status.load_injuries(),
+            "snaps": SN.load_snaps(),
+            "links": SN.load_links(),
+            "players": Q.load_players()}
+
+
+def build_from_tables(tables: dict[str, pd.DataFrame], half_lives=Q.HALF_LIVES, ablations=R.ABLATIONS,
+                      games=None, verbose: bool = False) -> dict[tuple[float, str, bool], pd.DataFrame]:
+    """Feature tables keyed by (half-life, ablation run, key starters on) from load_tables() output.
+    Reads no file."""
+    sched, plays = tables["schedule"], tables["plays"]
+    times = game_times.build(sched[game_times.READ_COLS])
+    context, _, _ = GC.build(sched[GC.READ_COLS])
+    data = R.RatingData(plays[R.PLAY_COLS], times)
+    rest = (tables["players"], tables["injuries"], tables["snaps"], tables["links"])
+    qi = Q.inputs_from_tables(times, sched, plays, *rest)
+    ks = K.build(K.inputs_from_tables(times, sched, *rest), True, games=games)
+    out = {}
+    for h in half_lives:
+        pace = PC.build(plays[["game_id", "posteam"]], times, h)
+        if games is not None:
+            pace = pace[pace.game_id.isin(list(games))]
+        for ab in ablations:
+            t0 = time.time()
+            ratings = TR.build(data, h, R.TEST1_PENALTIES, ab, games=games)
+            qb = Q.build(qi, data, h, R.TEST1_PENALTIES, ab, games=games)
+            for on in [True, False]:
+                out[(h, ab, on)] = assemble(times, context, ratings, pace, qb, ks if on else None, ab, on,
+                                            games=games)
+            if verbose:
+                print(f"feature_table h{h} {ab}: {len(out[(h, ab, False)]):,} rows in {time.time() - t0:.1f}s")
+    return out
+
+
 def main() -> None:
     t_all = time.time()
-    sched = game_times.load_schedule(GC.READ_COLS)
-    times = game_times.build(sched[game_times.READ_COLS])
-    context, _, _ = GC.build(sched)
-    data = R.load_data()
-    plays = pd.read_parquet(R.CLEAN_PLAYS, columns=["game_id", "posteam"])
-    qi = Q.load_inputs()
-    ks = K.build(K.load_inputs(), True)
+    tables = build_from_tables(load_tables(), verbose=True)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    for h in Q.HALF_LIVES:
-        pace = PC.build(plays, times, h)
-        for ab in R.ABLATIONS:
-            t0 = time.time()
-            ratings = TR.build(data, h, R.TEST1_PENALTIES, ab)
-            qb = Q.build(qi, data, h, R.TEST1_PENALTIES, ab)
-            for on in [True, False]:
-                t = assemble(times, context, ratings, pace, qb, ks if on else None, ab, on)
-                t.to_parquet(OUT_DIR / file_name(h, ab, on), index=False)
-            print(f"feature_table h{h} {ab}: {len(t):,} rows in {time.time() - t0:.1f}s")
+    for (h, ab, on), t in tables.items():
+        t.to_parquet(OUT_DIR / file_name(h, ab, on), index=False)
     print(f"total {time.time() - t_all:.1f}s")
 
 

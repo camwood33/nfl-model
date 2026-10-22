@@ -74,6 +74,8 @@ BEFORE_2015 = "before 2015"
 EMPTY_POOL = "empty pool"
 PASS_COLS = ["primary_pass", "substitute_pass", "qb_pass"]
 RUSH_COLS = ["primary_rush", "substitute_rush", "qb_rush"]
+STARTER_COLS = ["game_id", "season", "home_team", "away_team", "home_qb_id", "away_qb_id"]
+QB_PLAY_COLS = ["game_id", "posteam", "regression", "qb_dropback", "passer_id", "rusher_player_id", "designed_qb_run"]
 ID_COLS = ["game_id", "team", "side", "season", "primary_qb_id", "primary_status", "primary_path",
            "substitute_qb_id", "substitute_status", "substitute_path", "P", "train_exclude", "exclude_reason"]
 
@@ -335,16 +337,30 @@ def build(inp: QBInputs, data: R.RatingData | None, half_life: float = 8,
     return t.reindex(columns=cols).sort_values(["game_id", "side"]).reset_index(drop=True)
 
 
+def load_players() -> pd.DataFrame:
+    return pd.read_parquet(PLAYERS, columns=["gsis_id", "position"])
+
+
+def qb_listed(players: pd.DataFrame) -> set[str]:
+    """gsis_ids listed as QB in the players table."""
+    players = players.dropna(subset=["gsis_id"])
+    return set(players.drop_duplicates("gsis_id").query("position == 'QB'").gsis_id)
+
+
+def inputs_from_tables(times: pd.DataFrame, schedule: pd.DataFrame, plays: pd.DataFrame, players: pd.DataFrame,
+                       injuries: pd.DataFrame, snaps: pd.DataFrame, links: pd.DataFrame) -> QBInputs:
+    """QBInputs from loaded tables (schedule rows with STARTER_COLS, clean plays, the players table, loaded
+    injuries, loaded snap counts and their links). Reads no file."""
+    status = injury_status.build(injuries, times)
+    return QBInputs(times, schedule[STARTER_COLS], plays[QB_PLAY_COLS], qb_listed(players), status,
+                    SN.build(snaps, links))
+
+
 def load_inputs() -> QBInputs:
     times = game_times.build(game_times.load_schedule())
-    starters = game_times.load_schedule(["game_id", "season", "home_team", "away_team", "home_qb_id", "away_qb_id"])
-    plays = pd.read_parquet(R.CLEAN_PLAYS, columns=["game_id", "posteam", "regression", "qb_dropback",
-                                                    "passer_id", "rusher_player_id", "designed_qb_run"])
-    players = pd.read_parquet(PLAYERS, columns=["gsis_id", "position"]).dropna(subset=["gsis_id"])
-    qb_listed = set(players.drop_duplicates("gsis_id").query("position == 'QB'").gsis_id)
-    status = injury_status.build(injury_status.load_injuries(), times)
-    snaps = SN.build(SN.load_snaps(), SN.load_links())
-    return QBInputs(times, starters, plays, qb_listed, status, snaps)
+    return inputs_from_tables(times, game_times.load_schedule(STARTER_COLS),
+                              pd.read_parquet(R.CLEAN_PLAYS, columns=QB_PLAY_COLS), load_players(),
+                              injury_status.load_injuries(), SN.load_snaps(), SN.load_links())
 
 
 def main() -> None:

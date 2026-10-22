@@ -60,9 +60,12 @@ def _indicators(fit: R.Fit, team: str, season: int) -> dict[str, float]:
 
 
 def build(data: R.RatingData, half_life: float = 8, penalties: R.Penalties = R.TEST1_PENALTIES,
-          ablation: str = "full", F: float = 8, c: float | dict[str, float] = 0.5, seasons=SEASONS) -> pd.DataFrame:
+          ablation: str = "full", F: float = 8, c: float | dict[str, float] = 0.5, seasons=SEASONS,
+          games=None) -> pd.DataFrame:
     carry = c if isinstance(c, dict) else {k: c for k in RATING_TYPES}
     tg = team_games(data.times, seasons)
+    if games is not None:
+        tg = tg[tg.game_id.isin(list(games))].reset_index(drop=True)
     tg["g"] = games_before(data.times, tg)
     tg["w"] = np.minimum(1.0, tg.g / F)
     eos = {s - 1: R.fit_end_of_season(data, s - 1, half_life, penalties, ablation)

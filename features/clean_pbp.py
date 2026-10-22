@@ -67,14 +67,23 @@ GAME_COLS = [
 ]
 
 
-def load_pbp() -> pd.DataFrame:
-    """All play-by-play rows after the Amendment 5 cleaning."""
-    d = pd.concat(
+def read_pbp() -> pd.DataFrame:
+    """Raw play-by-play rows, 2010 to 2024, before any cleaning."""
+    return pd.concat(
         [pd.read_parquet(PBP_DIR / f"play_by_play_{y}.parquet", columns=PBP_COLS) for y in SEASONS],
         ignore_index=True,
     )
+
+
+def clean(d: pd.DataFrame) -> pd.DataFrame:
+    """The Amendment 5 cleaning of raw play-by-play rows."""
     d = d.drop_duplicates(DUPLICATE_KEY)
     return d[~d.game_id.isin(EXCLUDED_GAMES)]
+
+
+def load_pbp() -> pd.DataFrame:
+    """All play-by-play rows after the Amendment 5 cleaning."""
+    return clean(read_pbp())
 
 
 def exclusion_reasons(d: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
@@ -112,22 +121,23 @@ def exclusion_table(d: pd.DataFrame, reason: pd.Series) -> pd.DataFrame:
     return t
 
 
-def schedule() -> pd.DataFrame:
-    g = pd.read_parquet(SCHEDULES)
+def schedule(g: pd.DataFrame) -> pd.DataFrame:
     g = g[g.season.isin(SEASONS) & ~g.game_id.isin(EXCLUDED_GAMES)].copy()
     g["home_team"] = apply_franchise_map(g.home_team)
     g["away_team"] = apply_franchise_map(g.away_team)
     return g
 
 
-def build() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Return (clean_plays, exclusion table, games)."""
-    pbp = load_pbp()
+def build_from_tables(raw_pbp: pd.DataFrame, raw_schedule: pd.DataFrame,
+                      players: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Return (clean_plays, exclusion table, games) from raw play-by-play rows, the raw schedules file and
+    the players table (gsis_id, position). Reads no file."""
+    pbp = clean(raw_pbp)
     cand, reason = exclusion_reasons(pbp)
     table = exclusion_table(cand, reason)
 
-    sched = schedule()
-    players = pd.read_parquet(PLAYERS, columns=["gsis_id", "position"]).dropna(subset=["gsis_id"])
+    sched = schedule(raw_schedule)
+    players = players.dropna(subset=["gsis_id"])
     qb_ids = set(players.drop_duplicates("gsis_id").query("position == 'QB'").gsis_id)
 
     kept = cand[reason.isin(KEPT)].copy()
@@ -141,6 +151,12 @@ def build() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     games = sched.merge(half1, left_on="game_id", right_index=True, how="left", validate="1:1")
     games = games[GAME_COLS].sort_values("game_id").reset_index(drop=True)
     return plays, table, games
+
+
+def build() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Return (clean_plays, exclusion table, games) from the files."""
+    return build_from_tables(read_pbp(), pd.read_parquet(SCHEDULES),
+                             pd.read_parquet(PLAYERS, columns=["gsis_id", "position"]))
 
 
 def final_scores_from_pbp() -> pd.DataFrame:
