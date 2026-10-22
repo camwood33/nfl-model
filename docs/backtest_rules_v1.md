@@ -1019,3 +1019,14 @@ as aborted plays.
   - A leak in code that runs only with key starters off, and touches no column that also exists with them on, is covered only by decision 12's check on the full build.
 
 - Counts from the 2026-10-21 design review: 3,007 version 1 games and 587 distinct cutoffs in 2013 to 2024; 62 regular season injury rows with no date_modified, none Out, Doubtful or Questionable.
+
+---
+
+## Amendment 18 (2026-10-21, before any test 1 code exists and before any test 1 result)
+
+- Purpose. Replaces control B of Amendment 17 decision 10. As written, control B fires only through an error (qb_features.py:177 stops on a missing starting QB id in the deleted build), so it never shows that test 1 catches wrong values produced by production code. Written before any test 1 code exists and before any test 1 result.
+
+- Decisions:
+  - 1. Control B. Inside both builds, module 6's rating fit at cutoff C (features/ratings.py fit) is patched to also use the plays of every game in the predicted game-week P, including G, whether or not they finished before C. Those plays have age 0, so the negative-age stop of Amendment 12 decision 5 is not reached. The end-of-season fit, module 1 and the reducer are not patched. Control B runs only on sampled games where at least one team has g of 1 or more (Amendment 10), because when both teams have g = 0 the blend weight w is 0 and the current fit cannot move a rating (189 such version 1 games in 2013 to 2024, all in week 1). On every such sampled game, control B must fail through a value difference in at least one of the 8 blended rating columns.
+  - 2. Firing means a value difference. For controls A, B and C, a control fires on a game only if the comparison of Amendment 17 decision 8 finds a value difference in that game's row. A control game whose deleted build or full build raises an error does not count as firing; it is reported with the error, and test 1 stops before the full run.
+  - 3. Everything else in Amendment 17 decision 10 stands, including control A, control C and its selection scan, the unpatched sample with zero failures, and the synthetic test of a game finishing exactly at C. Amendment 17 decision 9 (an error in the real test 1 run is a failure) is unchanged.
