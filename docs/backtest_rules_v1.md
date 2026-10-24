@@ -1057,3 +1057,15 @@ as aborted plays.
   - 3. Control B scope. The patched ratings.fit is also used by qb_features, so control B may change QB columns too. Firing is still judged only on the 8 blended rating columns (Amendment 18 decision 1).
   - 4. Timing of shared inputs. Each build calls build_from_tables once per cutoff. Inputs shared across settings (times, context, rating data, QB inputs, key starter inputs) are timed as their own line per cutoff, and once for each full build. The per-setting figures of Amendment 19 decision 6 exclude that shared part.
   - 5. Full run gate. --sample writes data/historical/derived/test1/summary.json with: pass or fail for every check, git HEAD, and SHA-256 hashes of every file in features/ and tests/, of docs/backtest_rules_v1.md, and of every input file load_tables() and the reducer read. --full refuses to run unless --approved is given and summary.json shows a pass with every hash equal to the current files. Any change to code, rules or inputs after the sample means the sample is rerun from scratch (Amendment 12 decision 24).
+
+---
+
+## Amendment 21 (2026-10-24, before any test 1 run and before any test 1 result)
+
+- Purpose. Writing the test 1 harness showed that Amendment 20 decisions 4 and 5 do not say which files are hashed, where pace's time goes, or which software the sample and full run use. This settles them before any test 1 run or result.
+
+- Decisions:
+  - 1. Code files hashed. "Every file in features/ and tests/" (Amendment 20 decision 5) means the files that git ls-files --cached --others --exclude-standard lists in those folders: tracked files plus untracked files that are not git-ignored. __pycache__ and other git-ignored files are not hashed.
+  - 2. Input files hashed. Besides the files load_tables() and the reducer read, the hashes cover the raw play-by-play files read by the Amendment 17 decision 1 clean_pbp check.
+  - 3. Software. summary.json also records the interpreter path and the versions of Python, pandas, numpy and pyarrow. --full refuses unless it runs under the same interpreter with the same versions.
+  - 4. Pace timing. pace.build runs once per half-life and is shared by that half-life's 3 ablation runs. Its time is reported as its own line per half-life, per cutoff and per full build, and is excluded from the per-setting figures, as with the shared inputs of Amendment 20 decision 4.
