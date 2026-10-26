@@ -1,0 +1,491 @@
+{
+ "A": [
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2013_01_ARI_STL",
+    "2013_01_ATL_NO",
+    "2013_01_CIN_CHI",
+    "2013_01_GB_SF",
+    "2013_01_KC_JAX",
+    "2013_01_MIA_CLE",
+    "2013_01_MIN_DET",
+    "2013_01_NE_BUF",
+    "2013_01_NYG_DAL",
+    "2013_01_OAK_IND",
+    "2013_01_SEA_CAR",
+    "2013_01_TB_NYJ",
+    "2013_01_TEN_PIT"
+   ],
+   "missed": [],
+   "cutoff": "2013-09-06 20:00:00-04:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2013_14_HOU_JAX"
+   ],
+   "missed": [],
+   "cutoff": "2013-12-04 20:00:00-05:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2014_13_ARI_ATL",
+    "2014_13_CAR_MIN",
+    "2014_13_CIN_TB",
+    "2014_13_CLE_BUF",
+    "2014_13_DEN_KC",
+    "2014_13_NE_GB",
+    "2014_13_NO_PIT",
+    "2014_13_NYG_JAX",
+    "2014_13_OAK_STL",
+    "2014_13_SD_BAL",
+    "2014_13_TEN_HOU",
+    "2014_13_WAS_IND"
+   ],
+   "missed": [],
+   "cutoff": "2014-11-28 20:00:00-05:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2015_02_DEN_KC"
+   ],
+   "missed": [],
+   "cutoff": "2015-09-16 20:00:00-04:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2016_09_CAR_LA",
+    "2016_09_DAL_CLE",
+    "2016_09_DEN_OAK",
+    "2016_09_DET_MIN",
+    "2016_09_IND_GB",
+    "2016_09_JAX_KC",
+    "2016_09_NO_SF",
+    "2016_09_NYJ_MIA",
+    "2016_09_PHI_NYG",
+    "2016_09_PIT_BAL",
+    "2016_09_TEN_SD"
+   ],
+   "missed": [],
+   "cutoff": "2016-11-04 20:00:00-04:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2017_10_SEA_ARI"
+   ],
+   "missed": [],
+   "cutoff": "2017-11-08 20:00:00-05:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2018_07_DEN_ARI"
+   ],
+   "missed": [],
+   "cutoff": "2018-10-17 20:00:00-04:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2019_04_PHI_GB"
+   ],
+   "missed": [],
+   "cutoff": "2019-09-25 20:00:00-04:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2020_12_HOU_DET",
+    "2020_12_WAS_DAL"
+   ],
+   "missed": [],
+   "cutoff": "2020-11-25 20:00:00-05:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2021_13_NE_BUF"
+   ],
+   "missed": [],
+   "cutoff": "2021-12-04 20:00:00-05:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2022_12_ATL_WAS",
+    "2022_12_BAL_JAX",
+    "2022_12_CHI_NYJ",
+    "2022_12_CIN_TEN",
+    "2022_12_DEN_CAR",
+    "2022_12_GB_PHI",
+    "2022_12_HOU_MIA",
+    "2022_12_LAC_ARI",
+    "2022_12_LA_KC",
+    "2022_12_LV_SEA",
+    "2022_12_NO_SF",
+    "2022_12_TB_CLE"
+   ],
+   "missed": [],
+   "cutoff": "2022-11-25 20:00:00-05:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2023_11_CIN_BAL"
+   ],
+   "missed": [],
+   "cutoff": "2023-11-15 20:00:00-05:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2024_01_ARI_BUF",
+    "2024_01_CAR_NO",
+    "2024_01_DAL_CLE",
+    "2024_01_DEN_SEA",
+    "2024_01_HOU_IND",
+    "2024_01_JAX_MIA",
+    "2024_01_LA_DET",
+    "2024_01_LV_LAC",
+    "2024_01_MIN_NYG",
+    "2024_01_NE_CIN",
+    "2024_01_PIT_ATL",
+    "2024_01_TEN_CHI",
+    "2024_01_WAS_TB"
+   ],
+   "missed": [],
+   "cutoff": "2024-09-06 20:00:00-04:00"
+  },
+  {
+   "control": "A",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2024_02_CHI_HOU",
+    "2024_02_CIN_KC",
+    "2024_02_CLE_JAX",
+    "2024_02_IND_GB",
+    "2024_02_LAC_CAR",
+    "2024_02_LA_ARI",
+    "2024_02_LV_BAL",
+    "2024_02_NO_DAL",
+    "2024_02_NYG_WAS",
+    "2024_02_NYJ_TEN",
+    "2024_02_PIT_DEN",
+    "2024_02_SEA_NE",
+    "2024_02_SF_MIN",
+    "2024_02_TB_DET"
+   ],
+   "missed": [],
+   "cutoff": "2024-09-13 20:00:00-04:00"
+  }
+ ],
+ "B": [
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [],
+   "missed": [],
+   "cutoff": "2013-09-06 20:00:00-04:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2013_14_HOU_JAX"
+   ],
+   "missed": [],
+   "cutoff": "2013-12-04 20:00:00-05:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2014_13_ARI_ATL",
+    "2014_13_CAR_MIN",
+    "2014_13_CIN_TB",
+    "2014_13_CLE_BUF",
+    "2014_13_DEN_KC",
+    "2014_13_NE_GB",
+    "2014_13_NO_PIT",
+    "2014_13_NYG_JAX",
+    "2014_13_OAK_STL",
+    "2014_13_SD_BAL",
+    "2014_13_TEN_HOU",
+    "2014_13_WAS_IND"
+   ],
+   "missed": [],
+   "cutoff": "2014-11-28 20:00:00-05:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2015_02_DEN_KC"
+   ],
+   "missed": [],
+   "cutoff": "2015-09-16 20:00:00-04:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2016_09_CAR_LA",
+    "2016_09_DAL_CLE",
+    "2016_09_DEN_OAK",
+    "2016_09_DET_MIN",
+    "2016_09_IND_GB",
+    "2016_09_JAX_KC",
+    "2016_09_NO_SF",
+    "2016_09_NYJ_MIA",
+    "2016_09_PHI_NYG",
+    "2016_09_PIT_BAL",
+    "2016_09_TEN_SD"
+   ],
+   "missed": [],
+   "cutoff": "2016-11-04 20:00:00-04:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2017_10_SEA_ARI"
+   ],
+   "missed": [],
+   "cutoff": "2017-11-08 20:00:00-05:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2018_07_DEN_ARI"
+   ],
+   "missed": [],
+   "cutoff": "2018-10-17 20:00:00-04:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2019_04_PHI_GB"
+   ],
+   "missed": [],
+   "cutoff": "2019-09-25 20:00:00-04:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2020_12_HOU_DET",
+    "2020_12_WAS_DAL"
+   ],
+   "missed": [],
+   "cutoff": "2020-11-25 20:00:00-05:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2021_13_NE_BUF"
+   ],
+   "missed": [],
+   "cutoff": "2021-12-04 20:00:00-05:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2022_12_ATL_WAS",
+    "2022_12_BAL_JAX",
+    "2022_12_CHI_NYJ",
+    "2022_12_CIN_TEN",
+    "2022_12_DEN_CAR",
+    "2022_12_GB_PHI",
+    "2022_12_HOU_MIA",
+    "2022_12_LAC_ARI",
+    "2022_12_LA_KC",
+    "2022_12_LV_SEA",
+    "2022_12_NO_SF",
+    "2022_12_TB_CLE"
+   ],
+   "missed": [],
+   "cutoff": "2022-11-25 20:00:00-05:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2023_11_CIN_BAL"
+   ],
+   "missed": [],
+   "cutoff": "2023-11-15 20:00:00-05:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [],
+   "missed": [],
+   "cutoff": "2024-09-06 20:00:00-04:00"
+  },
+  {
+   "control": "B",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2024_02_CHI_HOU",
+    "2024_02_CIN_KC",
+    "2024_02_CLE_JAX",
+    "2024_02_IND_GB",
+    "2024_02_LAC_CAR",
+    "2024_02_LA_ARI",
+    "2024_02_LV_BAL",
+    "2024_02_NO_DAL",
+    "2024_02_NYG_WAS",
+    "2024_02_NYJ_TEN",
+    "2024_02_PIT_DEN",
+    "2024_02_SEA_NE",
+    "2024_02_SF_MIN",
+    "2024_02_TB_DET"
+   ],
+   "missed": [],
+   "cutoff": "2024-09-13 20:00:00-04:00"
+  }
+ ],
+ "C": [
+  {
+   "control": "C",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2015_09_PHI_DAL"
+   ],
+   "missed": [],
+   "cutoff": "2015-11-06 20:00:00-05:00"
+  },
+  {
+   "control": "C",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2019_05_NE_WAS"
+   ],
+   "missed": [],
+   "cutoff": "2019-10-04 20:00:00-04:00"
+  },
+  {
+   "control": "C",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2019_17_IND_JAX"
+   ],
+   "missed": [],
+   "cutoff": "2019-12-27 20:00:00-05:00"
+  },
+  {
+   "control": "C",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2020_01_PHI_WAS"
+   ],
+   "missed": [],
+   "cutoff": "2020-09-11 20:00:00-04:00"
+  },
+  {
+   "control": "C",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2020_08_DAL_PHI",
+    "2020_08_SF_SEA"
+   ],
+   "missed": [],
+   "cutoff": "2020-10-30 20:00:00-04:00"
+  },
+  {
+   "control": "C",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2021_11_BAL_CHI"
+   ],
+   "missed": [],
+   "cutoff": "2021-11-19 20:00:00-05:00"
+  },
+  {
+   "control": "C",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2022_10_NO_PIT"
+   ],
+   "missed": [],
+   "cutoff": "2022-11-11 20:00:00-05:00"
+  },
+  {
+   "control": "C",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2022_11_WAS_HOU"
+   ],
+   "missed": [],
+   "cutoff": "2022-11-18 20:00:00-05:00"
+  },
+  {
+   "control": "C",
+   "pass": true,
+   "error": null,
+   "fired": [
+    "2024_10_NE_CHI"
+   ],
+   "missed": [],
+   "cutoff": "2024-11-08 20:00:00-05:00"
+  }
+ ]
+}

@@ -1,0 +1,311 @@
+check,cutoff,error,n_failures,build,setting
+clean_pbp,2013-12-04 20:00:00-05:00,,0,,
+clean_pbp,2018-10-17 20:00:00-04:00,,0,,
+clean_pbp,2024-09-13 20:00:00-04:00,,0,,
+deleted build,2013-09-06 20:00:00-04:00,,0,unpatched,h4 full
+deleted build,2013-09-06 20:00:00-04:00,,0,unpatched,h4 no_qb_rush
+deleted build,2013-09-06 20:00:00-04:00,,0,unpatched,h4 no_qb
+deleted build,2013-09-06 20:00:00-04:00,,0,unpatched,h8 full
+deleted build,2013-09-06 20:00:00-04:00,,0,unpatched,h8 no_qb_rush
+deleted build,2013-09-06 20:00:00-04:00,,0,unpatched,h8 no_qb
+deleted build,2013-09-06 20:00:00-04:00,,0,unpatched,h16 full
+deleted build,2013-09-06 20:00:00-04:00,,0,unpatched,h16 no_qb_rush
+deleted build,2013-09-06 20:00:00-04:00,,0,unpatched,h16 no_qb
+filtered build,2013-09-06 20:00:00-04:00,,0,filtered,h4 full
+filtered build,2013-09-06 20:00:00-04:00,,0,filtered,h4 no_qb_rush
+filtered build,2013-09-06 20:00:00-04:00,,0,filtered,h4 no_qb
+filtered build,2013-09-06 20:00:00-04:00,,0,filtered,h8 full
+filtered build,2013-09-06 20:00:00-04:00,,0,filtered,h8 no_qb_rush
+filtered build,2013-09-06 20:00:00-04:00,,0,filtered,h8 no_qb
+filtered build,2013-09-06 20:00:00-04:00,,0,filtered,h16 full
+filtered build,2013-09-06 20:00:00-04:00,,0,filtered,h16 no_qb_rush
+filtered build,2013-09-06 20:00:00-04:00,,0,filtered,h16 no_qb
+deleted build,2013-09-06 20:00:00-04:00,,13,control A,h8 full
+deleted build,2013-09-06 20:00:00-04:00,,52,control B,h8 full
+deleted build,2013-12-04 20:00:00-05:00,,0,unpatched,h4 full
+deleted build,2013-12-04 20:00:00-05:00,,0,unpatched,h4 no_qb_rush
+deleted build,2013-12-04 20:00:00-05:00,,0,unpatched,h4 no_qb
+deleted build,2013-12-04 20:00:00-05:00,,0,unpatched,h8 full
+deleted build,2013-12-04 20:00:00-05:00,,0,unpatched,h8 no_qb_rush
+deleted build,2013-12-04 20:00:00-05:00,,0,unpatched,h8 no_qb
+deleted build,2013-12-04 20:00:00-05:00,,0,unpatched,h16 full
+deleted build,2013-12-04 20:00:00-05:00,,0,unpatched,h16 no_qb_rush
+deleted build,2013-12-04 20:00:00-05:00,,0,unpatched,h16 no_qb
+filtered build,2013-12-04 20:00:00-05:00,,0,filtered,h4 full
+filtered build,2013-12-04 20:00:00-05:00,,0,filtered,h4 no_qb_rush
+filtered build,2013-12-04 20:00:00-05:00,,0,filtered,h4 no_qb
+filtered build,2013-12-04 20:00:00-05:00,,0,filtered,h8 full
+filtered build,2013-12-04 20:00:00-05:00,,0,filtered,h8 no_qb_rush
+filtered build,2013-12-04 20:00:00-05:00,,0,filtered,h8 no_qb
+filtered build,2013-12-04 20:00:00-05:00,,0,filtered,h16 full
+filtered build,2013-12-04 20:00:00-05:00,,0,filtered,h16 no_qb_rush
+filtered build,2013-12-04 20:00:00-05:00,,0,filtered,h16 no_qb
+deleted build,2013-12-04 20:00:00-05:00,,1,control A,h8 full
+deleted build,2013-12-04 20:00:00-05:00,,20,control B,h8 full
+deleted build,2014-11-28 20:00:00-05:00,,0,unpatched,h4 full
+deleted build,2014-11-28 20:00:00-05:00,,0,unpatched,h4 no_qb_rush
+deleted build,2014-11-28 20:00:00-05:00,,0,unpatched,h4 no_qb
+deleted build,2014-11-28 20:00:00-05:00,,0,unpatched,h8 full
+deleted build,2014-11-28 20:00:00-05:00,,0,unpatched,h8 no_qb_rush
+deleted build,2014-11-28 20:00:00-05:00,,0,unpatched,h8 no_qb
+deleted build,2014-11-28 20:00:00-05:00,,0,unpatched,h16 full
+deleted build,2014-11-28 20:00:00-05:00,,0,unpatched,h16 no_qb_rush
+deleted build,2014-11-28 20:00:00-05:00,,0,unpatched,h16 no_qb
+filtered build,2014-11-28 20:00:00-05:00,,0,filtered,h4 full
+filtered build,2014-11-28 20:00:00-05:00,,0,filtered,h4 no_qb_rush
+filtered build,2014-11-28 20:00:00-05:00,,0,filtered,h4 no_qb
+filtered build,2014-11-28 20:00:00-05:00,,0,filtered,h8 full
+filtered build,2014-11-28 20:00:00-05:00,,0,filtered,h8 no_qb_rush
+filtered build,2014-11-28 20:00:00-05:00,,0,filtered,h8 no_qb
+filtered build,2014-11-28 20:00:00-05:00,,0,filtered,h16 full
+filtered build,2014-11-28 20:00:00-05:00,,0,filtered,h16 no_qb_rush
+filtered build,2014-11-28 20:00:00-05:00,,0,filtered,h16 no_qb
+deleted build,2014-11-28 20:00:00-05:00,,12,control A,h8 full
+deleted build,2014-11-28 20:00:00-05:00,,239,control B,h8 full
+deleted build,2015-09-16 20:00:00-04:00,,0,unpatched,h4 full
+deleted build,2015-09-16 20:00:00-04:00,,0,unpatched,h4 no_qb_rush
+deleted build,2015-09-16 20:00:00-04:00,,0,unpatched,h4 no_qb
+deleted build,2015-09-16 20:00:00-04:00,,0,unpatched,h8 full
+deleted build,2015-09-16 20:00:00-04:00,,0,unpatched,h8 no_qb_rush
+deleted build,2015-09-16 20:00:00-04:00,,0,unpatched,h8 no_qb
+deleted build,2015-09-16 20:00:00-04:00,,0,unpatched,h16 full
+deleted build,2015-09-16 20:00:00-04:00,,0,unpatched,h16 no_qb_rush
+deleted build,2015-09-16 20:00:00-04:00,,0,unpatched,h16 no_qb
+filtered build,2015-09-16 20:00:00-04:00,,0,filtered,h4 full
+filtered build,2015-09-16 20:00:00-04:00,,0,filtered,h4 no_qb_rush
+filtered build,2015-09-16 20:00:00-04:00,,0,filtered,h4 no_qb
+filtered build,2015-09-16 20:00:00-04:00,,0,filtered,h8 full
+filtered build,2015-09-16 20:00:00-04:00,,0,filtered,h8 no_qb_rush
+filtered build,2015-09-16 20:00:00-04:00,,0,filtered,h8 no_qb
+filtered build,2015-09-16 20:00:00-04:00,,0,filtered,h16 full
+filtered build,2015-09-16 20:00:00-04:00,,0,filtered,h16 no_qb_rush
+filtered build,2015-09-16 20:00:00-04:00,,0,filtered,h16 no_qb
+deleted build,2015-09-16 20:00:00-04:00,,1,control A,h8 full
+deleted build,2015-09-16 20:00:00-04:00,,20,control B,h8 full
+deleted build,2015-11-06 20:00:00-05:00,,0,unpatched,h8 full
+filtered build,2015-11-06 20:00:00-05:00,,0,filtered,h8 full
+deleted build,2015-11-06 20:00:00-05:00,,1,control C,h8 full
+deleted build,2016-11-04 20:00:00-04:00,,0,unpatched,h4 full
+deleted build,2016-11-04 20:00:00-04:00,,0,unpatched,h4 no_qb_rush
+deleted build,2016-11-04 20:00:00-04:00,,0,unpatched,h4 no_qb
+deleted build,2016-11-04 20:00:00-04:00,,0,unpatched,h8 full
+deleted build,2016-11-04 20:00:00-04:00,,0,unpatched,h8 no_qb_rush
+deleted build,2016-11-04 20:00:00-04:00,,0,unpatched,h8 no_qb
+deleted build,2016-11-04 20:00:00-04:00,,0,unpatched,h16 full
+deleted build,2016-11-04 20:00:00-04:00,,0,unpatched,h16 no_qb_rush
+deleted build,2016-11-04 20:00:00-04:00,,0,unpatched,h16 no_qb
+filtered build,2016-11-04 20:00:00-04:00,,0,filtered,h4 full
+filtered build,2016-11-04 20:00:00-04:00,,0,filtered,h4 no_qb_rush
+filtered build,2016-11-04 20:00:00-04:00,,0,filtered,h4 no_qb
+filtered build,2016-11-04 20:00:00-04:00,,0,filtered,h8 full
+filtered build,2016-11-04 20:00:00-04:00,,0,filtered,h8 no_qb_rush
+filtered build,2016-11-04 20:00:00-04:00,,0,filtered,h8 no_qb
+filtered build,2016-11-04 20:00:00-04:00,,0,filtered,h16 full
+filtered build,2016-11-04 20:00:00-04:00,,0,filtered,h16 no_qb_rush
+filtered build,2016-11-04 20:00:00-04:00,,0,filtered,h16 no_qb
+deleted build,2016-11-04 20:00:00-04:00,,11,control A,h8 full
+deleted build,2016-11-04 20:00:00-04:00,,219,control B,h8 full
+deleted build,2017-11-08 20:00:00-05:00,,0,unpatched,h4 full
+deleted build,2017-11-08 20:00:00-05:00,,0,unpatched,h4 no_qb_rush
+deleted build,2017-11-08 20:00:00-05:00,,0,unpatched,h4 no_qb
+deleted build,2017-11-08 20:00:00-05:00,,0,unpatched,h8 full
+deleted build,2017-11-08 20:00:00-05:00,,0,unpatched,h8 no_qb_rush
+deleted build,2017-11-08 20:00:00-05:00,,0,unpatched,h8 no_qb
+deleted build,2017-11-08 20:00:00-05:00,,0,unpatched,h16 full
+deleted build,2017-11-08 20:00:00-05:00,,0,unpatched,h16 no_qb_rush
+deleted build,2017-11-08 20:00:00-05:00,,0,unpatched,h16 no_qb
+filtered build,2017-11-08 20:00:00-05:00,,0,filtered,h4 full
+filtered build,2017-11-08 20:00:00-05:00,,0,filtered,h4 no_qb_rush
+filtered build,2017-11-08 20:00:00-05:00,,0,filtered,h4 no_qb
+filtered build,2017-11-08 20:00:00-05:00,,0,filtered,h8 full
+filtered build,2017-11-08 20:00:00-05:00,,0,filtered,h8 no_qb_rush
+filtered build,2017-11-08 20:00:00-05:00,,0,filtered,h8 no_qb
+filtered build,2017-11-08 20:00:00-05:00,,0,filtered,h16 full
+filtered build,2017-11-08 20:00:00-05:00,,0,filtered,h16 no_qb_rush
+filtered build,2017-11-08 20:00:00-05:00,,0,filtered,h16 no_qb
+deleted build,2017-11-08 20:00:00-05:00,,1,control A,h8 full
+deleted build,2017-11-08 20:00:00-05:00,,20,control B,h8 full
+deleted build,2018-10-17 20:00:00-04:00,,0,unpatched,h4 full
+deleted build,2018-10-17 20:00:00-04:00,,0,unpatched,h4 no_qb_rush
+deleted build,2018-10-17 20:00:00-04:00,,0,unpatched,h4 no_qb
+deleted build,2018-10-17 20:00:00-04:00,,0,unpatched,h8 full
+deleted build,2018-10-17 20:00:00-04:00,,0,unpatched,h8 no_qb_rush
+deleted build,2018-10-17 20:00:00-04:00,,0,unpatched,h8 no_qb
+deleted build,2018-10-17 20:00:00-04:00,,0,unpatched,h16 full
+deleted build,2018-10-17 20:00:00-04:00,,0,unpatched,h16 no_qb_rush
+deleted build,2018-10-17 20:00:00-04:00,,0,unpatched,h16 no_qb
+filtered build,2018-10-17 20:00:00-04:00,,0,filtered,h4 full
+filtered build,2018-10-17 20:00:00-04:00,,0,filtered,h4 no_qb_rush
+filtered build,2018-10-17 20:00:00-04:00,,0,filtered,h4 no_qb
+filtered build,2018-10-17 20:00:00-04:00,,0,filtered,h8 full
+filtered build,2018-10-17 20:00:00-04:00,,0,filtered,h8 no_qb_rush
+filtered build,2018-10-17 20:00:00-04:00,,0,filtered,h8 no_qb
+filtered build,2018-10-17 20:00:00-04:00,,0,filtered,h16 full
+filtered build,2018-10-17 20:00:00-04:00,,0,filtered,h16 no_qb_rush
+filtered build,2018-10-17 20:00:00-04:00,,0,filtered,h16 no_qb
+deleted build,2018-10-17 20:00:00-04:00,,1,control A,h8 full
+deleted build,2018-10-17 20:00:00-04:00,,19,control B,h8 full
+deleted build,2019-09-25 20:00:00-04:00,,0,unpatched,h4 full
+deleted build,2019-09-25 20:00:00-04:00,,0,unpatched,h4 no_qb_rush
+deleted build,2019-09-25 20:00:00-04:00,,0,unpatched,h4 no_qb
+deleted build,2019-09-25 20:00:00-04:00,,0,unpatched,h8 full
+deleted build,2019-09-25 20:00:00-04:00,,0,unpatched,h8 no_qb_rush
+deleted build,2019-09-25 20:00:00-04:00,,0,unpatched,h8 no_qb
+deleted build,2019-09-25 20:00:00-04:00,,0,unpatched,h16 full
+deleted build,2019-09-25 20:00:00-04:00,,0,unpatched,h16 no_qb_rush
+deleted build,2019-09-25 20:00:00-04:00,,0,unpatched,h16 no_qb
+filtered build,2019-09-25 20:00:00-04:00,,0,filtered,h4 full
+filtered build,2019-09-25 20:00:00-04:00,,0,filtered,h4 no_qb_rush
+filtered build,2019-09-25 20:00:00-04:00,,0,filtered,h4 no_qb
+filtered build,2019-09-25 20:00:00-04:00,,0,filtered,h8 full
+filtered build,2019-09-25 20:00:00-04:00,,0,filtered,h8 no_qb_rush
+filtered build,2019-09-25 20:00:00-04:00,,0,filtered,h8 no_qb
+filtered build,2019-09-25 20:00:00-04:00,,0,filtered,h16 full
+filtered build,2019-09-25 20:00:00-04:00,,0,filtered,h16 no_qb_rush
+filtered build,2019-09-25 20:00:00-04:00,,0,filtered,h16 no_qb
+deleted build,2019-09-25 20:00:00-04:00,,1,control A,h8 full
+deleted build,2019-09-25 20:00:00-04:00,,20,control B,h8 full
+deleted build,2019-10-04 20:00:00-04:00,,0,unpatched,h8 full
+filtered build,2019-10-04 20:00:00-04:00,,0,filtered,h8 full
+deleted build,2019-10-04 20:00:00-04:00,,1,control C,h8 full
+deleted build,2019-12-27 20:00:00-05:00,,0,unpatched,h8 full
+filtered build,2019-12-27 20:00:00-05:00,,0,filtered,h8 full
+deleted build,2019-12-27 20:00:00-05:00,,2,control C,h8 full
+deleted build,2020-09-11 20:00:00-04:00,,0,unpatched,h8 full
+filtered build,2020-09-11 20:00:00-04:00,,0,filtered,h8 full
+deleted build,2020-09-11 20:00:00-04:00,,1,control C,h8 full
+deleted build,2020-10-30 20:00:00-04:00,,0,unpatched,h8 full
+filtered build,2020-10-30 20:00:00-04:00,,0,filtered,h8 full
+deleted build,2020-10-30 20:00:00-04:00,,4,control C,h8 full
+deleted build,2020-11-25 20:00:00-05:00,,0,unpatched,h4 full
+deleted build,2020-11-25 20:00:00-05:00,,0,unpatched,h4 no_qb_rush
+deleted build,2020-11-25 20:00:00-05:00,,0,unpatched,h4 no_qb
+deleted build,2020-11-25 20:00:00-05:00,,0,unpatched,h8 full
+deleted build,2020-11-25 20:00:00-05:00,,0,unpatched,h8 no_qb_rush
+deleted build,2020-11-25 20:00:00-05:00,,0,unpatched,h8 no_qb
+deleted build,2020-11-25 20:00:00-05:00,,0,unpatched,h16 full
+deleted build,2020-11-25 20:00:00-05:00,,0,unpatched,h16 no_qb_rush
+deleted build,2020-11-25 20:00:00-05:00,,0,unpatched,h16 no_qb
+filtered build,2020-11-25 20:00:00-05:00,,0,filtered,h4 full
+filtered build,2020-11-25 20:00:00-05:00,,0,filtered,h4 no_qb_rush
+filtered build,2020-11-25 20:00:00-05:00,,0,filtered,h4 no_qb
+filtered build,2020-11-25 20:00:00-05:00,,0,filtered,h8 full
+filtered build,2020-11-25 20:00:00-05:00,,0,filtered,h8 no_qb_rush
+filtered build,2020-11-25 20:00:00-05:00,,0,filtered,h8 no_qb
+filtered build,2020-11-25 20:00:00-05:00,,0,filtered,h16 full
+filtered build,2020-11-25 20:00:00-05:00,,0,filtered,h16 no_qb_rush
+filtered build,2020-11-25 20:00:00-05:00,,0,filtered,h16 no_qb
+deleted build,2020-11-25 20:00:00-05:00,,2,control A,h8 full
+deleted build,2020-11-25 20:00:00-05:00,,40,control B,h8 full
+deleted build,2021-11-19 20:00:00-05:00,,0,unpatched,h8 full
+filtered build,2021-11-19 20:00:00-05:00,,0,filtered,h8 full
+deleted build,2021-11-19 20:00:00-05:00,,3,control C,h8 full
+deleted build,2021-12-04 20:00:00-05:00,,0,unpatched,h4 full
+deleted build,2021-12-04 20:00:00-05:00,,0,unpatched,h4 no_qb_rush
+deleted build,2021-12-04 20:00:00-05:00,,0,unpatched,h4 no_qb
+deleted build,2021-12-04 20:00:00-05:00,,0,unpatched,h8 full
+deleted build,2021-12-04 20:00:00-05:00,,0,unpatched,h8 no_qb_rush
+deleted build,2021-12-04 20:00:00-05:00,,0,unpatched,h8 no_qb
+deleted build,2021-12-04 20:00:00-05:00,,0,unpatched,h16 full
+deleted build,2021-12-04 20:00:00-05:00,,0,unpatched,h16 no_qb_rush
+deleted build,2021-12-04 20:00:00-05:00,,0,unpatched,h16 no_qb
+filtered build,2021-12-04 20:00:00-05:00,,0,filtered,h4 full
+filtered build,2021-12-04 20:00:00-05:00,,0,filtered,h4 no_qb_rush
+filtered build,2021-12-04 20:00:00-05:00,,0,filtered,h4 no_qb
+filtered build,2021-12-04 20:00:00-05:00,,0,filtered,h8 full
+filtered build,2021-12-04 20:00:00-05:00,,0,filtered,h8 no_qb_rush
+filtered build,2021-12-04 20:00:00-05:00,,0,filtered,h8 no_qb
+filtered build,2021-12-04 20:00:00-05:00,,0,filtered,h16 full
+filtered build,2021-12-04 20:00:00-05:00,,0,filtered,h16 no_qb_rush
+filtered build,2021-12-04 20:00:00-05:00,,0,filtered,h16 no_qb
+deleted build,2021-12-04 20:00:00-05:00,,1,control A,h8 full
+deleted build,2021-12-04 20:00:00-05:00,,20,control B,h8 full
+deleted build,2022-11-11 20:00:00-05:00,,0,unpatched,h8 full
+filtered build,2022-11-11 20:00:00-05:00,,0,filtered,h8 full
+deleted build,2022-11-11 20:00:00-05:00,,1,control C,h8 full
+deleted build,2022-11-18 20:00:00-05:00,,0,unpatched,h8 full
+filtered build,2022-11-18 20:00:00-05:00,,0,filtered,h8 full
+deleted build,2022-11-18 20:00:00-05:00,,1,control C,h8 full
+deleted build,2022-11-25 20:00:00-05:00,,0,unpatched,h4 full
+deleted build,2022-11-25 20:00:00-05:00,,0,unpatched,h4 no_qb_rush
+deleted build,2022-11-25 20:00:00-05:00,,0,unpatched,h4 no_qb
+deleted build,2022-11-25 20:00:00-05:00,,0,unpatched,h8 full
+deleted build,2022-11-25 20:00:00-05:00,,0,unpatched,h8 no_qb_rush
+deleted build,2022-11-25 20:00:00-05:00,,0,unpatched,h8 no_qb
+deleted build,2022-11-25 20:00:00-05:00,,0,unpatched,h16 full
+deleted build,2022-11-25 20:00:00-05:00,,0,unpatched,h16 no_qb_rush
+deleted build,2022-11-25 20:00:00-05:00,,0,unpatched,h16 no_qb
+filtered build,2022-11-25 20:00:00-05:00,,0,filtered,h4 full
+filtered build,2022-11-25 20:00:00-05:00,,0,filtered,h4 no_qb_rush
+filtered build,2022-11-25 20:00:00-05:00,,0,filtered,h4 no_qb
+filtered build,2022-11-25 20:00:00-05:00,,0,filtered,h8 full
+filtered build,2022-11-25 20:00:00-05:00,,0,filtered,h8 no_qb_rush
+filtered build,2022-11-25 20:00:00-05:00,,0,filtered,h8 no_qb
+filtered build,2022-11-25 20:00:00-05:00,,0,filtered,h16 full
+filtered build,2022-11-25 20:00:00-05:00,,0,filtered,h16 no_qb_rush
+filtered build,2022-11-25 20:00:00-05:00,,0,filtered,h16 no_qb
+deleted build,2022-11-25 20:00:00-05:00,,12,control A,h8 full
+deleted build,2022-11-25 20:00:00-05:00,,240,control B,h8 full
+deleted build,2023-11-15 20:00:00-05:00,,0,unpatched,h4 full
+deleted build,2023-11-15 20:00:00-05:00,,0,unpatched,h4 no_qb_rush
+deleted build,2023-11-15 20:00:00-05:00,,0,unpatched,h4 no_qb
+deleted build,2023-11-15 20:00:00-05:00,,0,unpatched,h8 full
+deleted build,2023-11-15 20:00:00-05:00,,0,unpatched,h8 no_qb_rush
+deleted build,2023-11-15 20:00:00-05:00,,0,unpatched,h8 no_qb
+deleted build,2023-11-15 20:00:00-05:00,,0,unpatched,h16 full
+deleted build,2023-11-15 20:00:00-05:00,,0,unpatched,h16 no_qb_rush
+deleted build,2023-11-15 20:00:00-05:00,,0,unpatched,h16 no_qb
+filtered build,2023-11-15 20:00:00-05:00,,0,filtered,h4 full
+filtered build,2023-11-15 20:00:00-05:00,,0,filtered,h4 no_qb_rush
+filtered build,2023-11-15 20:00:00-05:00,,0,filtered,h4 no_qb
+filtered build,2023-11-15 20:00:00-05:00,,0,filtered,h8 full
+filtered build,2023-11-15 20:00:00-05:00,,0,filtered,h8 no_qb_rush
+filtered build,2023-11-15 20:00:00-05:00,,0,filtered,h8 no_qb
+filtered build,2023-11-15 20:00:00-05:00,,0,filtered,h16 full
+filtered build,2023-11-15 20:00:00-05:00,,0,filtered,h16 no_qb_rush
+filtered build,2023-11-15 20:00:00-05:00,,0,filtered,h16 no_qb
+deleted build,2023-11-15 20:00:00-05:00,,1,control A,h8 full
+deleted build,2023-11-15 20:00:00-05:00,,20,control B,h8 full
+deleted build,2024-09-06 20:00:00-04:00,,0,unpatched,h4 full
+deleted build,2024-09-06 20:00:00-04:00,,0,unpatched,h4 no_qb_rush
+deleted build,2024-09-06 20:00:00-04:00,,0,unpatched,h4 no_qb
+deleted build,2024-09-06 20:00:00-04:00,,0,unpatched,h8 full
+deleted build,2024-09-06 20:00:00-04:00,,0,unpatched,h8 no_qb_rush
+deleted build,2024-09-06 20:00:00-04:00,,0,unpatched,h8 no_qb
+deleted build,2024-09-06 20:00:00-04:00,,0,unpatched,h16 full
+deleted build,2024-09-06 20:00:00-04:00,,0,unpatched,h16 no_qb_rush
+deleted build,2024-09-06 20:00:00-04:00,,0,unpatched,h16 no_qb
+filtered build,2024-09-06 20:00:00-04:00,,0,filtered,h4 full
+filtered build,2024-09-06 20:00:00-04:00,,0,filtered,h4 no_qb_rush
+filtered build,2024-09-06 20:00:00-04:00,,0,filtered,h4 no_qb
+filtered build,2024-09-06 20:00:00-04:00,,0,filtered,h8 full
+filtered build,2024-09-06 20:00:00-04:00,,0,filtered,h8 no_qb_rush
+filtered build,2024-09-06 20:00:00-04:00,,0,filtered,h8 no_qb
+filtered build,2024-09-06 20:00:00-04:00,,0,filtered,h16 full
+filtered build,2024-09-06 20:00:00-04:00,,0,filtered,h16 no_qb_rush
+filtered build,2024-09-06 20:00:00-04:00,,0,filtered,h16 no_qb
+deleted build,2024-09-06 20:00:00-04:00,,13,control A,h8 full
+deleted build,2024-09-06 20:00:00-04:00,,52,control B,h8 full
+deleted build,2024-09-13 20:00:00-04:00,,0,unpatched,h4 full
+deleted build,2024-09-13 20:00:00-04:00,,0,unpatched,h4 no_qb_rush
+deleted build,2024-09-13 20:00:00-04:00,,0,unpatched,h4 no_qb
+deleted build,2024-09-13 20:00:00-04:00,,0,unpatched,h8 full
+deleted build,2024-09-13 20:00:00-04:00,,0,unpatched,h8 no_qb_rush
+deleted build,2024-09-13 20:00:00-04:00,,0,unpatched,h8 no_qb
+deleted build,2024-09-13 20:00:00-04:00,,0,unpatched,h16 full
+deleted build,2024-09-13 20:00:00-04:00,,0,unpatched,h16 no_qb_rush
+deleted build,2024-09-13 20:00:00-04:00,,0,unpatched,h16 no_qb
+filtered build,2024-09-13 20:00:00-04:00,,0,filtered,h4 full
+filtered build,2024-09-13 20:00:00-04:00,,0,filtered,h4 no_qb_rush
+filtered build,2024-09-13 20:00:00-04:00,,0,filtered,h4 no_qb
+filtered build,2024-09-13 20:00:00-04:00,,0,filtered,h8 full
+filtered build,2024-09-13 20:00:00-04:00,,0,filtered,h8 no_qb_rush
+filtered build,2024-09-13 20:00:00-04:00,,0,filtered,h8 no_qb
+filtered build,2024-09-13 20:00:00-04:00,,0,filtered,h16 full
+filtered build,2024-09-13 20:00:00-04:00,,0,filtered,h16 no_qb_rush
+filtered build,2024-09-13 20:00:00-04:00,,0,filtered,h16 no_qb
+deleted build,2024-09-13 20:00:00-04:00,,14,control A,h8 full
+deleted build,2024-09-13 20:00:00-04:00,,279,control B,h8 full
+deleted build,2024-11-08 20:00:00-05:00,,0,unpatched,h8 full
+filtered build,2024-11-08 20:00:00-05:00,,0,filtered,h8 full
+deleted build,2024-11-08 20:00:00-05:00,,2,control C,h8 full
