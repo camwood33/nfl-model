@@ -1091,3 +1091,14 @@ as aborted plays.
   - 12. Failure. If any solve fails the Cholesky or non-finite check, the run stops and reports. No combination is skipped.
   - 13. Run gate. A timing run of single fits comes first, then a sample run, then a full run only after Cam approves it from the measured times. Long runs use python -u with progress lines, run from Terminal with nohup and caffeinate.
   - 14. Recording. The run writes the full grid (half-life, regression type, combination, MSE, play and game counts, standard error, tie flag, winner, edge flag) plus git HEAD, hashes and software to a git-ignored data/historical/derived/tuning/. It is copied unchanged to docs/tuning_results/. The tuned values are recorded in a later dated amendment before any code uses them.
+
+---
+
+## Amendment 23 (2026-10-26, after the penalty tuning run, recording its result)
+
+- Purpose. Records the tuned penalties from the full module 13 run (Amendment 22). The evidence is in docs/tuning_results/ (grid.csv, per_game.csv, timing.csv, summary.json and README.md), from tuning/penalties.py at commit 9040fdf.
+
+- Decisions:
+  - 1. Tuned penalties per half-life, as Penalties(pass_team, pass_qb, rush_team, rush_qb): h4 (100, 3000, 300, 1600); h8 (300, 300, 1000, 1600); h16 (300, 300, 1000, 1600). They replace test 1's fixed values from test 2 on (Amendment 9). The success-rate regressions reuse them. The run without QB rushing uses the same pass penalties and the rush team penalty. The run without any QB term uses only the two team penalties (Amendment 22 decision 1).
+  - 2. Edge winners, reported and not extended (Amendment 9): every rush winner is at the top of the QB rushing grid (1600), and the h4 pass winner is at the edge of both grids (team 100, QB 3000).
+  - 3. Known limit, recorded and not changed, because the rule was fixed before any result. At h4 pass, the best combination was 300 / 300 (pooled MSE 2.49452), and Amendment 22 decision 3's grid-position sum chose 100 / 3000 (pooled MSE 2.49491), a smaller team penalty traded for a larger QB penalty. Its pooled MSE is 0.000384879 above the best's, within one standard error (0.00046723, grid.csv). Combinations far from the best have larger standard errors, so they tie more easily. Any future tuning rule should require the winner to be at least as large as the best in both penalties.
