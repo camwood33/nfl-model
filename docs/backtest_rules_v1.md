@@ -1119,3 +1119,29 @@ as aborted plays.
   - 7. Run gate. The run is estimated at about 3 seconds of fitting (72 end-of-season fits at 0.0382 s each, measured in docs/tuning_results/timing.csv). Amendment 22 decision 13's sample step covers module 13 only; module 14 has no sample stage. One run, after the tests pass, which refuses unless given --approved with features/, tuning/ and tests/ clean in git. Any failed solve stops the run (as in Amendment 22 decision 12).
   - 8. Recording. The run writes to a git-ignored data/historical/derived/carry_factor/: c.csv (72 rows: half-life, run, rating type, raw c, c used, clipped flag, pairs, standard error, per-season means of x and y), pairs.csv (every setting, type, team, S, x and y), and summary.json (git HEAD, software, hashes). They are copied unchanged to docs/carry_factor_results/ with a README. The values are recorded in a later dated amendment before any code uses them.
   - 9. Known limit. The rating model has one intercept across all seasons, so a league-wide change in EPA from one season to the next sits in every team's season indicators. c therefore mixes team carry-over with league drift. The blend applies c to the same uncentered prior, so this is consistent, and the per-season means in decision 3 show its size.
+
+---
+
+## Amendment 25 (2026-10-26, after the carry factor run, recording its result)
+
+- Purpose. Records the carry factors from the module 14 run (Amendment 24). The evidence is in docs/carry_factor_results/ (c.csv, pairs.csv, summary.json and README.md), from tuning/carry_factor.py at commit 526a503.
+
+- Decisions:
+  - 1. Carry factors. The 72 values of c used, read from c.csv, 4 significant figures, one row per half-life and run and one column per rating type:
+
+| Half-life | Run | pass_epa_off | pass_epa_def | pass_success_off | pass_success_def | rush_epa_off | rush_epa_def | rush_success_off | rush_success_def |
+|---|---|---|---|---|---|---|---|---|---|
+| 4 | full | 0.2712 | 0.2583 | 0.3224 | 0.2682 | 0.1074 | 0.1878 | 0.1803 | 0.2201 |
+| 4 | no_qb_rush | 0.2712 | 0.2583 | 0.3224 | 0.2682 | 0.1343 | 0.1853 | 0.2015 | 0.217 |
+| 4 | no_qb | 0.272 | 0.2576 | 0.3238 | 0.2672 | 0.1343 | 0.1853 | 0.2015 | 0.217 |
+| 8 | full | 0.2546 | 0.2914 | 0.303 | 0.3049 | 0.1377 | 0.2263 | 0.2254 | 0.2602 |
+| 8 | no_qb_rush | 0.2546 | 0.2914 | 0.303 | 0.3049 | 0.1679 | 0.223 | 0.248 | 0.2581 |
+| 8 | no_qb | 0.3366 | 0.2804 | 0.3965 | 0.293 | 0.1679 | 0.223 | 0.248 | 0.2581 |
+| 16 | full | 0.1915 | 0.3075 | 0.228 | 0.3139 | 0.1472 | 0.2376 | 0.2417 | 0.2719 |
+| 16 | no_qb_rush | 0.1915 | 0.3075 | 0.228 | 0.3139 | 0.1758 | 0.2352 | 0.263 | 0.2711 |
+| 16 | no_qb | 0.3677 | 0.2957 | 0.4245 | 0.3007 | 0.1758 | 0.2352 | 0.263 | 0.2711 |
+
+    They replace test 1's c = 0.5 from test 2 on (Amendment 10). None was clipped (Amendment 24 decision 4), so c used equals c raw.
+  - 2. Expected duplicates. The run without QB rushing has the full run's pass values, and the run without any QB term has the run without QB rushing's rush values, because those regressions are the same models.
+  - 3. Precision, for information only. Every standard error is between 0.0598 and 0.06592 (c.csv).
+  - 4. League drift (Amendment 24 decision 9). The largest absolute per-season mean of x or y across all 72 rows is 0.007948 (mean -0.007948), at h16, the run without any QB term, pass EPA, season 2017 (mean_y_2017). The offense and defense columns share it (pass_epa_off and pass_epa_def, equal to within 1e-15).
