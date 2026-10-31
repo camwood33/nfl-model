@@ -1257,3 +1257,15 @@ as aborted plays.
   - 4. Missing ids. If the actual starter, the default or either candidate is missing for any team-game of the population, including candidate (ii) when the team has no kept dropbacks by an Amendment 11 QB in its last 16 finished regular-season games, the run stops and reports. No row is dropped and no missing id counts as a disagreement.
   - 5. Also settled, as read from the code and Amendment 12 decision 7: the team's last game of the previous season is its last game of season S - 1 in finish order, any game type, with its starter from the same starter ids qb_features uses; kept dropbacks are clean_plays rows with qb_dropback = 1, credited by passer_id, and candidate (ii) uses leader() with the Amendment 11 QB set.
   - 6. Unchanged. Amendment 28 decisions 6 and 7, including the 5-percentage-point trigger and the tie rule, apply as written.
+
+---
+
+## Amendment 30 (2026-10-31, after the week-1 primary QB diagnostic, recording its result)
+
+- Purpose. Records the result of the week-1 primary QB diagnostic of Amendment 28 decisions 6 and 7 and Amendment 29. The evidence is in docs/week1_qb_diagnostic/ (report_2026-10-31.md and diag.py, copied unchanged from the run at commit 8cd37c8; the report prints some rates as np.float64(...), which are the exact values).
+
+- Decisions:
+  - 1. Stop checks. All passed: the default ids are identical in all 18 saved feature tables on the 81 population games; the default recomputed from the first-game rule plus the override equals the saved id on every row; the recomputed primary_path equals all 9 saved qb_features tables, which agree with each other; no id is missing.
+  - 2. Result, 160 team-games (32 per season, 2013 to 2017): the default disagrees with the actual week-1 starter in 42 (0.2625); candidate (i) in 49 (0.30625); candidate (ii) in 42 (0.2625). Every row's own-rule path is own, and the override fired for no rule, so the splits have one group each. The two candidates agree on 130 of 160 (0.8125).
+  - 3. Trigger (Amendment 28 decision 7). Neither candidate is at least 5 percentage points below the default: candidate (i) is 4.375 points above it and candidate (ii) equals it. The trigger does not fire. The default rule of Amendment 11 stays, and Amendment 11's open question on the first-game primary QB source is closed. No code or feature table changes.
+  - 4. Known limit. The primary QB of a team's first game of a season differs from the actual starter in about one team-game in four in 2013 to 2017, and no rule tested here using facts known before the cutoff does better. The rate in 2018 to 2024 was not measured, by design (Amendment 28 decision 6). The week-1 QB features carry this error into test 2.
