@@ -78,6 +78,11 @@ HALF_LIVES = (4, 8, 16)
 ABLATIONS = ("full", "no_qb_rush", "no_qb")
 SETTINGS = [(h, ab) for h in HALF_LIVES for ab in ABLATIONS]  # Amendment 12 decision 22
 CONTROL_SETTING = (8, "full")
+# Amendment 28 decision 10(b): the sample rerun at tuned values, h8 full, once per F, written only here.
+TEST2_DIR = ROOT / "data" / "historical" / "derived" / "test2_leakage_sample"
+TEST2_FADES = (4, 8, 12)
+# Build arguments for build_from_tables (penalties, c, F); empty means the test 1 values.
+BUILD_KW: dict = {}
 SIDES = ("home", "away")
 CONTROL_A_COL = "control_a_own_plays"
 # compare_tables reasons that are a value difference in a row (Amendment 18 decision 2). Structure reasons
@@ -402,7 +407,7 @@ def run_build(tables: dict[str, pd.DataFrame], settings, timer: Timer, phase: st
             st.enter_context(mock.patch.object(mod, name, timed(getattr(mod, name), kind)))
         if control is not None:
             st.enter_context(CONTROLS[control](tables))
-        out = B.build_from_tables(tables, half_lives=tuple(hs), ablations=tuple(abs_), games=games)
+        out = B.build_from_tables(tables, half_lives=tuple(hs), ablations=tuple(abs_), games=games, **BUILD_KW)
     total = time.perf_counter() - t0
     for (h, ab), t in sorted(per.items()):
         timer.add(phase, t, build, cutoff, setting_name(h, ab))
@@ -503,10 +508,10 @@ def git_head() -> str:
                           check=True).stdout.strip()
 
 
-def ensure_ignored():
-    r = subprocess.run(["git", "-C", str(ROOT), "check-ignore", "-q", str(SUMMARY)])
+def ensure_ignored(summary: Path = SUMMARY):
+    r = subprocess.run(["git", "-C", str(ROOT), "check-ignore", "-q", str(summary)])
     if r.returncode != 0:
-        raise RuntimeError(f"{OUT_DIR} is not git-ignored")
+        raise RuntimeError(f"{summary.parent} is not git-ignored")
 
 
 # --- runs --------------------------------------------------------------------------------------------------
@@ -557,9 +562,17 @@ def _compare_build(ctx: dict, build: str, tables, ref_out, settings, phase: str,
     return err, (pd.concat(all_f, ignore_index=True) if all_f else None)
 
 
-def run_sample() -> bool:
-    ensure_ignored()
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+def run_sample(out_dir: Path = OUT_DIR, settings=None, control_setting=CONTROL_SETTING,
+               build_kw: dict | None = None) -> bool:
+    """The test 1 sample. With no arguments, as Amendments 17 to 21 define it. out_dir, settings,
+    control_setting and build_kw (penalties, c, F for build_from_tables) let Amendment 28 decision 10(b)
+    rerun it at tuned values in another folder."""
+    global BUILD_KW
+    settings = SETTINGS if settings is None else list(settings)
+    summary = out_dir / "summary.json"
+    ensure_ignored(summary)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    BUILD_KW = dict(build_kw or {})
     timer, t_all = Timer(), time.perf_counter()
     checks, results, failures = {}, [], []
     state = {"main": [], "n_cutoffs": 587}
@@ -568,18 +581,18 @@ def run_sample() -> bool:
     def finish() -> bool:
         timer.add("total", time.perf_counter() - t_all)
         tt = timer.table()
-        tt.to_csv(OUT_DIR / "sample_timing.csv", index=False)
-        pd.DataFrame(results).to_csv(OUT_DIR / "sample_results.csv", index=False)
+        tt.to_csv(out_dir / "sample_timing.csv", index=False)
+        pd.DataFrame(results).to_csv(out_dir / "sample_results.csv", index=False)
         (pd.concat(failures, ignore_index=True) if failures else pd.DataFrame()).to_csv(
-            OUT_DIR / "sample_failures.csv", index=False)
+            out_dir / "sample_failures.csv", index=False)
         passed = bool(checks) and all(checks.values())
-        SUMMARY.write_text(json.dumps({"mode": "sample", "passed": passed, "checks": checks,
+        summary.write_text(json.dumps({"mode": "sample", "passed": passed, "checks": checks,
                                        "git_head": git_head(), "software": software(), "hashes": hashes},
                                       indent=1))
         print("\nChecks:")
         for k, v in checks.items():
             print(f"  {'pass' if v else 'FAIL'}  {k}")
-        print(f"\nSample {'PASSED' if passed else 'FAILED'}. Output in {OUT_DIR}\n")
+        print(f"\nSample {'PASSED' if passed else 'FAILED'}. Output in {out_dir}\n")
         print(timing_report(tt, state["main"], state["n_cutoffs"]))
         return passed
 
@@ -590,7 +603,7 @@ def run_sample() -> bool:
     # Amendment 17 decisions 2 and 4, before anything else
     with timer.phase("finish check"):
         bad = finish_check(tables, times)
-    bad.to_csv(OUT_DIR / "finish_check_failures.csv", index=False)
+    bad.to_csv(out_dir / "finish_check_failures.csv", index=False)
     checks["A17 d2 reducer finish equals module 1 finish, 2010 to 2024"] = bad.empty
     try:
         cuts = cutoff_table(tested_games(times))
@@ -608,14 +621,14 @@ def run_sample() -> bool:
     state["main"] = main_cuts
     checks_at = check_cutoffs(sample)
     s = sample.assign(game_ids=sample.game_ids.map(" ".join), clean_pbp_check=sample.cutoff_et.isin(checks_at))
-    s.to_csv(OUT_DIR / "sample_cutoffs.csv", index=False)
+    s.to_csv(out_dir / "sample_cutoffs.csv", index=False)
     print(f"Main sample: {len(s)} cutoffs, {int(s.n_games.sum())} games")
     print(s.to_string(index=False))
 
     # Amendment 19 decision 3; Amendment 20 decision 2
     with timer.phase("control C scan"):
         hits = control_c_scan(tables, times)
-    pd.DataFrame({"game_id": hits}).to_csv(OUT_DIR / "control_c_hits.csv", index=False)
+    pd.DataFrame({"game_id": hits}).to_csv(out_dir / "control_c_hits.csv", index=False)
     checks["A17 d10 control C scan found a game"] = bool(hits)
     if not hits:
         print("Control C scan found no game: test 1 stops (Amendment 17 decision 10).")
@@ -624,7 +637,7 @@ def run_sample() -> bool:
     cut_of = tested_games(times).set_index("game_id").cutoff_et
     c_cuts = sorted(set(cut_of.loc[chosen]))
     pd.DataFrame({"game_id": chosen, "cutoff_et": list(cut_of.loc[chosen])}).to_csv(
-        OUT_DIR / "control_c_games.csv", index=False)
+        out_dir / "control_c_games.csv", index=False)
     print(f"Control C: {len(hits)} hits, {len(chosen)} selected at {len(c_cuts)} cutoffs: {', '.join(chosen)}")
 
     reducer = Reducer(tables)
@@ -654,10 +667,10 @@ def run_sample() -> bool:
 
     # full builds, fresh in this run (Amendment 17 decision 7)
     full, full_err = {}, {}
-    for name, settings, control in [("unpatched", SETTINGS, None), ("control A", [CONTROL_SETTING], "A"),
-                                    ("control B", [CONTROL_SETTING], "B"), ("control C", [CONTROL_SETTING], "C")]:
+    for name, bset, control in [("unpatched", settings, None), ("control A", [control_setting], "A"),
+                                ("control B", [control_setting], "B"), ("control C", [control_setting], "C")]:
         try:
-            full[name] = run_build(tables, settings, timer, "full build", name, control=control)
+            full[name] = run_build(tables, bset, timer, "full build", name, control=control)
         except Exception as e:  # noqa: BLE001
             full_err[name] = _error(e)
             print(f"full build {name} raised {full_err[name]}")
@@ -667,7 +680,7 @@ def run_sample() -> bool:
 
     # Amendment 17 decision 12
     with timer.phase("identity check"):
-        idf = identity_check(full["unpatched"], SETTINGS)
+        idf = identity_check(full["unpatched"], settings)
     checks["A17 d12 key starters off identity"] = idf.empty
     if len(idf):
         failures.append(idf.assign(check="identity"))
@@ -682,12 +695,12 @@ def run_sample() -> bool:
         ctx = {"cutoff": c, "games": games, "timer": timer, "results": results, "failures": failures}
         with timer.phase("reduction", cutoff=c):
             reduced = reducer.reduce(c, int(row.season), int(row.week))
-        settings = SETTINGS if in_main else [CONTROL_SETTING]
+        use = settings if in_main else [control_setting]
 
         # unpatched deleted build and Amendment 17 decision 6(c), where Amendment 19 decisions 4 and 5 put them
-        err, f = _compare_build(ctx, "unpatched", reduced, full["unpatched"], settings, "deleted build")
+        err, f = _compare_build(ctx, "unpatched", reduced, full["unpatched"], use, "deleted build")
         unpatched_ok &= err is None and f.empty
-        err, f = _compare_build(ctx, "filtered", tables, full["unpatched"], settings, "filtered build")
+        err, f = _compare_build(ctx, "filtered", tables, full["unpatched"], use, "filtered build")
         filter_ok &= err is None and f.empty
 
         for name in (["A", "B"] if in_main else []) + (["C"] if c in c_cuts else []):
@@ -702,7 +715,7 @@ def run_sample() -> bool:
             if build in full_err:
                 v = control_verdict(name, games, must, None, f"full build: {full_err[build]}")
             else:
-                err, f = _compare_build(ctx, build, reduced, full[build], [CONTROL_SETTING], "deleted build",
+                err, f = _compare_build(ctx, build, reduced, full[build], [control_setting], "deleted build",
                                         control=name)
                 v = control_verdict(name, games, must, f, err, cols)
             v["cutoff"] = str(c)
@@ -717,11 +730,13 @@ def run_sample() -> bool:
         checks[f"control {name} fired on every required game"] = bool(verdicts[name]) and all(
             v["pass"] for v in verdicts[name])
     checks["A19 d4 control B has a game with g of 1 or more"] = b_eligible > 0
-    (OUT_DIR / "control_verdicts.json").write_text(json.dumps(verdicts, indent=1, default=str))
+    (out_dir / "control_verdicts.json").write_text(json.dumps(verdicts, indent=1, default=str))
     return finish()
 
 
 def run_full(approved: bool) -> bool:
+    global BUILD_KW
+    BUILD_KW = {}  # the full run is test 1's only (Amendment 20 decision 5)
     ensure_ignored()
     reason = gate(approved, SUMMARY, current_hashes)
     if reason is not None:
@@ -762,9 +777,33 @@ def main(argv=None) -> int:
     mode.add_argument("--sample", action="store_true", help="everything before the full run, then stop")
     mode.add_argument("--full", action="store_true", help="the full run; needs --approved and a passing sample")
     p.add_argument("--approved", action="store_true", help="Cam's approval of the full run")
+    mode.add_argument("--test2-sample", action="store_true",
+                      help="Amendment 28 decision 10(b): the sample at h8 full, tuned penalties and c, F = 4, 8 "
+                           "and 12, written only to data/historical/derived/test2_leakage_sample/")
     a = p.parse_args(argv)
+    if a.test2_sample:
+        return 0 if run_test2_sample() else 1
     ok = run_sample() if a.sample else run_full(a.approved)
     return 0 if ok else 1
+
+
+def test2_runs() -> list[dict]:
+    """Amendment 28 decision 10(b): exactly 3 settings, h8 full with the tuned penalties and c for that
+    half-life and run, one per F, each in its own subfolder of TEST2_DIR."""
+    from tuning.tuned import TUNED_C, TUNED_PENALTIES
+    h, ab = CONTROL_SETTING
+    return [{"out_dir": TEST2_DIR / f"F{F:g}", "settings": [(h, ab)], "control_setting": (h, ab),
+             "build_kw": {"penalties": TUNED_PENALTIES[h], "c": TUNED_C[(h, ab)], "F": F}} for F in TEST2_FADES]
+
+
+def run_test2_sample() -> bool:
+    results = {}
+    for run in test2_runs():
+        print(f"\n=== test 2 leakage sample, F = {run['build_kw']['F']:g}, output {run['out_dir']} ===", flush=True)
+        results[run["build_kw"]["F"]] = run_sample(**run)
+    for F, ok in results.items():
+        print(f"F = {F:g}: {'PASSED' if ok else 'FAILED'}")
+    return all(results.values())
 
 
 if __name__ == "__main__":

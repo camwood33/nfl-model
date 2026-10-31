@@ -155,10 +155,29 @@ def load_tables() -> dict[str, pd.DataFrame]:
             "players": Q.load_players()}
 
 
+def _penalties_for(penalties, h: float) -> R.Penalties:
+    """One Penalties for every half-life, or a dict by half-life (Amendment 22 decision 1: one per half-life
+    serves all three ablation runs)."""
+    return penalties[h] if isinstance(penalties, dict) else penalties
+
+
+def _c_for(c, h: float, ab: str):
+    """c as a number, a dict by rating type, or a dict by (half-life, ablation run) of either."""
+    if isinstance(c, dict) and c and isinstance(next(iter(c)), tuple):
+        return c[(h, ab)]
+    return c
+
+
 def build_from_tables(tables: dict[str, pd.DataFrame], half_lives=Q.HALF_LIVES, ablations=R.ABLATIONS,
-                      games=None, verbose: bool = False) -> dict[tuple[float, str, bool], pd.DataFrame]:
+                      games=None, verbose: bool = False, penalties=R.TEST1_PENALTIES, c=0.5, F: float = 8,
+                      progress=None) -> dict[tuple[float, str, bool], pd.DataFrame]:
     """Feature tables keyed by (half-life, ablation run, key starters on) from load_tables() output.
-    Reads no file."""
+    Reads no file.
+
+    penalties, c and F (Amendment 28 decisions 8 and 9) default to the test 1 values, so a call without them
+    is the test 1 build. penalties reach team_ratings.build and qb_features.build; c and F reach only the
+    blend in team_ratings.build. progress, if given, is called with (half-life, ablation run, seconds) after
+    each build."""
     sched, plays = tables["schedule"], tables["plays"]
     times = game_times.build(sched[game_times.READ_COLS])
     context, _, _ = GC.build(sched[GC.READ_COLS])
@@ -173,13 +192,16 @@ def build_from_tables(tables: dict[str, pd.DataFrame], half_lives=Q.HALF_LIVES, 
             pace = pace[pace.game_id.isin(list(games))]
         for ab in ablations:
             t0 = time.time()
-            ratings = TR.build(data, h, R.TEST1_PENALTIES, ab, games=games)
-            qb = Q.build(qi, data, h, R.TEST1_PENALTIES, ab, games=games)
+            pen = _penalties_for(penalties, h)
+            ratings = TR.build(data, h, pen, ab, F=F, c=_c_for(c, h, ab), games=games)
+            qb = Q.build(qi, data, h, pen, ab, games=games)
             for on in [True, False]:
                 out[(h, ab, on)] = assemble(times, context, ratings, pace, qb, ks if on else None, ab, on,
                                             games=games)
             if verbose:
                 print(f"feature_table h{h} {ab}: {len(out[(h, ab, False)]):,} rows in {time.time() - t0:.1f}s")
+            if progress is not None:
+                progress(h, ab, time.time() - t0)
     return out
 
 
