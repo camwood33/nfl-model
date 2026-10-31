@@ -1243,3 +1243,17 @@ as aborted plays.
     - Settled: 44 to 47, 54 to 63, 67 and 68, the first-half score source part of 64 (64 is now settled in full), and the open parts of 66 (66 is now settled in full). Ambiguities 59 to 62 are settled as a diagnostic with a trigger fixed now (decisions 6 and 7); the rule itself changes only through decision 7's amendment.
     - With Amendments 26 and 27, every one of the 68 ambiguities and O1 to O10 is now settled.
     - Earlier open questions closed here: Amendment 14's minimum pool size and rows with missing P; Amendment 12's first-half score reconciliation. Amendment 11's week-1 primary QB source closes under decision 7. Every other open question stays open.
+
+---
+
+## Amendment 29 (2026-10-31, before the week-1 primary QB diagnostic runs)
+
+- Purpose. Settles four points Amendment 28 decisions 6 and 7 leave open for the week-1 primary QB diagnostic, before it runs and before any of its results.
+
+- Decisions:
+  - 1. Override on the candidates. Each candidate replaces only the first-game rule (the previous regular season's dropback leader). The returning-starter override of Amendment 11 is then applied on top of each candidate exactly as primary() in features/qb_features.py applies it to the default, so all three rules are compared like for like.
+  - 2. "The returning-starter rule fired", for each rule separately: the override changed that rule's QB, meaning the leader over the team's last 16 finished regular-season games has status Questionable or Doubtful at the cutoff and differs from the QB the rule picked before the override. A case where the condition holds but the QB is the same counts as not fired. Status is read at the cutoff as primary() reads it.
+  - 3. primary_path split, for each rule separately: the path of that rule's own QB, own if the QB has at least one kept dropback before the cutoff and no_history otherwise, computed as qb_features computes primary_path. For the default, the recomputed path must equal primary_path in all 9 saved qb_features tables in data/historical/derived/qb_features/ (half-lives 4, 8 and 16, each in the full, no_qb_rush and no_qb runs) on every row of the population, and the 9 tables must agree with each other on those rows; any difference stops the run.
+  - 4. Missing ids. If the actual starter, the default or either candidate is missing for any team-game of the population, including candidate (ii) when the team has no kept dropbacks by an Amendment 11 QB in its last 16 finished regular-season games, the run stops and reports. No row is dropped and no missing id counts as a disagreement.
+  - 5. Also settled, as read from the code and Amendment 12 decision 7: the team's last game of the previous season is its last game of season S - 1 in finish order, any game type, with its starter from the same starter ids qb_features uses; kept dropbacks are clean_plays rows with qb_dropback = 1, credited by passer_id, and candidate (ii) uses leader() with the Amendment 11 QB set.
+  - 6. Unchanged. Amendment 28 decisions 6 and 7, including the 5-percentage-point trigger and the tie rule, apply as written.
