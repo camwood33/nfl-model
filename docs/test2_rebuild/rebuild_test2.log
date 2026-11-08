@@ -1,0 +1,29 @@
+inputs loaded in 0.2s
+build 1/27 h4 F4 full: 180.7s, elapsed 228.3s
+build 2/27 h4 F4 no_qb_rush: 168.9s, elapsed 397.2s
+build 3/27 h4 F4 no_qb: 123.3s, elapsed 520.5s
+build 4/27 h8 F4 full: 175.5s, elapsed 696.2s
+build 5/27 h8 F4 no_qb_rush: 163.5s, elapsed 859.7s
+build 6/27 h8 F4 no_qb: 116.7s, elapsed 976.4s
+build 7/27 h16 F4 full: 175.5s, elapsed 1152.1s
+build 8/27 h16 F4 no_qb_rush: 164.9s, elapsed 1317.0s
+build 9/27 h16 F4 no_qb: 116.5s, elapsed 1433.5s
+build 10/27 h4 F8 full: 181.5s, elapsed 1656.8s
+build 11/27 h4 F8 no_qb_rush: 164.0s, elapsed 1820.8s
+build 12/27 h4 F8 no_qb: 115.4s, elapsed 1936.2s
+build 13/27 h8 F8 full: 175.0s, elapsed 2111.4s
+build 14/27 h8 F8 no_qb_rush: 164.4s, elapsed 2275.8s
+build 15/27 h8 F8 no_qb: 117.2s, elapsed 2393.0s
+build 16/27 h16 F8 full: 177.1s, elapsed 2570.3s
+build 17/27 h16 F8 no_qb_rush: 163.7s, elapsed 2734.0s
+build 18/27 h16 F8 no_qb: 116.4s, elapsed 2850.3s
+build 19/27 h4 F12 full: 178.0s, elapsed 3069.9s
+build 20/27 h4 F12 no_qb_rush: 165.5s, elapsed 3235.4s
+build 21/27 h4 F12 no_qb: 115.5s, elapsed 3350.9s
+build 22/27 h8 F12 full: 174.8s, elapsed 3525.9s
+build 23/27 h8 F12 no_qb_rush: 163.0s, elapsed 3688.9s
+build 24/27 h8 F12 no_qb: 116.0s, elapsed 3804.9s
+build 25/27 h16 F12 full: 175.9s, elapsed 3981.0s
+build 26/27 h16 F12 no_qb_rush: 162.2s, elapsed 4143.3s
+build 27/27 h16 F12 no_qb: 118.4s, elapsed 4261.7s
+54 tables written to /Users/cameronwood/nfl-model/data/historical/derived/feature_table_test2; total 4261.9s

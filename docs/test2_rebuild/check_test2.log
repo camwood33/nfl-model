@@ -1,0 +1,14 @@
+feature_table h4 full: 3,007 rows in 176.4s
+feature_table h4 no_qb_rush: 3,007 rows in 164.1s
+feature_table h4 no_qb: 3,007 rows in 116.4s
+feature_table h8 full: 3,007 rows in 182.6s
+feature_table h8 no_qb_rush: 3,007 rows in 167.9s
+feature_table h8 no_qb: 3,007 rows in 116.2s
+feature_table h16 full: 3,007 rows in 176.8s
+feature_table h16 no_qb_rush: 3,007 rows in 162.9s
+feature_table h16 no_qb: 3,007 rows in 115.2s
+pass  10(a) test 1 reproduction: 18 tables, failing cells 0, 1423.4s
+pass  10(c) settings-free columns: 54 tables compared, failing 0
+pass  10(d) rows and missing values: 54 tables, failing 0
+pass  10(e) tuned settings reach the build: changed cells per column {'home_pass_epa_off': 3007, 'home_pass_epa_def': 3007, 'home_pass_success_off': 3007, 'home_pass_success_def': 3007, 'home_rush_epa_off': 3002, 'home_rush_epa_def': 3006, 'home_rush_success_off': 3004, 'home_rush_success_def': 3006, 'home_qb_pass': 2993, 'home_qb_rush': 2916, 'away_pass_epa_off': 3007, 'away_pass_epa_def': 3007, 'away_pass_success_off': 3007, 'away_pass_success_def': 3007, 'away_rush_epa_off': 3006, 'away_rush_epa_def': 3006, 'away_rush_success_off': 3003, 'away_rush_success_def': 3002, 'away_qb_pass': 2990, 'away_qb_rush': 2909}
+all checks passed; 1425.1s

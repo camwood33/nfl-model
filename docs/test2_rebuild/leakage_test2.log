@@ -1,0 +1,426 @@
+
+=== test 2 leakage sample, F = 4, output /Users/cameronwood/nfl-model/data/historical/derived/test2_leakage_sample/F4 ===
+Main sample: 14 cutoffs, 84 games
+                cutoff_et part  season  week  n_games                                                                                                                                                                                                                game_ids  clean_pbp_check
+2013-12-04 20:00:00-05:00    a    2013    14        1                                                                                                                                                                                                         2013_14_HOU_JAX             True
+2014-11-28 20:00:00-05:00    a    2014    13       12                               2014_13_ARI_ATL 2014_13_CAR_MIN 2014_13_CIN_TB 2014_13_CLE_BUF 2014_13_DEN_KC 2014_13_NE_GB 2014_13_NO_PIT 2014_13_NYG_JAX 2014_13_OAK_STL 2014_13_SD_BAL 2014_13_TEN_HOU 2014_13_WAS_IND            False
+2015-09-16 20:00:00-04:00    a    2015     2        1                                                                                                                                                                                                          2015_02_DEN_KC            False
+2016-11-04 20:00:00-04:00    a    2016     9       11                                               2016_09_CAR_LA 2016_09_DAL_CLE 2016_09_DEN_OAK 2016_09_DET_MIN 2016_09_IND_GB 2016_09_JAX_KC 2016_09_NO_SF 2016_09_NYJ_MIA 2016_09_PHI_NYG 2016_09_PIT_BAL 2016_09_TEN_SD            False
+2017-11-08 20:00:00-05:00    a    2017    10        1                                                                                                                                                                                                         2017_10_SEA_ARI            False
+2018-10-17 20:00:00-04:00    a    2018     7        1                                                                                                                                                                                                         2018_07_DEN_ARI             True
+2019-09-25 20:00:00-04:00    a    2019     4        1                                                                                                                                                                                                          2019_04_PHI_GB            False
+2020-11-25 20:00:00-05:00    a    2020    12        2                                                                                                                                                                                         2020_12_HOU_DET 2020_12_WAS_DAL            False
+2021-12-04 20:00:00-05:00    a    2021    13        1                                                                                                                                                                                                          2021_13_NE_BUF            False
+2022-11-25 20:00:00-05:00    a    2022    12       12                                2022_12_ATL_WAS 2022_12_BAL_JAX 2022_12_CHI_NYJ 2022_12_CIN_TEN 2022_12_DEN_CAR 2022_12_GB_PHI 2022_12_HOU_MIA 2022_12_LAC_ARI 2022_12_LA_KC 2022_12_LV_SEA 2022_12_NO_SF 2022_12_TB_CLE            False
+2023-11-15 20:00:00-05:00    a    2023    11        1                                                                                                                                                                                                         2023_11_CIN_BAL            False
+2024-09-13 20:00:00-04:00    a    2024     2       14 2024_02_CHI_HOU 2024_02_CIN_KC 2024_02_CLE_JAX 2024_02_IND_GB 2024_02_LAC_CAR 2024_02_LA_ARI 2024_02_LV_BAL 2024_02_NO_DAL 2024_02_NYG_WAS 2024_02_NYJ_TEN 2024_02_PIT_DEN 2024_02_SEA_NE 2024_02_SF_MIN 2024_02_TB_DET             True
+2013-09-06 20:00:00-04:00    b    2013     1       13               2013_01_ARI_STL 2013_01_ATL_NO 2013_01_CIN_CHI 2013_01_GB_SF 2013_01_KC_JAX 2013_01_MIA_CLE 2013_01_MIN_DET 2013_01_NE_BUF 2013_01_NYG_DAL 2013_01_OAK_IND 2013_01_SEA_CAR 2013_01_TB_NYJ 2013_01_TEN_PIT            False
+2024-09-06 20:00:00-04:00    b    2024     1       13              2024_01_ARI_BUF 2024_01_CAR_NO 2024_01_DAL_CLE 2024_01_DEN_SEA 2024_01_HOU_IND 2024_01_JAX_MIA 2024_01_LA_DET 2024_01_LV_LAC 2024_01_MIN_NYG 2024_01_NE_CIN 2024_01_PIT_ATL 2024_01_TEN_CHI 2024_01_WAS_TB            False
+Control C: 22 hits, 10 selected at 9 cutoffs: 2015_09_PHI_DAL, 2019_05_NE_WAS, 2019_17_IND_JAX, 2020_01_PHI_WAS, 2020_08_DAL_PHI, 2020_08_SF_SEA, 2021_11_BAL_CHI, 2022_10_NO_PIT, 2022_11_WAS_HOU, 2024_10_NE_CHI
+2013-09-06 20:00:00-04:00 control A: fired (13/13 games)
+2013-09-06 20:00:00-04:00 control B: fired (0/0 games)
+2013-09-06 20:00:00-04:00: unpatched ok, filter ok
+2013-12-04 20:00:00-05:00 control A: fired (1/1 games)
+2013-12-04 20:00:00-05:00 control B: fired (1/1 games)
+2013-12-04 20:00:00-05:00: unpatched ok, filter ok
+2014-11-28 20:00:00-05:00 control A: fired (12/12 games)
+2014-11-28 20:00:00-05:00 control B: fired (12/12 games)
+2014-11-28 20:00:00-05:00: unpatched ok, filter ok
+2015-09-16 20:00:00-04:00 control A: fired (1/1 games)
+2015-09-16 20:00:00-04:00 control B: fired (1/1 games)
+2015-09-16 20:00:00-04:00: unpatched ok, filter ok
+2015-11-06 20:00:00-05:00 control C: fired (1/1 games)
+2015-11-06 20:00:00-05:00: unpatched ok, filter ok
+2016-11-04 20:00:00-04:00 control A: fired (11/11 games)
+2016-11-04 20:00:00-04:00 control B: fired (11/11 games)
+2016-11-04 20:00:00-04:00: unpatched ok, filter ok
+2017-11-08 20:00:00-05:00 control A: fired (1/1 games)
+2017-11-08 20:00:00-05:00 control B: fired (1/1 games)
+2017-11-08 20:00:00-05:00: unpatched ok, filter ok
+2018-10-17 20:00:00-04:00 control A: fired (1/1 games)
+2018-10-17 20:00:00-04:00 control B: fired (1/1 games)
+2018-10-17 20:00:00-04:00: unpatched ok, filter ok
+2019-09-25 20:00:00-04:00 control A: fired (1/1 games)
+2019-09-25 20:00:00-04:00 control B: fired (1/1 games)
+2019-09-25 20:00:00-04:00: unpatched ok, filter ok
+2019-10-04 20:00:00-04:00 control C: fired (1/1 games)
+2019-10-04 20:00:00-04:00: unpatched ok, filter ok
+2019-12-27 20:00:00-05:00 control C: fired (1/1 games)
+2019-12-27 20:00:00-05:00: unpatched ok, filter ok
+2020-09-11 20:00:00-04:00 control C: fired (1/1 games)
+2020-09-11 20:00:00-04:00: unpatched ok, filter ok
+2020-10-30 20:00:00-04:00 control C: fired (2/2 games)
+2020-10-30 20:00:00-04:00: unpatched ok, filter ok
+2020-11-25 20:00:00-05:00 control A: fired (2/2 games)
+2020-11-25 20:00:00-05:00 control B: fired (2/2 games)
+2020-11-25 20:00:00-05:00: unpatched ok, filter ok
+2021-11-19 20:00:00-05:00 control C: fired (1/1 games)
+2021-11-19 20:00:00-05:00: unpatched ok, filter ok
+2021-12-04 20:00:00-05:00 control A: fired (1/1 games)
+2021-12-04 20:00:00-05:00 control B: fired (1/1 games)
+2021-12-04 20:00:00-05:00: unpatched ok, filter ok
+2022-11-11 20:00:00-05:00 control C: fired (1/1 games)
+2022-11-11 20:00:00-05:00: unpatched ok, filter ok
+2022-11-18 20:00:00-05:00 control C: fired (1/1 games)
+2022-11-18 20:00:00-05:00: unpatched ok, filter ok
+2022-11-25 20:00:00-05:00 control A: fired (12/12 games)
+2022-11-25 20:00:00-05:00 control B: fired (12/12 games)
+2022-11-25 20:00:00-05:00: unpatched ok, filter ok
+2023-11-15 20:00:00-05:00 control A: fired (1/1 games)
+2023-11-15 20:00:00-05:00 control B: fired (1/1 games)
+2023-11-15 20:00:00-05:00: unpatched ok, filter ok
+2024-09-06 20:00:00-04:00 control A: fired (13/13 games)
+2024-09-06 20:00:00-04:00 control B: fired (0/0 games)
+2024-09-06 20:00:00-04:00: unpatched ok, filter ok
+2024-09-13 20:00:00-04:00 control A: fired (14/14 games)
+2024-09-13 20:00:00-04:00 control B: fired (14/14 games)
+2024-09-13 20:00:00-04:00: unpatched ok, filter ok
+2024-11-08 20:00:00-05:00 control C: fired (1/1 games)
+2024-11-08 20:00:00-05:00: unpatched ok, filter ok
+
+Checks:
+  pass  A17 d2 reducer finish equals module 1 finish, 2010 to 2024
+  pass  A17 d4 every cutoff has one (season, week)
+  pass  A17 d10 control C scan found a game
+  pass  A17 d1 clean_pbp check at 2013-12-04 20:00:00-05:00
+  pass  A17 d1 clean_pbp check at 2018-10-17 20:00:00-04:00
+  pass  A17 d1 clean_pbp check at 2024-09-13 20:00:00-04:00
+  pass  full builds ran
+  pass  A17 d12 key starters off identity
+  pass  A17 d10 unpatched sample has zero failures
+  pass  A17 d6(c) filtered build equals full build rows
+  pass  control A fired on every required game
+  pass  control B fired on every required game
+  pass  control C fired on every required game
+  pass  A19 d4 control B has a game with g of 1 or more
+
+Sample PASSED. Output in /Users/cameronwood/nfl-model/data/historical/derived/test2_leakage_sample/F4
+
+Timing (seconds)
+          phase                    build setting  count     sum    mean     max
+    load tables                                       1    0.74    0.74    0.74
+   finish check                                       1    0.01    0.01    0.01
+ control C scan                                       1  189.14  189.14  189.14
+clean_pbp check                                       3    2.98    0.99    1.68
+     full build                unpatched h8 full      1  177.39  177.39  177.39
+           pace    full build, unpatched      h8      1    0.22    0.22    0.22
+  shared inputs    full build, unpatched              1   41.75   41.75   41.75
+     full build                control A h8 full      1  177.77  177.77  177.77
+           pace    full build, control A      h8      1    0.23    0.23    0.23
+  shared inputs    full build, control A              1   41.70   41.70   41.70
+     full build                control B h8 full      1  175.92  175.92  175.92
+           pace    full build, control B      h8      1    0.21    0.21    0.21
+  shared inputs    full build, control B              1   41.41   41.41   41.41
+     full build                control C h8 full      1  175.72  175.72  175.72
+           pace    full build, control C      h8      1    0.20    0.20    0.20
+  shared inputs    full build, control C              1   41.06   41.06   41.06
+ identity check                                       1    0.03    0.03    0.03
+      reduction                                      23    2.06    0.09    0.15
+  deleted build                unpatched h8 full     23  367.45   15.98   28.74
+           pace deleted build, unpatched      h8     23    3.29    0.14    0.20
+  shared inputs deleted build, unpatched             23   44.59    1.94    2.94
+     comparison                unpatched h8 full     23    0.15    0.01    0.01
+ filtered build                 filtered h8 full     23  367.84   15.99   28.61
+           pace filtered build, filtered      h8     23    4.70    0.20    0.21
+  shared inputs filtered build, filtered             23   68.54    2.98    3.13
+     comparison                 filtered h8 full     23    0.15    0.01    0.01
+  deleted build                control A h8 full     14  200.29   14.31   28.85
+           pace deleted build, control A      h8     14    1.90    0.14    0.19
+  shared inputs deleted build, control A             14   24.67    1.76    2.89
+     comparison                control A h8 full     14    0.10    0.01    0.01
+  deleted build                control B h8 full     14  199.08   14.22   28.60
+           pace deleted build, control B      h8     14    1.90    0.14    0.20
+  shared inputs deleted build, control B             14   24.72    1.77    2.90
+     comparison                control B h8 full     14    0.10    0.01    0.01
+  deleted build                control C h8 full      9  169.28   18.81   28.72
+           pace deleted build, control C      h8      9    1.40    0.16    0.20
+  shared inputs deleted build, control C              9   19.91    2.21    2.92
+     comparison                control C h8 full      9    0.07    0.01    0.01
+          total                                       1 2569.91 2569.91 2569.91
+Unpatched per cutoff, all 9 settings (reduction, shared inputs, pace, deleted builds, comparisons): mean 16.3, min 1.1, max 31.9
+Rough full run estimate: 587 x mean + unpatched full build = 2.7 hours
+
+=== test 2 leakage sample, F = 8, output /Users/cameronwood/nfl-model/data/historical/derived/test2_leakage_sample/F8 ===
+Main sample: 14 cutoffs, 84 games
+                cutoff_et part  season  week  n_games                                                                                                                                                                                                                game_ids  clean_pbp_check
+2013-12-04 20:00:00-05:00    a    2013    14        1                                                                                                                                                                                                         2013_14_HOU_JAX             True
+2014-11-28 20:00:00-05:00    a    2014    13       12                               2014_13_ARI_ATL 2014_13_CAR_MIN 2014_13_CIN_TB 2014_13_CLE_BUF 2014_13_DEN_KC 2014_13_NE_GB 2014_13_NO_PIT 2014_13_NYG_JAX 2014_13_OAK_STL 2014_13_SD_BAL 2014_13_TEN_HOU 2014_13_WAS_IND            False
+2015-09-16 20:00:00-04:00    a    2015     2        1                                                                                                                                                                                                          2015_02_DEN_KC            False
+2016-11-04 20:00:00-04:00    a    2016     9       11                                               2016_09_CAR_LA 2016_09_DAL_CLE 2016_09_DEN_OAK 2016_09_DET_MIN 2016_09_IND_GB 2016_09_JAX_KC 2016_09_NO_SF 2016_09_NYJ_MIA 2016_09_PHI_NYG 2016_09_PIT_BAL 2016_09_TEN_SD            False
+2017-11-08 20:00:00-05:00    a    2017    10        1                                                                                                                                                                                                         2017_10_SEA_ARI            False
+2018-10-17 20:00:00-04:00    a    2018     7        1                                                                                                                                                                                                         2018_07_DEN_ARI             True
+2019-09-25 20:00:00-04:00    a    2019     4        1                                                                                                                                                                                                          2019_04_PHI_GB            False
+2020-11-25 20:00:00-05:00    a    2020    12        2                                                                                                                                                                                         2020_12_HOU_DET 2020_12_WAS_DAL            False
+2021-12-04 20:00:00-05:00    a    2021    13        1                                                                                                                                                                                                          2021_13_NE_BUF            False
+2022-11-25 20:00:00-05:00    a    2022    12       12                                2022_12_ATL_WAS 2022_12_BAL_JAX 2022_12_CHI_NYJ 2022_12_CIN_TEN 2022_12_DEN_CAR 2022_12_GB_PHI 2022_12_HOU_MIA 2022_12_LAC_ARI 2022_12_LA_KC 2022_12_LV_SEA 2022_12_NO_SF 2022_12_TB_CLE            False
+2023-11-15 20:00:00-05:00    a    2023    11        1                                                                                                                                                                                                         2023_11_CIN_BAL            False
+2024-09-13 20:00:00-04:00    a    2024     2       14 2024_02_CHI_HOU 2024_02_CIN_KC 2024_02_CLE_JAX 2024_02_IND_GB 2024_02_LAC_CAR 2024_02_LA_ARI 2024_02_LV_BAL 2024_02_NO_DAL 2024_02_NYG_WAS 2024_02_NYJ_TEN 2024_02_PIT_DEN 2024_02_SEA_NE 2024_02_SF_MIN 2024_02_TB_DET             True
+2013-09-06 20:00:00-04:00    b    2013     1       13               2013_01_ARI_STL 2013_01_ATL_NO 2013_01_CIN_CHI 2013_01_GB_SF 2013_01_KC_JAX 2013_01_MIA_CLE 2013_01_MIN_DET 2013_01_NE_BUF 2013_01_NYG_DAL 2013_01_OAK_IND 2013_01_SEA_CAR 2013_01_TB_NYJ 2013_01_TEN_PIT            False
+2024-09-06 20:00:00-04:00    b    2024     1       13              2024_01_ARI_BUF 2024_01_CAR_NO 2024_01_DAL_CLE 2024_01_DEN_SEA 2024_01_HOU_IND 2024_01_JAX_MIA 2024_01_LA_DET 2024_01_LV_LAC 2024_01_MIN_NYG 2024_01_NE_CIN 2024_01_PIT_ATL 2024_01_TEN_CHI 2024_01_WAS_TB            False
+Control C: 22 hits, 10 selected at 9 cutoffs: 2015_09_PHI_DAL, 2019_05_NE_WAS, 2019_17_IND_JAX, 2020_01_PHI_WAS, 2020_08_DAL_PHI, 2020_08_SF_SEA, 2021_11_BAL_CHI, 2022_10_NO_PIT, 2022_11_WAS_HOU, 2024_10_NE_CHI
+2013-09-06 20:00:00-04:00 control A: fired (13/13 games)
+2013-09-06 20:00:00-04:00 control B: fired (0/0 games)
+2013-09-06 20:00:00-04:00: unpatched ok, filter ok
+2013-12-04 20:00:00-05:00 control A: fired (1/1 games)
+2013-12-04 20:00:00-05:00 control B: fired (1/1 games)
+2013-12-04 20:00:00-05:00: unpatched ok, filter ok
+2014-11-28 20:00:00-05:00 control A: fired (12/12 games)
+2014-11-28 20:00:00-05:00 control B: fired (12/12 games)
+2014-11-28 20:00:00-05:00: unpatched ok, filter ok
+2015-09-16 20:00:00-04:00 control A: fired (1/1 games)
+2015-09-16 20:00:00-04:00 control B: fired (1/1 games)
+2015-09-16 20:00:00-04:00: unpatched ok, filter ok
+2015-11-06 20:00:00-05:00 control C: fired (1/1 games)
+2015-11-06 20:00:00-05:00: unpatched ok, filter ok
+2016-11-04 20:00:00-04:00 control A: fired (11/11 games)
+2016-11-04 20:00:00-04:00 control B: fired (11/11 games)
+2016-11-04 20:00:00-04:00: unpatched ok, filter ok
+2017-11-08 20:00:00-05:00 control A: fired (1/1 games)
+2017-11-08 20:00:00-05:00 control B: fired (1/1 games)
+2017-11-08 20:00:00-05:00: unpatched ok, filter ok
+2018-10-17 20:00:00-04:00 control A: fired (1/1 games)
+2018-10-17 20:00:00-04:00 control B: fired (1/1 games)
+2018-10-17 20:00:00-04:00: unpatched ok, filter ok
+2019-09-25 20:00:00-04:00 control A: fired (1/1 games)
+2019-09-25 20:00:00-04:00 control B: fired (1/1 games)
+2019-09-25 20:00:00-04:00: unpatched ok, filter ok
+2019-10-04 20:00:00-04:00 control C: fired (1/1 games)
+2019-10-04 20:00:00-04:00: unpatched ok, filter ok
+2019-12-27 20:00:00-05:00 control C: fired (1/1 games)
+2019-12-27 20:00:00-05:00: unpatched ok, filter ok
+2020-09-11 20:00:00-04:00 control C: fired (1/1 games)
+2020-09-11 20:00:00-04:00: unpatched ok, filter ok
+2020-10-30 20:00:00-04:00 control C: fired (2/2 games)
+2020-10-30 20:00:00-04:00: unpatched ok, filter ok
+2020-11-25 20:00:00-05:00 control A: fired (2/2 games)
+2020-11-25 20:00:00-05:00 control B: fired (2/2 games)
+2020-11-25 20:00:00-05:00: unpatched ok, filter ok
+2021-11-19 20:00:00-05:00 control C: fired (1/1 games)
+2021-11-19 20:00:00-05:00: unpatched ok, filter ok
+2021-12-04 20:00:00-05:00 control A: fired (1/1 games)
+2021-12-04 20:00:00-05:00 control B: fired (1/1 games)
+2021-12-04 20:00:00-05:00: unpatched ok, filter ok
+2022-11-11 20:00:00-05:00 control C: fired (1/1 games)
+2022-11-11 20:00:00-05:00: unpatched ok, filter ok
+2022-11-18 20:00:00-05:00 control C: fired (1/1 games)
+2022-11-18 20:00:00-05:00: unpatched ok, filter ok
+2022-11-25 20:00:00-05:00 control A: fired (12/12 games)
+2022-11-25 20:00:00-05:00 control B: fired (12/12 games)
+2022-11-25 20:00:00-05:00: unpatched ok, filter ok
+2023-11-15 20:00:00-05:00 control A: fired (1/1 games)
+2023-11-15 20:00:00-05:00 control B: fired (1/1 games)
+2023-11-15 20:00:00-05:00: unpatched ok, filter ok
+2024-09-06 20:00:00-04:00 control A: fired (13/13 games)
+2024-09-06 20:00:00-04:00 control B: fired (0/0 games)
+2024-09-06 20:00:00-04:00: unpatched ok, filter ok
+2024-09-13 20:00:00-04:00 control A: fired (14/14 games)
+2024-09-13 20:00:00-04:00 control B: fired (14/14 games)
+2024-09-13 20:00:00-04:00: unpatched ok, filter ok
+2024-11-08 20:00:00-05:00 control C: fired (1/1 games)
+2024-11-08 20:00:00-05:00: unpatched ok, filter ok
+
+Checks:
+  pass  A17 d2 reducer finish equals module 1 finish, 2010 to 2024
+  pass  A17 d4 every cutoff has one (season, week)
+  pass  A17 d10 control C scan found a game
+  pass  A17 d1 clean_pbp check at 2013-12-04 20:00:00-05:00
+  pass  A17 d1 clean_pbp check at 2018-10-17 20:00:00-04:00
+  pass  A17 d1 clean_pbp check at 2024-09-13 20:00:00-04:00
+  pass  full builds ran
+  pass  A17 d12 key starters off identity
+  pass  A17 d10 unpatched sample has zero failures
+  pass  A17 d6(c) filtered build equals full build rows
+  pass  control A fired on every required game
+  pass  control B fired on every required game
+  pass  control C fired on every required game
+  pass  A19 d4 control B has a game with g of 1 or more
+
+Sample PASSED. Output in /Users/cameronwood/nfl-model/data/historical/derived/test2_leakage_sample/F8
+
+Timing (seconds)
+          phase                    build setting  count     sum    mean     max
+    load tables                                       1    0.17    0.17    0.17
+   finish check                                       1    0.00    0.00    0.00
+ control C scan                                       1  175.18  175.18  175.18
+clean_pbp check                                       3    3.40    1.13    1.81
+     full build                unpatched h8 full      1  191.16  191.16  191.16
+           pace    full build, unpatched      h8      1    0.22    0.22    0.22
+  shared inputs    full build, unpatched              1   46.73   46.73   46.73
+     full build                control A h8 full      1  181.88  181.88  181.88
+           pace    full build, control A      h8      1    0.21    0.21    0.21
+  shared inputs    full build, control A              1   43.37   43.37   43.37
+     full build                control B h8 full      1  174.30  174.30  174.30
+           pace    full build, control B      h8      1    0.20    0.20    0.20
+  shared inputs    full build, control B              1   41.34   41.34   41.34
+     full build                control C h8 full      1  178.92  178.92  178.92
+           pace    full build, control C      h8      1    0.22    0.22    0.22
+  shared inputs    full build, control C              1   41.98   41.98   41.98
+ identity check                                       1    0.03    0.03    0.03
+      reduction                                      23    1.92    0.08    0.14
+  deleted build                unpatched h8 full     23  368.31   16.01   29.29
+           pace deleted build, unpatched      h8     23    3.29    0.14    0.20
+  shared inputs deleted build, unpatched             23   44.56    1.94    2.96
+     comparison                unpatched h8 full     23    0.15    0.01    0.01
+ filtered build                 filtered h8 full     23  367.73   15.99   29.03
+           pace filtered build, filtered      h8     23    4.69    0.20    0.21
+  shared inputs filtered build, filtered             23   68.22    2.97    3.14
+     comparison                 filtered h8 full     23    0.15    0.01    0.01
+  deleted build                control A h8 full     14  199.53   14.25   29.24
+           pace deleted build, control A      h8     14    1.91    0.14    0.21
+  shared inputs deleted build, control A             14   24.75    1.77    2.99
+     comparison                control A h8 full     14    0.09    0.01    0.01
+  deleted build                control B h8 full     14  201.07   14.36   29.46
+           pace deleted build, control B      h8     14    1.90    0.14    0.20
+  shared inputs deleted build, control B             14   24.64    1.76    2.91
+     comparison                control B h8 full     14    0.10    0.01    0.01
+  deleted build                control C h8 full      9  169.19   18.80   29.29
+           pace deleted build, control C      h8      9    1.39    0.15    0.20
+  shared inputs deleted build, control C              9   19.81    2.20    3.01
+     comparison                control C h8 full      9    0.06    0.01    0.01
+          total                                       1 2584.18 2584.18 2584.18
+Unpatched per cutoff, all 9 settings (reduction, shared inputs, pace, deleted builds, comparisons): mean 16.3, min 1.1, max 32.3
+Rough full run estimate: 587 x mean + unpatched full build = 2.7 hours
+
+=== test 2 leakage sample, F = 12, output /Users/cameronwood/nfl-model/data/historical/derived/test2_leakage_sample/F12 ===
+Main sample: 14 cutoffs, 84 games
+                cutoff_et part  season  week  n_games                                                                                                                                                                                                                game_ids  clean_pbp_check
+2013-12-04 20:00:00-05:00    a    2013    14        1                                                                                                                                                                                                         2013_14_HOU_JAX             True
+2014-11-28 20:00:00-05:00    a    2014    13       12                               2014_13_ARI_ATL 2014_13_CAR_MIN 2014_13_CIN_TB 2014_13_CLE_BUF 2014_13_DEN_KC 2014_13_NE_GB 2014_13_NO_PIT 2014_13_NYG_JAX 2014_13_OAK_STL 2014_13_SD_BAL 2014_13_TEN_HOU 2014_13_WAS_IND            False
+2015-09-16 20:00:00-04:00    a    2015     2        1                                                                                                                                                                                                          2015_02_DEN_KC            False
+2016-11-04 20:00:00-04:00    a    2016     9       11                                               2016_09_CAR_LA 2016_09_DAL_CLE 2016_09_DEN_OAK 2016_09_DET_MIN 2016_09_IND_GB 2016_09_JAX_KC 2016_09_NO_SF 2016_09_NYJ_MIA 2016_09_PHI_NYG 2016_09_PIT_BAL 2016_09_TEN_SD            False
+2017-11-08 20:00:00-05:00    a    2017    10        1                                                                                                                                                                                                         2017_10_SEA_ARI            False
+2018-10-17 20:00:00-04:00    a    2018     7        1                                                                                                                                                                                                         2018_07_DEN_ARI             True
+2019-09-25 20:00:00-04:00    a    2019     4        1                                                                                                                                                                                                          2019_04_PHI_GB            False
+2020-11-25 20:00:00-05:00    a    2020    12        2                                                                                                                                                                                         2020_12_HOU_DET 2020_12_WAS_DAL            False
+2021-12-04 20:00:00-05:00    a    2021    13        1                                                                                                                                                                                                          2021_13_NE_BUF            False
+2022-11-25 20:00:00-05:00    a    2022    12       12                                2022_12_ATL_WAS 2022_12_BAL_JAX 2022_12_CHI_NYJ 2022_12_CIN_TEN 2022_12_DEN_CAR 2022_12_GB_PHI 2022_12_HOU_MIA 2022_12_LAC_ARI 2022_12_LA_KC 2022_12_LV_SEA 2022_12_NO_SF 2022_12_TB_CLE            False
+2023-11-15 20:00:00-05:00    a    2023    11        1                                                                                                                                                                                                         2023_11_CIN_BAL            False
+2024-09-13 20:00:00-04:00    a    2024     2       14 2024_02_CHI_HOU 2024_02_CIN_KC 2024_02_CLE_JAX 2024_02_IND_GB 2024_02_LAC_CAR 2024_02_LA_ARI 2024_02_LV_BAL 2024_02_NO_DAL 2024_02_NYG_WAS 2024_02_NYJ_TEN 2024_02_PIT_DEN 2024_02_SEA_NE 2024_02_SF_MIN 2024_02_TB_DET             True
+2013-09-06 20:00:00-04:00    b    2013     1       13               2013_01_ARI_STL 2013_01_ATL_NO 2013_01_CIN_CHI 2013_01_GB_SF 2013_01_KC_JAX 2013_01_MIA_CLE 2013_01_MIN_DET 2013_01_NE_BUF 2013_01_NYG_DAL 2013_01_OAK_IND 2013_01_SEA_CAR 2013_01_TB_NYJ 2013_01_TEN_PIT            False
+2024-09-06 20:00:00-04:00    b    2024     1       13              2024_01_ARI_BUF 2024_01_CAR_NO 2024_01_DAL_CLE 2024_01_DEN_SEA 2024_01_HOU_IND 2024_01_JAX_MIA 2024_01_LA_DET 2024_01_LV_LAC 2024_01_MIN_NYG 2024_01_NE_CIN 2024_01_PIT_ATL 2024_01_TEN_CHI 2024_01_WAS_TB            False
+Control C: 22 hits, 10 selected at 9 cutoffs: 2015_09_PHI_DAL, 2019_05_NE_WAS, 2019_17_IND_JAX, 2020_01_PHI_WAS, 2020_08_DAL_PHI, 2020_08_SF_SEA, 2021_11_BAL_CHI, 2022_10_NO_PIT, 2022_11_WAS_HOU, 2024_10_NE_CHI
+2013-09-06 20:00:00-04:00 control A: fired (13/13 games)
+2013-09-06 20:00:00-04:00 control B: fired (0/0 games)
+2013-09-06 20:00:00-04:00: unpatched ok, filter ok
+2013-12-04 20:00:00-05:00 control A: fired (1/1 games)
+2013-12-04 20:00:00-05:00 control B: fired (1/1 games)
+2013-12-04 20:00:00-05:00: unpatched ok, filter ok
+2014-11-28 20:00:00-05:00 control A: fired (12/12 games)
+2014-11-28 20:00:00-05:00 control B: fired (12/12 games)
+2014-11-28 20:00:00-05:00: unpatched ok, filter ok
+2015-09-16 20:00:00-04:00 control A: fired (1/1 games)
+2015-09-16 20:00:00-04:00 control B: fired (1/1 games)
+2015-09-16 20:00:00-04:00: unpatched ok, filter ok
+2015-11-06 20:00:00-05:00 control C: fired (1/1 games)
+2015-11-06 20:00:00-05:00: unpatched ok, filter ok
+2016-11-04 20:00:00-04:00 control A: fired (11/11 games)
+2016-11-04 20:00:00-04:00 control B: fired (11/11 games)
+2016-11-04 20:00:00-04:00: unpatched ok, filter ok
+2017-11-08 20:00:00-05:00 control A: fired (1/1 games)
+2017-11-08 20:00:00-05:00 control B: fired (1/1 games)
+2017-11-08 20:00:00-05:00: unpatched ok, filter ok
+2018-10-17 20:00:00-04:00 control A: fired (1/1 games)
+2018-10-17 20:00:00-04:00 control B: fired (1/1 games)
+2018-10-17 20:00:00-04:00: unpatched ok, filter ok
+2019-09-25 20:00:00-04:00 control A: fired (1/1 games)
+2019-09-25 20:00:00-04:00 control B: fired (1/1 games)
+2019-09-25 20:00:00-04:00: unpatched ok, filter ok
+2019-10-04 20:00:00-04:00 control C: fired (1/1 games)
+2019-10-04 20:00:00-04:00: unpatched ok, filter ok
+2019-12-27 20:00:00-05:00 control C: fired (1/1 games)
+2019-12-27 20:00:00-05:00: unpatched ok, filter ok
+2020-09-11 20:00:00-04:00 control C: fired (1/1 games)
+2020-09-11 20:00:00-04:00: unpatched ok, filter ok
+2020-10-30 20:00:00-04:00 control C: fired (2/2 games)
+2020-10-30 20:00:00-04:00: unpatched ok, filter ok
+2020-11-25 20:00:00-05:00 control A: fired (2/2 games)
+2020-11-25 20:00:00-05:00 control B: fired (2/2 games)
+2020-11-25 20:00:00-05:00: unpatched ok, filter ok
+2021-11-19 20:00:00-05:00 control C: fired (1/1 games)
+2021-11-19 20:00:00-05:00: unpatched ok, filter ok
+2021-12-04 20:00:00-05:00 control A: fired (1/1 games)
+2021-12-04 20:00:00-05:00 control B: fired (1/1 games)
+2021-12-04 20:00:00-05:00: unpatched ok, filter ok
+2022-11-11 20:00:00-05:00 control C: fired (1/1 games)
+2022-11-11 20:00:00-05:00: unpatched ok, filter ok
+2022-11-18 20:00:00-05:00 control C: fired (1/1 games)
+2022-11-18 20:00:00-05:00: unpatched ok, filter ok
+2022-11-25 20:00:00-05:00 control A: fired (12/12 games)
+2022-11-25 20:00:00-05:00 control B: fired (12/12 games)
+2022-11-25 20:00:00-05:00: unpatched ok, filter ok
+2023-11-15 20:00:00-05:00 control A: fired (1/1 games)
+2023-11-15 20:00:00-05:00 control B: fired (1/1 games)
+2023-11-15 20:00:00-05:00: unpatched ok, filter ok
+2024-09-06 20:00:00-04:00 control A: fired (13/13 games)
+2024-09-06 20:00:00-04:00 control B: fired (0/0 games)
+2024-09-06 20:00:00-04:00: unpatched ok, filter ok
+2024-09-13 20:00:00-04:00 control A: fired (14/14 games)
+2024-09-13 20:00:00-04:00 control B: fired (14/14 games)
+2024-09-13 20:00:00-04:00: unpatched ok, filter ok
+2024-11-08 20:00:00-05:00 control C: fired (1/1 games)
+2024-11-08 20:00:00-05:00: unpatched ok, filter ok
+
+Checks:
+  pass  A17 d2 reducer finish equals module 1 finish, 2010 to 2024
+  pass  A17 d4 every cutoff has one (season, week)
+  pass  A17 d10 control C scan found a game
+  pass  A17 d1 clean_pbp check at 2013-12-04 20:00:00-05:00
+  pass  A17 d1 clean_pbp check at 2018-10-17 20:00:00-04:00
+  pass  A17 d1 clean_pbp check at 2024-09-13 20:00:00-04:00
+  pass  full builds ran
+  pass  A17 d12 key starters off identity
+  pass  A17 d10 unpatched sample has zero failures
+  pass  A17 d6(c) filtered build equals full build rows
+  pass  control A fired on every required game
+  pass  control B fired on every required game
+  pass  control C fired on every required game
+  pass  A19 d4 control B has a game with g of 1 or more
+
+Sample PASSED. Output in /Users/cameronwood/nfl-model/data/historical/derived/test2_leakage_sample/F12
+
+Timing (seconds)
+          phase                    build setting  count     sum    mean     max
+    load tables                                       1    0.22    0.22    0.22
+   finish check                                       1    0.00    0.00    0.00
+ control C scan                                       1  169.08  169.08  169.08
+clean_pbp check                                       3    2.67    0.89    1.43
+     full build                unpatched h8 full      1  178.52  178.52  178.52
+           pace    full build, unpatched      h8      1    0.21    0.21    0.21
+  shared inputs    full build, unpatched              1   41.59   41.59   41.59
+     full build                control A h8 full      1  178.25  178.25  178.25
+           pace    full build, control A      h8      1    0.21    0.21    0.21
+  shared inputs    full build, control A              1   42.10   42.10   42.10
+     full build                control B h8 full      1  175.14  175.14  175.14
+           pace    full build, control B      h8      1    0.21    0.21    0.21
+  shared inputs    full build, control B              1   41.57   41.57   41.57
+     full build                control C h8 full      1  175.88  175.88  175.88
+           pace    full build, control C      h8      1    0.21    0.21    0.21
+  shared inputs    full build, control C              1   41.10   41.10   41.10
+ identity check                                       1    0.03    0.03    0.03
+      reduction                                      23    1.96    0.09    0.15
+  deleted build                unpatched h8 full     23  366.72   15.94   29.01
+           pace deleted build, unpatched      h8     23    3.31    0.14    0.20
+  shared inputs deleted build, unpatched             23   44.53    1.94    3.00
+     comparison                unpatched h8 full     23    0.15    0.01    0.01
+ filtered build                 filtered h8 full     23  366.35   15.93   29.15
+           pace filtered build, filtered      h8     23    4.68    0.20    0.21
+  shared inputs filtered build, filtered             23   68.17    2.96    3.12
+     comparison                 filtered h8 full     23    0.15    0.01    0.01
+  deleted build                control A h8 full     14  199.73   14.27   28.88
+           pace deleted build, control A      h8     14    1.90    0.14    0.20
+  shared inputs deleted build, control A             14   24.70    1.76    2.89
+     comparison                control A h8 full     14    0.09    0.01    0.01
+  deleted build                control B h8 full     14  200.79   14.34   29.01
+           pace deleted build, control B      h8     14    1.91    0.14    0.20
+  shared inputs deleted build, control B             14   24.74    1.77    2.96
+     comparison                control B h8 full     14    0.10    0.01    0.01
+  deleted build                control C h8 full      9  168.65   18.74   28.77
+           pace deleted build, control C      h8      9    1.40    0.16    0.20
+  shared inputs deleted build, control C              9   19.92    2.21    2.91
+     comparison                control C h8 full      9    0.06    0.01    0.01
+          total                                       1 2548.14 2548.14 2548.14
+Unpatched per cutoff, all 9 settings (reduction, shared inputs, pace, deleted builds, comparisons): mean 16.2, min 1.1, max 32.2
+Rough full run estimate: 587 x mean + unpatched full build = 2.7 hours
+F = 4: PASSED
+F = 8: PASSED
+F = 12: PASSED
