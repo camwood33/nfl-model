@@ -67,10 +67,17 @@ GAME_COLS = [
 ]
 
 
-def read_pbp() -> pd.DataFrame:
-    """Raw play-by-play rows, 2010 to 2024, before any cleaning."""
+def pbp_columns(extra: tuple[str, ...] = ()) -> list[str]:
+    """PBP_COLS plus any extra columns not already in it (Amendment 33 decision 1)."""
+    return PBP_COLS + [c for c in extra if c not in PBP_COLS]
+
+
+def read_pbp(extra: tuple[str, ...] = ()) -> pd.DataFrame:
+    """Raw play-by-play rows, 2010 to 2024, before any cleaning. extra (Amendment 33 decision 1) names columns
+    read in addition to PBP_COLS; with no argument exactly PBP_COLS is read."""
+    cols = pbp_columns(extra)
     return pd.concat(
-        [pd.read_parquet(PBP_DIR / f"play_by_play_{y}.parquet", columns=PBP_COLS) for y in SEASONS],
+        [pd.read_parquet(PBP_DIR / f"play_by_play_{y}.parquet", columns=cols) for y in SEASONS],
         ignore_index=True,
     )
 
