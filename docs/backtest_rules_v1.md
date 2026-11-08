@@ -1341,3 +1341,15 @@ as aborted plays.
   - 4. Extra stop checks. The run also stops if roof_category has a value other than outdoors, dome or retractable; if a feature table does not have exactly 3,007 version 1 games; or, in the full run, if the 54 tables do not list the same games in the same order.
   - 5. Ordering. First-half check (c) and the running-score-drop count order a game's plays by play_id.
   - 6. Unchanged. Every other part of Amendments 26 to 28 and 31 to 34 applies as written. The next step is the timing run (Amendment 28 decision 12, Amendment 32 decisions 1, 2, 6 and 7).
+
+---
+
+## Amendment 36 (2026-11-08, after the timing and sample runs, recording their results, before the full test 2 run)
+
+- Purpose. Records the timing run (Amendment 28 decision 12, Amendment 32) and the sample run (Amendment 28 decision 13, Amendment 34), both run on 2026-11-08 at git HEAD 606ee7e under .venv. The evidence is in docs/test2_timing/ and docs/test2_sample/, each folder's files and its log copied unchanged.
+
+- Decisions:
+  - 1. Timing run: passed. First-half reconciliation: all 3,007 version 1 games pass checks (a) to (d), including all 1,767 of 2018 to 2024, so no game leaves first-half training. Training games for test season 2024 with L = 8: 1,996. Load and reconciliation 1.41 seconds. Fits (each a 9-lambda cross-validation plus the final fit): A1 full game 0.014 seconds, A1 first half 0.011, M1 full game 0.012, M1 first half 0.011. Upper-bound estimate for all 324 configurations over 7 test seasons (Amendment 32 decision 2): 56 seconds.
+  - 2. Sample run: passed, test season 2018, 249 test games for every configuration, so pairing holds. Training games 1,209 for L = 5 (the version 1 games of 2013 to 2017 minus the 31 train_exclude games) and 737 for L = 3 (2015 to 2017), the same for the first half. Chosen lambdas, full game and first half: default (L5 h8 F8 A1 no_qb noks) 300 and 1000; L = 3: 1000 and 1000; half-life 4: 300 and 1000; F = 4: 300 and 1000; M1: 300 and 1000; full run with key starters on: 300 and 1000. No chosen lambda is at an edge. No error, residual or prediction summary was shown.
+  - 3. Rerun before the full run. This amendment changes the rules file, so its SHA-256 no longer matches the timing and sample summaries, and the --full gate (Amendment 34 decision 3) refuses. The timing and sample runs are therefore rerun after this commit, with the same commands, writing to the same git-ignored folders and logs. The reruns must pass and must reproduce every count, chosen lambda and edge flag recorded here; any difference stops the work. Their fit times may differ. The reruns are recorded in the amendment that records the full run.
+  - 4. Run gate. The measured times allow the full run (Amendment 28 decision 11 step 8). It runs only after Cam approves it.

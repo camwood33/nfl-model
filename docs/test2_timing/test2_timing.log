@@ -1,0 +1,9 @@
+git HEAD 606ee7ee7010d04842fc2b28e7ed73c21c734370; start 2026-11-08T11:00:30-06:00
+load and reconciliation 1.41s; version 1 games 3007, passing 3007; 2018 to 2024 1767, passing 1767; failing 2013 to 2017 0
+training games 1996
+fit A1 full: 0.014s
+fit A1 first_half: 0.011s
+fit M1 full: 0.012s
+fit M1 first_half: 0.011s
+324-configuration estimate (upper bound): 56s, 0.02 hours
+end 2026-11-08T11:00:31-06:00; PASSED; wrote /Users/cameronwood/nfl-model/data/historical/derived/test2_timing
