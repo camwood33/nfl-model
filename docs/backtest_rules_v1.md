@@ -1315,3 +1315,15 @@ as aborted plays.
   - 1. read_pbp gets one optional argument, extra, a tuple of column names read in addition to PBP_COLS, default empty. Called with no argument it reads exactly what it reads now, so clean_pbp's outputs and every feature table are unchanged. A test checks that read_pbp's default column list equals PBP_COLS. This is the only change to features/.
   - 2. Checks (a) to (d) of Amendment 28 decision 2 run on the cleaned play-by-play rows, clean(read_pbp(extra=("posteam_score", "defteam_score"))), the same cleaned rows from which features/clean_pbp.py computes the first-half scores (Amendment 28 decision 1). Check (d) reuses final_scores_from_pbp.
   - 3. Amendment 32 decision 9's words "reading play-by-play through features/clean_pbp.py's read_pbp" mean decisions 1 and 2 here. Every other part of Amendment 32 decision 9 applies as written.
+
+---
+
+## Amendment 34 (2026-11-08, before any score model code exists and before any test 2 result)
+
+- Purpose. Settles four points found by Claude Code's read-only check before writing the score model and test 2 harness. Written before any score model code exists and before any score model fit, prediction, residual or timing.
+
+- Decisions:
+  - 1. Negative predicted scores. Amendment 27 decision 12's count of negative predicted scores is derived from predictions, so under Amendment 28 decision 13 the sample run neither prints nor writes it. The full run records it, per configuration and test season, full game and first half, in data/historical/derived/test2/.
+  - 2. The sample run needs a passed timing run (Amendment 32 decision 7). If no timing summary exists, or it did not pass, or any software version differs from it (Amendment 28 decision 16), the sample run stops and reports.
+  - 3. The sample summary records git HEAD, the SHA-256 of the rules file, of the 4 tables its 6 configurations read and of the code files (Amendment 32 decision 3), the interpreter path and the versions of Python, pandas, numpy and pyarrow. The --full gate requires the rules file and code file hashes in both the timing and sample summaries to equal the current ones, and every table hash they record to equal the current file's.
+  - 4. Progress lines. A block is one feature table (half-life, F, ablation run, key starters) for one test season: its 6 lookback and form combinations, each with its full-game and first-half fits. The full run prints one line per block, 378 in all (54 tables x 7 seasons), with elapsed seconds and blocks done out of 378. The timing and sample runs print one line per fit.
