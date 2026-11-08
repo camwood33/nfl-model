@@ -1304,3 +1304,14 @@ as aborted plays.
   - 8. Folders. The timing and sample runs write to git-ignored data/historical/derived/test2_timing/ and data/historical/derived/test2_sample/, beside the full run's data/historical/derived/test2/, so that Amendment 28 decision 14's copy to docs/test2_results/ holds only the full run. Each is copied unchanged to docs/test2_timing/ and docs/test2_sample/ in the amendment that records its result.
   - 9. First-half reconciliation. The repo has no code for Amendment 28 decision 2 (c). It is written new in score/, reading play-by-play through features/clean_pbp.py's read_pbp, and (d) reuses final_scores_from_pbp. Every run (timing, sample and full) checks (a) to (d) on all 3,007 version 1 games of 2013 to 2024 and reports the passing count overall and for 2018 to 2024. It stops on any 2018 to 2024 failure (Amendment 28 decision 3). A failing 2013 to 2017 game is left out of first-half training only, and its count and game ids are reported.
   - 10. Unchanged. Every other part of Amendments 26 to 28 and 31 applies as written.
+
+---
+
+## Amendment 33 (2026-11-08, before any score model code exists and before any test 2 result)
+
+- Purpose. Corrects Amendment 32 decision 9, which says check (c) of Amendment 28 decision 2 reads play-by-play "through features/clean_pbp.py's read_pbp". read_pbp reads only PBP_COLS, which does not include posteam_score or defteam_score, so the rule could not be followed as written. Written before any score model code exists and before any score model fit, prediction, residual or timing.
+
+- Decisions:
+  - 1. read_pbp gets one optional argument, extra, a tuple of column names read in addition to PBP_COLS, default empty. Called with no argument it reads exactly what it reads now, so clean_pbp's outputs and every feature table are unchanged. A test checks that read_pbp's default column list equals PBP_COLS. This is the only change to features/.
+  - 2. Checks (a) to (d) of Amendment 28 decision 2 run on the cleaned play-by-play rows, clean(read_pbp(extra=("posteam_score", "defteam_score"))), the same cleaned rows from which features/clean_pbp.py computes the first-half scores (Amendment 28 decision 1). Check (d) reuses final_scores_from_pbp.
+  - 3. Amendment 32 decision 9's words "reading play-by-play through features/clean_pbp.py's read_pbp" mean decisions 1 and 2 here. Every other part of Amendment 32 decision 9 applies as written.
