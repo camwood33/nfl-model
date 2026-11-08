@@ -1327,3 +1327,17 @@ as aborted plays.
   - 2. The sample run needs a passed timing run (Amendment 32 decision 7). If no timing summary exists, or it did not pass, or any software version differs from it (Amendment 28 decision 16), the sample run stops and reports.
   - 3. The sample summary records git HEAD, the SHA-256 of the rules file, of the 4 tables its 6 configurations read and of the code files (Amendment 32 decision 3), the interpreter path and the versions of Python, pandas, numpy and pyarrow. The --full gate requires the rules file and code file hashes in both the timing and sample summaries to equal the current ones, and every table hash they record to equal the current file's.
   - 4. Progress lines. A block is one feature table (half-life, F, ablation run, key starters) for one test season: its 6 lookback and form combinations, each with its full-game and first-half fits. The full run prints one line per block, 378 in all (54 tables x 7 seasons), with elapsed seconds and blocks done out of 378. The timing and sample runs print one line per fit.
+
+---
+
+## Amendment 35 (2026-11-08, after the score model code and before the timing run and any test 2 result)
+
+- Purpose. Records the score model and test 2 harness code, committed as not yet run (Amendment 28 decision 11 step 5), and settles three choices the code made that no earlier amendment states. Written before the timing run and before any score model fit on real data, prediction, residual or timing.
+
+- Decisions:
+  - 1. Code. Commit ce74c47: score/model.py, score/selection.py, score/reconcile.py, score/test2.py, the Amendment 33 change to features/clean_pbp.py, tests/test_score_model.py and tests/test_test2.py. Tests: 276 pass under /usr/bin/python3; 237 run under .venv with only the 8 known cryptography errors.
+  - 2. Missing targets. A missing full-game or first-half target in a training row stops the run, and a missing actual score of a 2018 to 2024 version 1 game stops the full run. No value is filled in. This extends Amendment 27 decision 10 from inputs to targets.
+  - 3. Exactly equal errors when finding the best. If two or more configurations (Amendment 26 decision 7) or lambdas (Amendment 27 decision 8) have exactly equal error, the best is the first in grid order: lookback 3, 5, 8, then half-life 4, 8, 16, then F 4, 8, 12, then form A1, M1 for configurations, and the smallest lambda for lambdas. This matters only where predictions are identical, such as lookbacks 5 and 8 on 2018 games (Amendment 27 decision 9). It cannot change a winner: Amendment 26 decision 7's tie-break and Amendment 27 decision 8's largest tied lambda then apply as written.
+  - 4. Extra stop checks. The run also stops if roof_category has a value other than outdoors, dome or retractable; if a feature table does not have exactly 3,007 version 1 games; or, in the full run, if the 54 tables do not list the same games in the same order.
+  - 5. Ordering. First-half check (c) and the running-score-drop count order a game's plays by play_id.
+  - 6. Unchanged. Every other part of Amendments 26 to 28 and 31 to 34 applies as written. The next step is the timing run (Amendment 28 decision 12, Amendment 32 decisions 1, 2, 6 and 7).
