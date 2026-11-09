@@ -1,0 +1,257 @@
+{
+  "mode": "test3",
+  "passed": true,
+  "checks": {
+    "walk_forward.parquet SHA-256 (Amendment 38 decision 2)": true,
+    "game set one to one with the schedules file (decision 3)": true,
+    "no missing line, score or prediction (decision 3)": true,
+    "123 season-week clusters (decision 5)": true
+  },
+  "counts": {
+    "games": 1767,
+    "clusters": 123,
+    "games_by_season": {
+      "2018": 249,
+      "2019": 248,
+      "2020": 244,
+      "2021": 262,
+      "2022": 249,
+      "2023": 258,
+      "2024": 257
+    }
+  },
+  "alpha_one_sided": 0.025,
+  "tripwire_c": 0.5,
+  "markets": {
+    "margin": {
+      "a": -0.12504866290436745,
+      "b": 1.0219623220162477,
+      "c": -0.020362557693226258,
+      "se_c": 0.1308687216979823,
+      "clusters": 123,
+      "n": 1767,
+      "t": -0.15559529755489468,
+      "df": 122,
+      "critical": 1.9795998784866176,
+      "p_one_sided": 0.5616954076888436,
+      "t_exceeds_critical": false,
+      "descriptive": {
+        "se_c_plain": 0.13223400467013147,
+        "se_c_hc1": 0.1350493674229279,
+        "se_c_season_clustered": 0.14876226208510726,
+        "season_clusters": 7,
+        "ci95_c": [
+          -0.279430263264251,
+          0.2387051478777985
+        ],
+        "ci95_df": 122,
+        "constrained": {
+          "a": -0.12225868975163073,
+          "c": -0.022433801736101135,
+          "se_c": 0.08249037247495257,
+          "clusters": 123
+        },
+        "without_2018": {
+          "a": -0.1320063234290756,
+          "b": 1.0594049999759028,
+          "c": -0.07208902734124223,
+          "se_c": 0.13967677496884695,
+          "clusters": 106,
+          "n": 1518,
+          "t": -0.5161132003321292,
+          "df": 105
+        },
+        "by_season": {
+          "2018": {
+            "c": 0.2972767154586773,
+            "n": 249
+          },
+          "2019": {
+            "c": -0.0745100279966957,
+            "n": 248
+          },
+          "2020": {
+            "c": 0.15203089188460606,
+            "n": 244
+          },
+          "2021": {
+            "c": -0.41344095266686764,
+            "n": 262
+          },
+          "2022": {
+            "c": -0.012633943156711958,
+            "n": 249
+          },
+          "2023": {
+            "c": -0.3995727415942367,
+            "n": 258
+          },
+          "2024": {
+            "c": 0.3195553661883128,
+            "n": 257
+          }
+        }
+      }
+    },
+    "total": {
+      "a": 0.5931528353557951,
+      "b": 1.0227261923064077,
+      "c": -0.024082133982062714,
+      "se_c": 0.122793635582201,
+      "clusters": 123,
+      "n": 1767,
+      "t": -0.1961187472614699,
+      "df": 122,
+      "critical": 1.9795998784866176,
+      "p_one_sided": 0.5775782388734145,
+      "t_exceeds_critical": false,
+      "descriptive": {
+        "se_c_plain": 0.11520831310928085,
+        "se_c_hc1": 0.11960356616814403,
+        "se_c_season_clustered": 0.10281420988303604,
+        "season_clusters": 7,
+        "ci95_c": [
+          -0.2671644000595178,
+          0.21900013209539237
+        ],
+        "ci95_df": 122,
+        "constrained": {
+          "a": 0.5313099007635309,
+          "c": -0.022995931316242064,
+          "se_c": 0.08738656513551363,
+          "clusters": 123
+        },
+        "without_2018": {
+          "a": 0.4237118278388152,
+          "b": 0.9375106071602488,
+          "c": 0.06466216618036924,
+          "se_c": 0.14023590138588043,
+          "clusters": 106,
+          "n": 1518,
+          "t": 0.46109566481440045,
+          "df": 105
+        },
+        "by_season": {
+          "2018": {
+            "c": -0.5472653106953658,
+            "n": 249
+          },
+          "2019": {
+            "c": -0.1355613807413647,
+            "n": 248
+          },
+          "2020": {
+            "c": 0.01467511959094736,
+            "n": 244
+          },
+          "2021": {
+            "c": 0.3498972612401303,
+            "n": 262
+          },
+          "2022": {
+            "c": 0.5611534739262538,
+            "n": 249
+          },
+          "2023": {
+            "c": 0.07124057012714502,
+            "n": 258
+          },
+          "2024": {
+            "c": -0.04484786987194411,
+            "n": 257
+          }
+        }
+      }
+    }
+  },
+  "tripwire": false,
+  "decisions_applied": true,
+  "status": "applied",
+  "shows_information": {
+    "margin": false,
+    "total": false
+  },
+  "kill_rule": {
+    "fires": true,
+    "test_4_runs": false,
+    "test_5_runs": true,
+    "tests_6_7": "Kalshi-versus-close approach only, designed by a later amendment",
+    "model_trading_markets": []
+  },
+  "total_seconds": 0.19554877281188965,
+  "software": {
+    "interpreter": "/Users/cameronwood/nfl-model/.venv/bin/python",
+    "python": "3.14.4",
+    "pandas": "3.0.6",
+    "numpy": "2.5.3",
+    "pyarrow": "25.0.1"
+  },
+  "hashes": {
+    "rules": {
+      "docs/backtest_rules_v1.md": "7c0a4e62b8d4a796dfec5330c90bf237adf63d5a68a462c4d961bf69b4f9871a"
+    },
+    "walk_forward": {
+      "docs/test2_results/walk_forward.parquet": "ed0a1018ac4ab028a49fe6c274ffdc335652d5a9767eeda0e5fe5ecf66dd1c92"
+    },
+    "schedules": {
+      "data/historical/schedules/games.parquet": "5d5d5143ad01eff372401eda29bc8e43cb3f41f78c4de23a4fb282d26b8c241e"
+    },
+    "code": {
+      "features/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "features/build_table.py": "d5c53a7c0d2ef112a948047e31013a3425bd9f61d9dec9be7f2519d18eb60846",
+      "features/build_test2.py": "a287581f6faf4638988bf00befca612607d974014cead77332ae22a44ac2b83e",
+      "features/clean_pbp.py": "d3f024df14c9ef1f7f1ff44e6ad3756ef7bec80eebe5b6e603f7f8c6c3a07a69",
+      "features/game_context.py": "d4f5e14dfdb93a95c8721470e15a62be8cb19d6bf9232badb2af164a04c3bef3",
+      "features/game_times.py": "be3fbbe6b480f16736c4f4c06058e3d4a833fa4952f71946782e0d2ec96c8bef",
+      "features/ids.py": "fa1607205f00aff836b8b48d12118d846d002f87424b88ddaf2998b2d3b6b413",
+      "features/injury_status.py": "fb75a0e98f02170e9c81b343c0a77e31fe85e25846be0daad4d0a87d38e100e7",
+      "features/key_starters.py": "cd4a690778ff1f7c520474254057751a017246de300d75ac8dd5e0ad166e96d7",
+      "features/pace.py": "e5e7547bd6fc3c75c7edcffde9d70e9d95d255d6b9951149c22f472e0eee2b85",
+      "features/qb_features.py": "b2b55ca52a3338693876125ddc92c3caccaa6b1500f308552b5ecf5d76b8fc8d",
+      "features/ratings.py": "bb4ee2f5e9e06ff70cdcd2fb58bd2a9f222805b9b39569dc1336845980f21d6d",
+      "features/snaps.py": "7921b793be3a9af1787c3b9192bfe0a6901c67da3aafd20a6ef8e15c9dc7db65",
+      "features/team_ratings.py": "39c445d3c16f599cae54375ea6a939020d21c9ea2bd34806fd36561486b06be9",
+      "features/team_timezones.py": "a4a5f514d617e513359509c6866a08c2784b46c6874eceb2f59b552d0b25ff5b",
+      "score/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "score/model.py": "cdeea64b61d8361e04aa28198fb379dc1e9afd2b16e5c59640ab2709228b6aac",
+      "score/reconcile.py": "2ae12fe32dbc02ac11a109b3285b1c382e9987f451a07584688359a7ea7e45ab",
+      "score/selection.py": "8f1fd7ac7f091dfef8cc862d5c3240f2abadcb40a48ab57e35f3b568e2ad31a0",
+      "score/test2.py": "7dfee294d967d135fab81f40175f9dc40de3ca9f0f3f268ba53ad10ae9a9dad2",
+      "score/test3.py": "cf9765da336f99d5f36edb2dce8516d0e24bdcc7a5bd9f6dddb48cbdeb0fefbe",
+      "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests/check_test2_tables.py": "93055f53c3e9ed426c519fb5be3ceb07321626a9a73af15ae28845c0964f2522",
+      "tests/compare_tables.py": "17545fd3b43e515f5c0de35f8b151a3a1ac092b2159a2d5c8ba203bbadaf7332",
+      "tests/test_blend_pace.py": "71d3088dc0e9394fcc9a271ecec7004eff7cab4d57aa22aee1e971f14a655e9b",
+      "tests/test_build_table.py": "c33945a99486bea677b443bb3af6fd4ba938c2a0a660331ab2302e958f69b100",
+      "tests/test_carry_factor.py": "e77bf164b3722e83afd2d91f846ecd6fc1ba30abedca5e8bb8ef106cac2d52b8",
+      "tests/test_clean_pbp.py": "bc5e2bdc746c02b4e27809eda7790535ebb03791f9f3b7d3686816f97a216236",
+      "tests/test_closing_api_guard.py": "effaf60310fb6dcd94bff9fc568c9c23e013a0e3b9ceb73a2d9b633d8435c315",
+      "tests/test_closing_on_pull.py": "c6e2525f34a0db6698214f255b8f7dc707da7b4b674cdb16ce38c140b76eaa56",
+      "tests/test_compare_tables.py": "9f12f55585d18bfbd0dd54752516d2dc9d64535456ff598dcbd2ab0f409cb5fe",
+      "tests/test_dispatch.py": "47441e75ee6510577cc8891e93345ad4145e0daa47c7ab9ba0bbf0f691a9c852",
+      "tests/test_feature_schedule.py": "0c074dced67015679e46582696821ba7fe31f54411a86b590d99e910e856c972",
+      "tests/test_injury_snaps.py": "f3c519c63f09510f3e94a6d719aa54137bfc4a882e88902107db5e9e889f5ef1",
+      "tests/test_kalshi_collector.py": "a58c9c92ab29609bb4726f3fde89a070cf7efdea4225513b2c2d025d1a74e63a",
+      "tests/test_key_starters.py": "0f36891a750d81add05db92be668bf9905d7a0909cbd197285982788471a7c24",
+      "tests/test_leakage.py": "f0e8de28954ffc0a227a7d2ac8fa40f50cf13885f32206cb7b805571ac566de7",
+      "tests/test_leakage_unit.py": "11c1a1481a3a2b26252d338ac219007b9a8c07745584054d4f5650580e314cf0",
+      "tests/test_ml_closing_price_paths.py": "5a692edb9b45aca86b17a5b98392936f8c7898d9051aa422593c724db4b68692",
+      "tests/test_qb_features.py": "cc3f5a6f9aeb95641481fa4034e24daa54fb630674375b92f0589768cbe352f0",
+      "tests/test_ratings.py": "c9b391e6a4dff830b3098400dc624ec7088044be344dfac5ca78ccee00ba2918",
+      "tests/test_score_model.py": "05c99103daa1ff6d84588cda409d88fab8a77f517dfba1bb0ebc52ece49a042e",
+      "tests/test_settle_tie_rules.py": "c4d583df776a3c5ab2c244c00994fb99f9cf49ed23c89570633119cc12e7a42a",
+      "tests/test_summary_no_closing_price.py": "ec306d630fe905176ef48924d3b82deafd9d49a10a12416fa70162d348507f0d",
+      "tests/test_test2.py": "4f6d54dbd405762206857e84eccdacf3f87a8571c5f004e4a075cfd4adb61fab",
+      "tests/test_test2_rebuild.py": "a8ebb02ecde9d886047ca2d2dfb2300a051ecefad0ab806c9feeede2276dbb18",
+      "tests/test_test3.py": "a871214c9fde240fedf21f915db5f023365d3da978630928c852507325e6df98",
+      "tests/test_tuning.py": "86f133d5b114ed16225b8714f97063145593d3880cc56aa6a48a44f8d531b77f",
+      "tuning/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tuning/carry_factor.py": "87cdf04930d296f2e9676ad663daf1d419a1579262809c59404164ddb52d9946",
+      "tuning/penalties.py": "0f13b2b00f1c6bc9480375ad923306f3e9d6ed792cf9f4978df5fdaff5f3ce6c",
+      "tuning/tuned.py": "096ac85f2663d25bc67746ddb640a71eb5dbb447ff557b61039b5a6ee22a3a77"
+    }
+  },
+  "git_head": "bf76d4c89bdcd644df157339e28ba97f2072dcd7",
+  "start": "2026-11-08T20:13:26-06:00",
+  "end": "2026-11-08T20:13:26-06:00"
+}

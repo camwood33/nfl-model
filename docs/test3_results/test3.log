@@ -1,0 +1,6 @@
+git HEAD bf76d4c89bdcd644df157339e28ba97f2072dcd7; start 2026-11-08T20:13:26-06:00
+stop checks passed: 1767 games, seasons 2018 to 2024, 123 season-week clusters
+margin: a -0.125049, b 1.021962, c -0.020363, clustered SE 0.130869, t -0.1556, critical 1.9796 (t, 122 df), one-sided p 0.561695
+total: a 0.593153, b 1.022726, c -0.024082, clustered SE 0.122794, t -0.1961, critical 1.9796 (t, 122 df), one-sided p 0.577578
+shows information: {'margin': False, 'total': False}; kill rule fires: True
+end 2026-11-08T20:13:26-06:00; PASSED; wrote /Users/cameronwood/nfl-model/data/historical/derived/test3
