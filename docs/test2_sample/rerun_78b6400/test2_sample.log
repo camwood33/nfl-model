@@ -1,0 +1,15 @@
+git HEAD 78b64001e2affe762b7c998d54efd57e66097e82; start 2026-11-08T11:13:28-06:00
+reconciliation: version 1 games 3007, passing 3007; 2018 to 2024 1767, passing 1767; failing 2013 to 2017 0
+L5_h8_F8_A1_no_qb_noks full: training games 1209, test games 249, lambda 300, edge False
+L5_h8_F8_A1_no_qb_noks first_half: training games 1209, test games 249, lambda 1000, edge False
+L3_h8_F8_A1_no_qb_noks full: training games 737, test games 249, lambda 1000, edge False
+L3_h8_F8_A1_no_qb_noks first_half: training games 737, test games 249, lambda 1000, edge False
+L5_h4_F8_A1_no_qb_noks full: training games 1209, test games 249, lambda 300, edge False
+L5_h4_F8_A1_no_qb_noks first_half: training games 1209, test games 249, lambda 1000, edge False
+L5_h8_F4_A1_no_qb_noks full: training games 1209, test games 249, lambda 300, edge False
+L5_h8_F4_A1_no_qb_noks first_half: training games 1209, test games 249, lambda 1000, edge False
+L5_h8_F8_M1_no_qb_noks full: training games 1209, test games 249, lambda 300, edge False
+L5_h8_F8_M1_no_qb_noks first_half: training games 1209, test games 249, lambda 1000, edge False
+L5_h8_F8_A1_full_ks full: training games 1209, test games 249, lambda 300, edge False
+L5_h8_F8_A1_full_ks first_half: training games 1209, test games 249, lambda 1000, edge False
+end 2026-11-08T11:13:31-06:00; PASSED; wrote /Users/cameronwood/nfl-model/data/historical/derived/test2_sample
